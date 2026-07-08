@@ -206,6 +206,41 @@
     Western: ['Avatar', 'Mean Girls', 'Fight Club'],
   };
 
+  // Word-only catalogs: just a flat pool of secret words per category.
+  // No per-word roles — everyone but the Jester simply sees the same word.
+  var wordOnlyCatalog = {
+    Food: ['Pizza','Sushi','Tacos','Pasta','Burger','Hot Dog','Sandwich','Pancakes','Waffles','French Toast',
+      'Ice Cream','Chocolate','Popcorn','French Fries','Fried Chicken','Steak','Ramen','Curry','Dumplings','Pretzel',
+      'Bacon','Cheese','Salad','Soup','Donut','Cupcake','Nachos','Burrito','Quesadilla','Enchiladas',
+      'Guacamole','Salsa','Fried Rice','Spring Rolls','Pad Thai','Pho','Dim Sum','Bao','Falafel','Hummus',
+      'Kebab','Shawarma','Gyro','Pierogi','Goulash','Paella','Risotto','Lasagna','Ravioli','Gnocchi',
+      'Meatballs','Spaghetti','Macaroni and Cheese','Grilled Cheese','BLT','Club Sandwich','Chicken Wings','Ribs','Barbecue','Meatloaf',
+      'Mashed Potatoes','Baked Potato','Sweet Potato','Corn on the Cob','Coleslaw','Potato Salad','Deviled Eggs','Omelette','Scrambled Eggs','Cereal',
+      'Oatmeal','Bagel','Croissant','Muffin','Biscuit','Toast','Peanut Butter','Jelly','Honey','Maple Syrup',
+      'Apple','Banana','Orange','Strawberry','Watermelon','Grapes','Pineapple','Mango','Avocado','Coconut',
+      'Chocolate Cake','Brownie','Cookies','Pie','Cheesecake','Tiramisu','Milkshake','Smoothie','Lemonade','Coffee'],
+    Animals: ['Lion','Elephant','Giraffe','Penguin','Kangaroo','Dolphin','Octopus','Gorilla','Cheetah','Panda',
+      'Tiger','Wolf','Fox','Owl','Eagle','Shark','Crocodile','Koala','Zebra','Rhino',
+      'Hippo','Peacock','Flamingo','Chameleon','Sloth','Bear','Polar Bear','Panther','Leopard','Jaguar',
+      'Hyena','Camel','Llama','Alpaca','Horse','Donkey','Cow','Pig','Sheep','Goat',
+      'Chicken','Duck','Turkey','Rabbit','Squirrel','Deer','Moose','Elk','Raccoon','Skunk',
+      'Beaver','Otter','Seal','Walrus','Whale','Orca','Stingray','Jellyfish','Starfish','Crab',
+      'Lobster','Shrimp','Snail','Butterfly','Bee','Ant','Spider','Scorpion','Snake','Lizard',
+      'Turtle','Tortoise','Frog','Toad','Bat','Mouse','Rat','Hamster','Guinea Pig','Hedgehog',
+      'Wombat','Platypus','Meerkat','Baboon','Chimpanzee','Orangutan','Lemur','Red Panda','Bison','Buffalo',
+      'Antelope','Gazelle','Wildebeest','Warthog','Vulture','Falcon','Hawk','Parrot','Toucan','Swan'],
+    Objects: ['Chair','Table','Lamp','Mirror','Clock','Pillow','Blanket','Couch','Bed','Desk',
+      'Bookshelf','Door','Window','Key','Wallet','Backpack','Umbrella','Sunglasses','Watch','Ring',
+      'Necklace','Bracelet','Hat','Scarf','Gloves','Shoes','Socks','Belt','Phone','Laptop',
+      'Computer','Television','Remote Control','Camera','Headphones','Speaker','Microphone','Keyboard','Mouse','Charger',
+      'Battery','Flashlight','Candle','Broom','Vacuum','Bucket','Sponge','Towel','Soap','Toothbrush',
+      'Comb','Scissors','Knife','Fork','Spoon','Plate','Bowl','Cup','Mug','Bottle',
+      'Jar','Box','Bag','Basket','Ladder','Hammer','Screwdriver','Wrench','Nail','Screw',
+      'Rope','Chain','Lock','Suitcase','Passport','Map','Compass','Binoculars','Telescope','Globe',
+      'Book','Notebook','Pen','Pencil','Eraser','Ruler','Calculator','Envelope','Stamp','Newspaper',
+      'Painting','Picture Frame','Vase','Rug','Curtain','Fan','Refrigerator','Stove','Toaster','Guitar'],
+  };
+
   window.IMPFALL_LOCATIONS_DATA = {
     biomeCatalog: biomeCatalog,
     locationCatalog: locationCatalog,
@@ -215,5 +250,6 @@
     fakeHistoricalErasRoleCatalog: fakeHistoricalErasRoleCatalog,
     movieCatalog: movieCatalog,
     fakeMovieRoleCatalog: fakeMovieRoleCatalog,
+    wordOnlyCatalog: wordOnlyCatalog,
   };
 })();

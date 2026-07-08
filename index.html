@@ -157,6 +157,7 @@
                     <div style="font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;">Categories</div>
                     <div onClick="{{ closeModal }}" style="font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;">×</div>
                   </div>
+                  <div style="font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63; margin-bottom:8px;">Role Categories</div>
                   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                     <sc-for list="{{ categoryItems }}" as="c" hint-placeholder-count="4">
                       <div onClick="{{ c.onToggle }}" style="padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:{{ c.tileBg }}; border:{{ c.tileBorder }};">
@@ -164,6 +165,16 @@
                       </div>
                     </sc-for>
                   </div>
+                  <sc-if value="{{ isWordsMode }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63; margin:18px 0 8px;">Word Categories</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                      <sc-for list="{{ wordCategoryItems }}" as="c" hint-placeholder-count="3">
+                        <div onClick="{{ c.onToggle }}" style="padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:{{ c.tileBg }}; border:{{ c.tileBorder }};">
+                          <div style="font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:{{ c.color }};">{{ c.cat }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-if>
 
@@ -185,7 +196,7 @@
                   <!-- randomize toggle row -->
                   <div style="display:flex; align-items:center; gap:12px; margin:20px 0 14px;">
                     <div style="flex:1; height:1px; background:rgba(200,162,76,.15);"></div>
-                    <div style="font-family:'EB Garamond',serif; font-size:13px; font-style:italic; color:#7a6a4a;">or randomize</div>
+                    <div style="font-family:'EB Garamond',serif; font-size:13px; color:#7a6a4a;">or randomize</div>
                     <div style="flex:1; height:1px; background:rgba(200,162,76,.15);"></div>
                   </div>
                   <div onClick="{{ toggleRandJesters }}" style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(200,162,76,.12); cursor:pointer; margin-bottom:14px;" class="imp-btn">
@@ -250,7 +261,7 @@
                   <div style="display:flex; flex-direction:column; gap:14px;">
                     <div style="padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid #caa64f;">
                       <div style="font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e; margin-bottom:4px;">The Setup</div>
-                      <div style="font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; line-height:1.5;">Add your players, then choose Locations, Biomes, Historical Eras, or Movies. Each round picks one category and gives the Jester a different role.</div>
+                      <div style="font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; line-height:1.5;">Add your players, then choose from Role Categories (Locations, Biomes, Historical Eras, Movies) or Word Categories (Food, Animals, Objects). Each round picks one category — role categories give the Jester a different role, word categories just hide the shared word.</div>
                     </div>
                     <div style="padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid #7a1620;">
                       <div style="font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e; margin-bottom:4px;">The Modes</div>
@@ -321,7 +332,7 @@
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="#e6cb7e" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="#caa64f" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="#caa64f" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>
                       </div>
                       <div style="flex:1;">
-                        <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">Jester Gets Role</div>
+                        <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">{{ jesterGetsRoleLabel }}</div>
                         <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">{{ jesterGetsRoleDesc }}</div>
                       </div>
                       <div style="position:relative; width:44px; height:24px; border-radius:12px; background:{{ jesterGetsRoleBg }}; transition:background .25s; flex:none;">
@@ -401,7 +412,7 @@
             <sc-if value="{{ notAddingPlayer }}" hint-placeholder-val="{{ true }}">
               <div onClick="{{ onAddTap }}" style="padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;" class="imp-btn">
                 <div style="font-size:22px; color:#caa64f; line-height:1; font-family:'EB Garamond',serif;">+</div>
-                <div style="font-family:'EB Garamond',serif; font-style:italic; font-size:16px; color:#c6b489;">Add a player…</div>
+                <div style="font-family:'EB Garamond',serif; font-size:16px; color:#c6b489;">Add a player…</div>
               </div>
             </sc-if>
           </div>
@@ -416,11 +427,10 @@
           <div style="height:24px;"></div>
           <div style="position:relative; text-align:center; padding:0 26px 18px;">
             <div onClick="{{ backToLobby }}" style="position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;" class="imp-btn">‹</div>
-            <div style="font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:#caa64f;">Act One</div>
-            <div style="font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:#f0e6c9; margin-top:4px;">Tap your name in secret</div>
-            <div style="font-family:'EB Garamond',serif; font-style:italic; font-size:14px; color:#8a9ab8; margin-top:4px;">Each player privately sees their role, then passes the phone.</div>
+            <div style="font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:#f0e6c9;">Tap your name in secret</div>
+            <div style="font-family:'EB Garamond',serif; font-size:14px; color:#8a9ab8; margin-top:4px;">Each player privately sees their role, then passes the phone.</div>
             <sc-if value="{{ showCategory }}" hint-placeholder-val="{{ true }}">
-              <div style="display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; background:rgba(200,162,76,.12); border:1px solid rgba(200,162,76,.3);">
+              <div style="display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; border:1px solid rgba(200,162,76,.3);">
                 <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;">Category</div>
                 <div style="font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e;">{{ gameCategory }}</div>
               </div>
@@ -506,7 +516,7 @@
                 <div onClick="{{ closeOverlay }}" style="margin-top:22px; padding:14px 32px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.4); color:#ecdfc0; font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:imp-rise .35s ease both;">GOT IT</div>
               </sc-if>
               <sc-if value="{{ cardNotOpen }}" hint-placeholder-val="{{ true }}">
-                <div style="margin-top:18px; font-family:'EB Garamond',serif; font-style:italic; font-size:14px; color:#caa64f;">Tap the curtain to reveal</div>
+                <div style="margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:#caa64f;">Tap the curtain to reveal</div>
               </sc-if>
             </div>
           </sc-if>
@@ -516,16 +526,14 @@
 
       <!-- ====== VOTING ====== -->
       <sc-if value="{{ isVoting }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#0b0d18; animation:imp-slide-in .3s ease both;">
+        <div style="position:absolute; inset:0; display:flex; flex-direction:column; background:#0e0810; animation:imp-slide-in .3s ease both;">
           <div style="height:24px;"></div>
 
           <!-- back + title -->
-          <div style="padding:0 22px 6px; display:flex; align-items:flex-start; gap:12px;">
-            <div onClick="{{ backToReveal }}" style="padding-top:4px; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; flex:none;" class="imp-btn">‹</div>
-            <div>
-              <div style="font-family:'Cinzel',serif; font-weight:800; font-size:28px; color:#f0e6c9; line-height:1.1;">The Trial</div>
-              <div style="font-family:'EB Garamond',serif; font-size:15px; color:#8a9ab8; margin-top:4px;">Debate, accuse, unmask the jester.</div>
-            </div>
+          <div style="position:relative; text-align:center; padding:0 26px 18px;">
+            <div onClick="{{ backToReveal }}" style="position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;" class="imp-btn">‹</div>
+            <div style="font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:#f0e6c9;">The Trial</div>
+            <div style="font-family:'EB Garamond',serif; font-size:14px; color:#8a9ab8; margin-top:4px;">Debate, accuse, unmask the jester.</div>
           </div>
 
           <div style="flex:1; overflow-y:auto; padding:16px 20px 0; display:flex; flex-direction:column;">
@@ -669,12 +677,14 @@ class Component extends DCLogic {
     jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: true, jestersKnow: false, jesterGetsRole: false,
     timeLimit: 5,
     categories: ['Locations','Biomes','Historical Eras','Movies'],
-    selCategories: ['Locations','Biomes','Historical Eras','Movies'],
+    wordCategories: ['Food','Animals','Objects'],
+    selCategories: ['Locations','Biomes','Historical Eras','Movies','Food','Animals','Objects'],
     roundJesterIndices: null,
     roundCategory: 'Locations',
     roundWord: '',
     roundRoleMap: {},
     roundJesterRoleMap: {},
+    roundJesterWordMap: {},
     secondsLeft: null,
     timeUp: false,
   };
@@ -745,7 +755,7 @@ class Component extends DCLogic {
     const lineColors = ['#7a1620','#14254a','#2e5bb0','#6e141c','#4a3010','#7a1620'];
     // Word/role data lives in ./impfall-locations-data.js (loaded in <head>)
     // so it isn't inlined here — see window.IMPFALL_LOCATIONS_DATA.
-    const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieCatalog, fakeMovieRoleCatalog } = window.IMPFALL_LOCATIONS_DATA;
+    const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieCatalog, fakeMovieRoleCatalog, wordOnlyCatalog } = window.IMPFALL_LOCATIONS_DATA;
     const biomeNames = Object.keys(biomeCatalog);
     const locationNames = Object.keys(locationCatalog);
     const historicalEraNames = Object.keys(historicalErasCatalog);
@@ -758,6 +768,19 @@ class Component extends DCLogic {
       }
       return next;
     };
+    const allCategoryNames = [...st.categories, ...st.wordCategories];
+    const mapCategoryItem = (cat) => ({
+      cat,
+      sel: st.selCategories.includes(cat),
+      tileBg: st.selCategories.includes(cat) ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.05)',
+      tileBorder: st.selCategories.includes(cat) ? '1.5px solid #caa64f' : '1px solid rgba(200,162,76,.15)',
+      color: st.selCategories.includes(cat) ? '#f0e6c9' : '#8a9ab8',
+      onToggle: () => {
+        const s = st.selCategories;
+        const next = s.includes(cat) ? (s.length > 1 ? s.filter(c => c !== cat) : s) : [...s, cat];
+        this.setState({ selCategories: next });
+      },
+    });
     const maxJesters = Math.max(0, st.playerList.length - 1);
     const jesterCount = Math.min(st.jesterCount, maxJesters);
     const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
@@ -790,10 +813,14 @@ class Component extends DCLogic {
     const roundCategory = st.roundCategory || 'Locations';
     const roundRoleMap = st.roundRoleMap || {};
     const roundJesterRoleMap = st.roundJesterRoleMap || {};
+    const roundJesterWordMap = st.roundJesterWordMap || {};
     const isBiomeRound = roundCategory === 'Biomes';
     const isLocationRound = roundCategory === 'Locations';
     const isHistoricalRound = roundCategory === 'Historical Eras';
     const isMovieRound = roundCategory === 'Movies';
+    const isFoodRound = roundCategory === 'Food';
+    const isAnimalsRound = roundCategory === 'Animals';
+    const isObjectsRound = roundCategory === 'Objects';
     const actOnePlayers = players.map(p => {
       const seen = !!st.viewed[p.name];
       return {
@@ -809,9 +836,11 @@ class Component extends DCLogic {
     const ap = st.activePlayer;
     const apIsJester = ap && !!ap.jester;
     const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.name] || 'PERFORMER') : null;
-    const apDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole;
-    const apFakeRole = apDisguised ? (roundJesterRoleMap[ap.name] || null) : null;
-    const apIsUndisguisedJester = apIsJester && !apDisguised;
+    const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole;
+    const apWordDisguised = apIsJester && st.gameMode === 'words' && st.jesterGetsRole;
+    const apFakeRole = apRoleDisguised ? (roundJesterRoleMap[ap.name] || null) : null;
+    const apFakeWord = apWordDisguised ? (roundJesterWordMap[ap.name] || null) : null;
+    const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
     const closeOverlay = () => {
       if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.name]: true } }));
     };
@@ -829,13 +858,13 @@ class Component extends DCLogic {
       apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
       apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : '#caa64f'))),
       apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : '23px'),
-      apWord: apIsJester ? null : st.roundWord,
-      apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : 'Location')),
+      apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
+      apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : 'Location'))))),
       apWordSize: isBiomeRound ? '20px' : '22px',
       apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
       apIsUndisguisedJester,
-      apIsDisguisedJester: apDisguised,
-      apIsPerformer: !apIsJester,
+      apIsDisguisedJester: apRoleDisguised,
+      apIsPerformer: !apIsJester || apWordDisguised,
       apHint: apIsUndisguisedJester
         ? 'You have no word. Blend in, bluff your clues, and avoid being unmasked before the curtain falls.'
         : isBiomeRound
@@ -875,7 +904,7 @@ class Component extends DCLogic {
       openHelp: () => this.setState({ modal: 'help' }),
       openSettings: () => this.setState({ modal: 'settings' }),
       openGameSettings: () => this.setState({ modal: 'gameSettings' }),
-      gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, (st.gameMode === 'roles' && st.jesterGetsRole) ? 'Jester Gets Role' : null].filter(Boolean).join(' · ') || 'Default',
+      gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
       playerItems: st.playerList.map((name, i) => {
         const editing = st.editingIdx === i;
         const p = players[i] || players[0];
@@ -916,19 +945,9 @@ class Component extends DCLogic {
         if (st.newName.trim()) this.setState({ playerList: [...st.playerList, st.newName.trim()], newName: '', addingPlayer: false });
       },
       cancelAdd: () => this.setState({ addingPlayer: false, newName: '' }),
-      categoryItems: st.categories.map(cat => ({
-        cat,
-        sel: st.selCategories.includes(cat),
-        tileBg: st.selCategories.includes(cat) ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.05)',
-        tileBorder: st.selCategories.includes(cat) ? '1.5px solid #caa64f' : '1px solid rgba(200,162,76,.15)',
-        color: st.selCategories.includes(cat) ? '#f0e6c9' : '#8a9ab8',
-        onToggle: () => {
-          const s = st.selCategories;
-          const next = s.includes(cat) ? (s.length > 1 ? s.filter(c => c !== cat) : s) : [...s, cat];
-          this.setState({ selCategories: next });
-        },
-      })),
-      catSummary: st.selCategories.length === st.categories.length ? st.categories.join(', ') : st.selCategories.join(', '),
+      categoryItems: st.categories.map(mapCategoryItem),
+      wordCategoryItems: st.wordCategories.map(mapCategoryItem),
+      catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
       jesterCount: st.jesterCount,
       incJester: () => this.setState({ jesterCount: Math.min(st.jesterCount + 1, maxJesters) }),
       decJester: () => this.setState({ jesterCount: Math.max(st.jesterCount - 1, maxJesters > 0 ? 1 : 0) }),
@@ -960,16 +979,14 @@ class Component extends DCLogic {
       jestersKnowBg: st.jestersKnow ? '#b3202f' : 'rgba(255,255,255,.12)',
       jestersKnowThumb: st.jestersKnow ? 'translateX(22px)' : 'translateX(2px)',
       toggleJestersKnow: () => this.setState({ jestersKnow: !st.jestersKnow }),
-      jesterGetsRole: st.gameMode === 'roles' ? st.jesterGetsRole : false,
-      jesterGetsRoleDesc: st.gameMode === 'words' ? 'Roles-only setting — unavailable in Word Mode' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
-      jesterGetsRoleBg: (st.gameMode === 'roles' && st.jesterGetsRole) ? '#b3202f' : 'rgba(255,255,255,.12)',
-      jesterGetsRoleThumb: (st.gameMode === 'roles' && st.jesterGetsRole) ? 'translateX(22px)' : 'translateX(2px)',
-      jesterGetsRoleToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
-      jesterGetsRoleTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
-      toggleJesterGetsRole: () => {
-        if (st.gameMode === 'words') return;
-        this.setState({ jesterGetsRole: !st.jesterGetsRole });
-      },
+      jesterGetsRole: st.jesterGetsRole,
+      jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
+      jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a similar but fake word instead of being told they’re the Jester' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
+      jesterGetsRoleBg: st.jesterGetsRole ? '#b3202f' : 'rgba(255,255,255,.12)',
+      jesterGetsRoleThumb: st.jesterGetsRole ? 'translateX(22px)' : 'translateX(2px)',
+      jesterGetsRoleToggleOpacity: '1',
+      jesterGetsRoleTogglePointerEvents: 'auto',
+      toggleJesterGetsRole: () => this.setState({ jesterGetsRole: !st.jesterGetsRole }),
       timeLimit: st.timeLimit,
       timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
       timeLimitUnit: st.timeLimit === 0 ? 'No limit' : st.timeLimit === 1 ? 'minute' : 'minutes',
@@ -993,9 +1010,13 @@ class Component extends DCLogic {
       isResults: st.screen === 'results',
       backToLobbyFromPlayers: () => this.setState({ screen: 'lobby' }),
       gameMode: st.gameMode,
+      isWordsMode: st.gameMode === 'words',
       showRoleHeading: st.gameMode !== 'words',
-      setRoleMode: () => this.setState({ gameMode: 'roles' }),
-      setWordMode: () => this.setState({ gameMode: 'words', showWord: true, jesterGetsRole: false }),
+      setRoleMode: () => {
+        const nextSel = st.selCategories.filter(c => !st.wordCategories.includes(c));
+        this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
+      },
+      setWordMode: () => this.setState({ gameMode: 'words', showWord: true }),
       roleTileBg: st.gameMode === 'roles' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.04)',
       roleTileBorder: st.gameMode === 'roles' ? '1.5px solid #caa64f' : '1px solid rgba(255,255,255,.08)',
       roleTileColor: st.gameMode === 'roles' ? '#f0e6c9' : '#8a9ab8',
@@ -1016,13 +1037,27 @@ class Component extends DCLogic {
         }
         const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
         const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
-        const pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
+        let pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
+        if (st.gameMode === 'roles') {
+          pickableCategories = pickableCategories.filter(c => !st.wordCategories.includes(c));
+          if (!pickableCategories.length) pickableCategories = st.categories;
+        }
         const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
         let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundJesterRoleMap: {} };
         const rolePlayers = players.filter(p => !p.jester);
         const jesterIndexSet = new Set(selectedJesterIndices);
         const jesterPlayerNames = st.playerList.filter((_, i) => jesterIndexSet.has(i));
         const useJesterRole = st.gameMode === 'roles' && st.jesterGetsRole;
+        const useJesterWord = st.gameMode === 'words' && st.jesterGetsRole;
+        const getWordPool = (category) => {
+          if (category === 'Biomes') return biomeNames;
+          if (category === 'Historical Eras') return historicalEraNames;
+          if (category === 'Movies') return movieGenreNames;
+          if (category === 'Food') return wordOnlyCatalog.Food;
+          if (category === 'Animals') return wordOnlyCatalog.Animals;
+          if (category === 'Objects') return wordOnlyCatalog.Objects;
+          return locationNames;
+        };
         const buildRound = (roundCategory, wordName, roleCatalog, fakeRoleCatalog) => {
           const roles = shuffle(roleCatalog[wordName]);
           const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
@@ -1039,6 +1074,10 @@ class Component extends DCLogic {
           }
           return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
         };
+        const buildWordOnlyRound = (category, words) => {
+          const word = words[Math.floor(Math.random() * words.length)];
+          return { roundCategory: category, roundWord: word, roundRoleMap: {}, roundJesterRoleMap: {} };
+        };
         if (chosenCategory === 'Biomes') {
           const biomeName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
           nextRound = buildRound('Biomes', biomeName, biomeCatalog, fakeBiomeRoleCatalog);
@@ -1048,10 +1087,28 @@ class Component extends DCLogic {
         } else if (chosenCategory === 'Movies') {
           const genreName = movieGenreNames[Math.floor(Math.random() * movieGenreNames.length)];
           nextRound = buildRound('Movies', genreName, movieCatalog, fakeMovieRoleCatalog);
+        } else if (chosenCategory === 'Food') {
+          nextRound = buildWordOnlyRound('Food', wordOnlyCatalog.Food);
+        } else if (chosenCategory === 'Animals') {
+          nextRound = buildWordOnlyRound('Animals', wordOnlyCatalog.Animals);
+        } else if (chosenCategory === 'Objects') {
+          nextRound = buildWordOnlyRound('Objects', wordOnlyCatalog.Objects);
         } else {
           const locationName = locationNames[Math.floor(Math.random() * locationNames.length)];
           nextRound = buildRound('Locations', locationName, locationCatalog, fakeLocationRoleCatalog);
         }
+        let roundJesterWordMap = {};
+        if (useJesterWord) {
+          const pool = getWordPool(nextRound.roundCategory).filter(w => w !== nextRound.roundWord);
+          if (pool.length) {
+            const fakeWords = shuffle(pool);
+            roundJesterWordMap = jesterPlayerNames.reduce((acc, name, index) => {
+              acc[name] = fakeWords[index % fakeWords.length];
+              return acc;
+            }, {});
+          }
+        }
+        nextRound = { ...nextRound, roundJesterWordMap };
         this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, jesterCount: newJesterCount, roundJesterIndices: selectedJesterIndices, ...nextRound });
       },
       goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
