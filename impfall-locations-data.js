@@ -1,4 +1,4 @@
-// Impfall word/role data — Locations and Biomes catalogs.
+// Impfall word/role data — Locations, Biomes, and Historical Eras catalogs.
 // Loaded as a plain script (not a dc-runtime file) so it can sit in its own
 // file; exposes everything on window.IMPFALL_LOCATIONS_DATA for
 // "Impfall - Play.dc.html" to read at render time.
@@ -130,10 +130,90 @@
     'Volcanic Region': ['Meadowlark', 'Mongolian Gazelle', 'Harpy Eagle'],
   };
 
+  var historicalErasCatalog = {
+    'Ancient Egypt': ['Pharaoh','Scribe','Priest','Pyramid Builder','Slave','Mummification Embalmer','Nile Fisherman','Royal Advisor'],
+    'Ancient Greece': ['Philosopher','Olympic Athlete','Spartan Soldier','Playwright','Senator','Oracle','Merchant','Slave'],
+    'Ancient Rome': ['Emperor','Gladiator','Roman Senator','Centurion','Slave','Chariot Racer','Blacksmith','Toga-Clad Citizen'],
+    'Medieval Europe': ['King','Knight','Peasant Farmer','Blacksmith','Monk','Jester','Lady of the Court','Plague Doctor'],
+    'Viking Age': ['Viking Raider','Shield Maiden','Blacksmith','Chieftain','Skald (Storyteller)','Farmer','Shipbuilder','Trader'],
+    Renaissance: ['Painter','Sculptor','Patron of the Arts','Inventor','Merchant','Philosopher','Explorer','Royal Court Member'],
+    'Age of Exploration': ['Ship Captain','Navigator','Explorer','Cartographer','Colonizer','Native Guide','Sailor','Merchant'],
+    'American Revolution': ['Continental Soldier','British Redcoat','Founding Father','Spy','Blacksmith','Loyalist','Farmer','Town Crier'],
+    'Wild West': ['Sheriff','Outlaw','Saloon Owner','Bounty Hunter','Cowboy','Gold Miner','Native American','Railroad Worker'],
+    'Industrial Revolution': ['Factory Worker','Inventor','Coal Miner','Child Laborer','Factory Owner','Railroad Engineer','Union Organizer','Chimney Sweep'],
+    'Victorian Era': ['Aristocrat','Chimney Sweep','Governess','Detective','Factory Worker','Street Vendor','Butler','Physician'],
+    'World War I': ['Infantry Soldier','Trench Medic','Fighter Pilot','Spy','Nurse','General','War Correspondent','Munitions Factory Worker'],
+    'Roaring Twenties': ['Flapper','Jazz Musician','Bootlegger','Speakeasy Owner','Gangster','Stock Broker','Silent Film Star','Prohibition Agent'],
+    'World War II': ['Soldier','Resistance Fighter','Code Breaker','Fighter Pilot','Nurse','Spy','Factory Worker','War Correspondent'],
+    'Space Race Era': ['Astronaut','NASA Engineer','Mission Control Officer','Soviet Cosmonaut','Journalist','Test Pilot','Rocket Scientist','News Anchor'],
+    'Ancient China (Dynastic Era)': ['Emperor','Silk Merchant','Confucian Scholar','Warrior','Farmer','Court Eunuch','Calligrapher','Imperial Guard'],
+    'Feudal Japan': ['Samurai','Shogun','Ninja','Geisha','Rice Farmer','Buddhist Monk','Blacksmith','Merchant'],
+    'Aztec Empire': ['Emperor','Warrior','Priest','Farmer','Trader','Human Sacrifice Victim','Featherworker','Temple Builder'],
+    'Prehistoric/Stone Age': ['Hunter','Gatherer','Cave Painter','Tribal Chief','Shaman','Toolmaker','Fire Keeper','Mammoth Tracker'],
+    'Great Depression': ['Soup Kitchen Worker','Dust Bowl Farmer','Bank Teller','Traveling Hobo','Radio Broadcaster','Unemployed Worker','Bread Line Regular','WPA Construction Worker'],
+    'Cold War Era': ['CIA Agent','KGB Spy','Nuclear Scientist','Diplomat','Berlin Wall Guard','Propaganda Broadcaster','Defector','Air Raid Drill Coordinator'],
+  };
+  var fakeHistoricalErasRoleCatalog = {
+    'Ancient Egypt': ['Samurai', 'Gladiator', 'Bootlegger'],
+    'Ancient Greece': ['Viking Raider', 'Factory Worker', 'CIA Agent'],
+    'Ancient Rome': ['Shogun', 'Astronaut', 'Union Organizer'],
+    'Medieval Europe': ['Confucian Scholar', 'Cowboy', 'Fighter Pilot'],
+    'Viking Age': ['Toga-Clad Citizen', 'Silk Merchant', 'Stock Broker'],
+    Renaissance: ['Centurion', 'Ninja', 'Radio Broadcaster'],
+    'Age of Exploration': ['Pharaoh', 'Knight', 'KGB Spy'],
+    'American Revolution': ['Samurai', 'Oracle', 'Rocket Scientist'],
+    'Wild West': ['Featherworker', 'Chariot Racer', 'War Correspondent'],
+    'Industrial Revolution': ['Spartan Soldier', 'Shaman', 'Governess'],
+    'Victorian Era': ['Rice Farmer', 'Coal Miner', 'Playwright'],
+    'World War I': ['Resistance Fighter', 'Bootlegger', 'Bank Teller'],
+    'Roaring Twenties': ['Trench Medic', 'Astronaut', 'Featherworker'],
+    'World War II': ['Jazz Musician', 'Cartographer', 'Dust Bowl Farmer'],
+    'Space Race Era': ['Gladiator', 'Blacksmith', 'Defector'],
+    'Ancient China (Dynastic Era)': ['Viking Raider', 'Detective', 'Cowboy'],
+    'Feudal Japan': ['Centurion', 'Founding Father', 'Nurse'],
+    'Aztec Empire': ['Knight', 'Scribe', 'Sheriff'],
+    'Prehistoric/Stone Age': ['Emperor', 'Diplomat', 'Stock Broker'],
+    'Great Depression': ['Chimney Sweep', 'Trader', 'Nuclear Scientist'],
+    'Cold War Era': ['Explorer', 'Blacksmith', 'Playwright'],
+  };
+
+  var movieCatalog = {
+    Horror: ['Halloween','The Conjuring','Scream','A Nightmare on Elm Street','The Exorcist','Get Out','It','The Shining'],
+    Comedy: ['Superbad','Anchorman','The Hangover','Bridesmaids','Ghostbusters','Mean Girls','Dumb and Dumber','Home Alone'],
+    Romance: ['The Notebook','Titanic','La La Land','Twilight','Notting Hill','500 Days of Summer','Crazy Rich Asians','The Princess Bride'],
+    Action: ['Die Hard','John Wick','Mission Impossible','Terminator','Fast and Furious','The Avengers','Mad Max','Speed'],
+    'Sci-Fi': ['Star Wars','The Matrix','Jurassic Park','Back to the Future','E.T.','Inception','Avatar','Interstellar'],
+    Fantasy: ['Harry Potter','The Lord of the Rings','Pirates of the Caribbean','The Chronicles of Narnia','The Princess Bride','Willow','Shrek','Aladdin'],
+    Thriller: ['Se7en','The Silence of the Lambs','Fight Club','Gone Girl','Jaws','Shutter Island','Parasite','Inception'],
+    Musical: ['Grease','The Greatest Showman','La La Land','Mamma Mia','Moulin Rouge','Chicago','West Side Story','Hairspray'],
+    Animated: ['Toy Story','Shrek','Finding Nemo','Frozen','The Lion King','Up','Coco','Spider-Man Into the Spider-Verse'],
+    War: ['Saving Private Ryan','Dunkirk','1917','American Sniper','Black Hawk Down','Pearl Harbor','Apocalypse Now','Hacksaw Ridge'],
+    Crime: ['The Godfather','Goodfellas','Pulp Fiction','Scarface','The Departed','Casino','Heat','The Dark Knight'],
+    Western: ['The Good the Bad and the Ugly','Django Unchained','Tombstone','True Grit','No Country for Old Men','3:10 to Yuma','Butch Cassidy and the Sundance Kid','Unforgiven'],
+  };
+  var fakeMovieRoleCatalog = {
+    Horror: ['Grease', 'Toy Story', 'Die Hard'],
+    Comedy: ['Jaws', 'Titanic', 'John Wick'],
+    Romance: ['Halloween', 'Die Hard', 'Goodfellas'],
+    Action: ['Frozen', 'The Notebook', 'The Exorcist'],
+    'Sci-Fi': ['Grease', 'The Godfather', 'Home Alone'],
+    Fantasy: ['Scarface', 'Se7en', 'Dunkirk'],
+    Thriller: ['Aladdin', 'Ghostbusters', 'Pearl Harbor'],
+    Musical: ['The Shining', 'Terminator', 'Coco'],
+    Animated: ['Titanic', 'Mad Max', 'The Conjuring'],
+    War: ['The Hangover', 'Notting Hill', 'It'],
+    Crime: ['Speed', 'Interstellar', 'Bridesmaids'],
+    Western: ['Avatar', 'Mean Girls', 'Fight Club'],
+  };
+
   window.IMPFALL_LOCATIONS_DATA = {
     biomeCatalog: biomeCatalog,
     locationCatalog: locationCatalog,
     fakeLocationRoleCatalog: fakeLocationRoleCatalog,
     fakeBiomeRoleCatalog: fakeBiomeRoleCatalog,
+    historicalErasCatalog: historicalErasCatalog,
+    fakeHistoricalErasRoleCatalog: fakeHistoricalErasRoleCatalog,
+    movieCatalog: movieCatalog,
+    fakeMovieRoleCatalog: fakeMovieRoleCatalog,
   };
 })();

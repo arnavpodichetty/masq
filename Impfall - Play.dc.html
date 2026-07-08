@@ -43,7 +43,7 @@
           <!-- top bar -->
           <div style="display:flex; align-items:center; justify-content:space-between; padding:28px 20px 14px;">
             <div onClick="{{ openHelp }}" style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:#caa64f;" class="imp-btn">?</div>
-            <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:#ecdfc0; letter-spacing:.04em;">IMPFALL</div>
+            <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:#ecdfc0; letter-spacing:.04em;">MASQUERADE</div>
             <div onClick="{{ openSettings }}" style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:#caa64f;" class="imp-btn">⚙</div>
           </div>
 
@@ -155,7 +155,7 @@
                     <div onClick="{{ closeModal }}" style="font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;">×</div>
                   </div>
                   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <sc-for list="{{ categoryItems }}" as="c" hint-placeholder-count="2">
+                    <sc-for list="{{ categoryItems }}" as="c" hint-placeholder-count="4">
                       <div onClick="{{ c.onToggle }}" style="padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:{{ c.tileBg }}; border:{{ c.tileBorder }};">
                         <div style="font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:{{ c.color }};">{{ c.cat }}</div>
                       </div>
@@ -247,7 +247,7 @@
                   <div style="display:flex; flex-direction:column; gap:14px;">
                     <div style="padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid #caa64f;">
                       <div style="font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e; margin-bottom:4px;">The Setup</div>
-                      <div style="font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; line-height:1.5;">Add your players, then choose Locations or Biomes. Each round picks one category and gives the Jester a different role.</div>
+                      <div style="font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; line-height:1.5;">Add your players, then choose Locations, Biomes, Historical Eras, or Movies. Each round picks one category and gives the Jester a different role.</div>
                     </div>
                     <div style="padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid #7a1620;">
                       <div style="font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e; margin-bottom:4px;">The Modes</div>
@@ -347,7 +347,7 @@
                       <div style="font-family:'Archivo',sans-serif; font-size:13px; color:#caa64f;">Always on</div>
                     </div>
                     <div style="padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; text-align:center;">
-                      <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:#e6cb7e;">IMPFALL</div>
+                      <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:#e6cb7e;">MASQUERADE</div>
                       <div style="font-family:'Archivo',sans-serif; font-size:11px; color:#5f6c86; margin-top:4px; letter-spacing:.06em;">VERSION 1.0 · THE THEATRON COMPANY</div>
                     </div>
                   </div>
@@ -473,6 +473,11 @@
                       </div>
                     </sc-if>
                   </sc-if>
+                  <!-- Disguised jester: fake role only, no word -->
+                  <sc-if value="{{ apIsDisguisedJester }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-family:'Archivo',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; text-decoration:underline; color:{{ apRoleColor }};">Role</div>
+                    <div style="font-family:'Cinzel',serif; font-weight:800; font-size:{{ apRoleSize }}; color:{{ apRoleColor }}; letter-spacing:.04em; text-wrap:balance; margin-top:4px;">{{ apRole }}</div>
+                  </sc-if>
                   <!-- Performer: category/word (words mode) above role (roles mode) -->
                   <sc-if value="{{ apIsPerformer }}" hint-placeholder-val="{{ true }}">
                     <div style="{{ apWordBlockStyle }}">
@@ -520,7 +525,7 @@
             </div>
           </div>
 
-          <div style="flex:1; overflow-y:auto; padding:16px 20px 0;">
+          <div style="flex:1; overflow-y:auto; padding:16px 20px 0; display:flex; flex-direction:column;">
 
             <!-- how it works header -->
             <div style="font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#ecdfc0; margin-bottom:14px;">How It Works</div>
@@ -577,6 +582,13 @@
               </div>
 
             </div>
+
+            <sc-if value="{{ hasTimeLimit }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                <div style="font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:#9b8a63;">Time Remaining</div>
+                <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:{{ timerColor }}; line-height:1.2;">{{ timerDisplay }}</div>
+              </div>
+            </sc-if>
           </div>
 
           <!-- reveal button -->
@@ -594,34 +606,35 @@
             <div onClick="{{ backToLobby }}" style="position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;">‹</div>
             <div style="font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:#caa64f;">The Final Curtain</div>
           </div>
-          <div style="font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:#f3ead0; margin-top:6px;">The Jester was…</div>
-          <div style="margin-top:18px; animation:imp-float 5s ease-in-out infinite;">
-            <dc-import name="Mask" comedy="{{ false }}" tragedy="{{ true }}" cracked="{{ true }}" face-color="{{ ivoryFace }}" line-color="{{ crimson }}" size="{{ 120 }}" hint-size="120px,150px"></dc-import>
-          </div>
-          <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:#e6cb7e; margin-top:14px;">{{ revealedName }}</div>
-          <div style="display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;">
-            <div style="flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);">
-              <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;">ROUND CATEGORY</div>
-              <div style="font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;">{{ gameCategory }}</div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">
+            <div style="font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:#f3ead0;">The Jester was…</div>
+            <div style="margin-top:18px; animation:imp-float 5s ease-in-out infinite;">
+              <dc-import name="Mask" comedy="{{ false }}" tragedy="{{ true }}" cracked="{{ true }}" face-color="{{ ivoryFace }}" line-color="{{ crimson }}" size="{{ 120 }}" hint-size="120px,150px"></dc-import>
             </div>
-              <div style="{{ roundWordBlockStyle }}">
-                <div style="flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);">
-                  <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;">ROUND WORD</div>
-                  <div style="font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;">{{ roundWordDisplay }}</div>
-                </div>
+            <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:#e6cb7e; margin-top:14px;">{{ revealedName }}</div>
+            <div style="display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;">
+              <div style="flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);">
+                <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;">ROUND CATEGORY</div>
+                <div style="font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;">{{ gameCategory }}</div>
               </div>
+                <div style="{{ roundWordBlockStyle }}">
+                  <div style="flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);">
+                    <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;">ROUND WORD</div>
+                    <div style="font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;">{{ roundWordDisplay }}</div>
+                  </div>
+                </div>
+            </div>
+            <div style="margin-top:26px; padding:0 30px; text-align:center;">
+              <sc-if value="{{ caughtSpy }}" hint-placeholder-val="{{ true }}">
+                <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;">The Cast wins! 🎉</div>
+                <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You unmasked the jester before the curtain fell.</div>
+              </sc-if>
+              <sc-if value="{{ missedSpy }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;">The Jester escapes!</div>
+                <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You accused the wrong performer. The jester takes a bow.</div>
+              </sc-if>
+            </div>
           </div>
-          <div style="margin-top:26px; padding:0 30px; text-align:center;">
-            <sc-if value="{{ caughtSpy }}" hint-placeholder-val="{{ true }}">
-              <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;">The Cast wins! 🎉</div>
-              <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You unmasked the jester before the curtain fell.</div>
-            </sc-if>
-            <sc-if value="{{ missedSpy }}" hint-placeholder-val="{{ false }}">
-              <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;">The Jester escapes!</div>
-              <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You accused the wrong performer. The jester takes a bow.</div>
-            </sc-if>
-          </div>
-          <div style="flex:1;"></div>
           <div style="width:100%; padding:14px 26px 28px;">
             <div onClick="{{ playAgain }}" style="padding:16px; text-align:center; background:linear-gradient(180deg,#ecdfc0,#d3bf93); color:#3c0a10; font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;" class="imp-btn">ENCORE · PLAY AGAIN</div>
           </div>
@@ -641,14 +654,44 @@ class Component extends DCLogic {
     addingPlayer: false, newName: '', editingIdx: null, editingVal: '',
     spyCount: 1, spyRandMin: 1, spyRandMax: 3, randJesters: false, showCategory: true, showWord: true, jestersKnow: false, imposterGetsRole: false,
     timeLimit: 5,
-    categories: ['Locations','Biomes'],
-    selCategories: ['Locations','Biomes'],
+    categories: ['Locations','Biomes','Historical Eras','Movies'],
+    selCategories: ['Locations','Biomes','Historical Eras','Movies'],
     roundSpyIndices: null,
     roundCategory: 'Locations',
     roundWord: '',
     roundRoleMap: {},
     roundSpyRoleMap: {},
+    secondsLeft: null,
   };
+
+  componentWillUnmount() {
+    this.__clearTimer();
+  }
+
+  __clearTimer() {
+    if (this.__timerId) {
+      clearInterval(this.__timerId);
+      this.__timerId = null;
+    }
+  }
+
+  __startTimer(minutes) {
+    this.__clearTimer();
+    if (!minutes) {
+      this.setState({ secondsLeft: null });
+      return;
+    }
+    this.setState({ secondsLeft: minutes * 60 });
+    this.__timerId = setInterval(() => {
+      const left = (this.state.secondsLeft || 0) - 1;
+      if (left <= 0) {
+        this.__clearTimer();
+        this.setState({ secondsLeft: 0 });
+      } else {
+        this.setState({ secondsLeft: left });
+      }
+    }, 1000);
+  }
 
   renderVals() {
     const st = this.state;
@@ -659,9 +702,11 @@ class Component extends DCLogic {
     const lineColors = ['#7a1620','#14254a','#2e5bb0','#6e141c','#4a3010','#7a1620'];
     // Word/role data lives in ./impfall-locations-data.js (loaded in <head>)
     // so it isn't inlined here — see window.IMPFALL_LOCATIONS_DATA.
-    const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog } = window.IMPFALL_LOCATIONS_DATA;
+    const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieCatalog, fakeMovieRoleCatalog } = window.IMPFALL_LOCATIONS_DATA;
     const biomeNames = Object.keys(biomeCatalog);
     const locationNames = Object.keys(locationCatalog);
+    const historicalEraNames = Object.keys(historicalErasCatalog);
+    const movieGenreNames = Object.keys(movieCatalog);
     const shuffle = (items) => {
       const next = [...items];
       for (let i = next.length - 1; i > 0; i -= 1) {
@@ -704,6 +749,8 @@ class Component extends DCLogic {
     const roundSpyRoleMap = st.roundSpyRoleMap || {};
     const isBiomeRound = roundCategory === 'Biomes';
     const isLocationRound = roundCategory === 'Locations';
+    const isHistoricalRound = roundCategory === 'Historical Eras';
+    const isMovieRound = roundCategory === 'Movies';
     const actOnePlayers = players.map(p => {
       const seen = !!st.viewed[p.name];
       return {
@@ -737,13 +784,14 @@ class Component extends DCLogic {
       apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
       apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
       apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsSpy ? (apFakeRole || 'PERFORMER') : apRoundRole),
-      apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : '#caa64f'),
+      apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : '#caa64f'))),
       apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : '23px'),
       apWord: apIsSpy ? null : st.roundWord,
-      apWordLabel: isBiomeRound ? 'Biome' : 'Location',
+      apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : 'Location')),
       apWordSize: isBiomeRound ? '20px' : '22px',
       apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
       apIsUndisguisedJester,
+      apIsDisguisedJester: apDisguised,
       apIsPerformer: !apIsSpy,
       apHint: apIsUndisguisedJester
         ? 'You have no word. Blend in, bluff your clues, and avoid being unmasked before the curtain falls.'
@@ -751,6 +799,10 @@ class Component extends DCLogic {
           ? 'The biome is your secret. Give clues that fit your animal role without making the answer obvious.'
           : isLocationRound
             ? 'The location is your secret. Give clues that fit your role without making the answer obvious.'
+          : isHistoricalRound
+            ? 'The era is your secret. Give clues that fit your role without making the answer obvious.'
+          : isMovieRound
+            ? 'The genre is your secret. Give clues that fit your movie without making the answer obvious.'
           : 'Give clues that prove you know the word — without giving it away to the Jester.',
       apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterNames.length > 1
         ? jesterNames.filter(n => n !== (ap ? ap.name : '')).join(', ')
@@ -881,6 +933,14 @@ class Component extends DCLogic {
       timeLimitRow: st.timeLimit === 0 ? 'No limit' : st.timeLimit + ' min',
       incTime: () => this.setState({ timeLimit: st.timeLimit === 0 ? 0 : st.timeLimit >= 10 ? 0 : st.timeLimit + 1 }),
       decTime: () => this.setState({ timeLimit: st.timeLimit === 0 ? 10 : Math.max(st.timeLimit - 1, 1) }),
+      hasTimeLimit: st.timeLimit > 0,
+      timerDisplay: (() => {
+        const total = st.secondsLeft != null ? st.secondsLeft : st.timeLimit * 60;
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return m + ':' + String(s).padStart(2, '0');
+      })(),
+      timerColor: st.secondsLeft !== null && st.secondsLeft <= 30 ? '#e8a0a8' : '#f0e6c9',
       playerNames: st.playerList.join(', '),
       playerCount: st.playerList.length,
       isLobby: st.screen === 'lobby',
@@ -913,58 +973,49 @@ class Component extends DCLogic {
         }
         const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
         const selectedSpyIndices = shuffledIndices.slice(0, Math.min(newSpyCount, maxSpies));
-        const chosenCategory = st.selCategories.length === 1
-          ? st.selCategories[0]
-          : (st.selCategories.includes('Biomes') && !st.selCategories.includes('Locations')
-            ? 'Biomes'
-            : st.selCategories.includes('Locations') && !st.selCategories.includes('Biomes')
-              ? 'Locations'
-              : (Math.random() < 0.5 ? 'Locations' : 'Biomes'));
+        const pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
+        const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
         let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundSpyRoleMap: {} };
         const rolePlayers = players.filter(p => !p.spy);
         const spyIndexSet = new Set(selectedSpyIndices);
         const spyPlayerNames = st.playerList.filter((_, i) => spyIndexSet.has(i));
         const useImposterRole = st.gameMode === 'roles' && st.imposterGetsRole;
+        const buildRound = (roundCategory, wordName, roleCatalog, fakeRoleCatalog) => {
+          const roles = shuffle(roleCatalog[wordName]);
+          const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
+            acc[player.name] = roles[index % roles.length];
+            return acc;
+          }, {});
+          let roundSpyRoleMap = {};
+          if (useImposterRole) {
+            const fakeRoles = shuffle(fakeRoleCatalog[wordName] || []);
+            roundSpyRoleMap = spyPlayerNames.reduce((acc, name, index) => {
+              acc[name] = fakeRoles[index % fakeRoles.length];
+              return acc;
+            }, {});
+          }
+          return { roundCategory, roundWord: wordName, roundRoleMap, roundSpyRoleMap };
+        };
         if (chosenCategory === 'Biomes') {
           const biomeName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
-          const biomeRoles = shuffle(biomeCatalog[biomeName]);
-          const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
-            acc[player.name] = biomeRoles[index % biomeRoles.length];
-            return acc;
-          }, {});
-          let roundSpyRoleMap = {};
-          if (useImposterRole) {
-            const fakeRoles = shuffle(fakeBiomeRoleCatalog[biomeName] || []);
-            roundSpyRoleMap = spyPlayerNames.reduce((acc, name, index) => {
-              acc[name] = fakeRoles[index % fakeRoles.length];
-              return acc;
-            }, {});
-          }
-          nextRound = { roundCategory: 'Biomes', roundWord: biomeName, roundRoleMap, roundSpyRoleMap };
+          nextRound = buildRound('Biomes', biomeName, biomeCatalog, fakeBiomeRoleCatalog);
+        } else if (chosenCategory === 'Historical Eras') {
+          const eraName = historicalEraNames[Math.floor(Math.random() * historicalEraNames.length)];
+          nextRound = buildRound('Historical Eras', eraName, historicalErasCatalog, fakeHistoricalErasRoleCatalog);
+        } else if (chosenCategory === 'Movies') {
+          const genreName = movieGenreNames[Math.floor(Math.random() * movieGenreNames.length)];
+          nextRound = buildRound('Movies', genreName, movieCatalog, fakeMovieRoleCatalog);
         } else {
           const locationName = locationNames[Math.floor(Math.random() * locationNames.length)];
-          const locationRoles = shuffle(locationCatalog[locationName]);
-          const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
-            acc[player.name] = locationRoles[index % locationRoles.length];
-            return acc;
-          }, {});
-          let roundSpyRoleMap = {};
-          if (useImposterRole) {
-            const fakeRoles = shuffle(fakeLocationRoleCatalog[locationName] || []);
-            roundSpyRoleMap = spyPlayerNames.reduce((acc, name, index) => {
-              acc[name] = fakeRoles[index % fakeRoles.length];
-              return acc;
-            }, {});
-          }
-          nextRound = { roundCategory: 'Locations', roundWord: locationName, roundRoleMap, roundSpyRoleMap };
+          nextRound = buildRound('Locations', locationName, locationCatalog, fakeLocationRoleCatalog);
         }
         this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, spyCount: newSpyCount, roundSpyIndices: selectedSpyIndices, ...nextRound });
       },
-      goVoting: () => this.setState({ screen: 'voting' }),
-      goResults: () => this.setState({ screen: 'results' }),
-      backToLobby: () => this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null }),
-      backToReveal: () => this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false }),
-      playAgain: () => this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null }),
+      goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
+      goResults: () => { this.__clearTimer(); this.setState({ screen: 'results' }); },
+      backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null, secondsLeft: null }); },
+      backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false, secondsLeft: null }); },
+      playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null, secondsLeft: null }); },
       hasVote: st.vote !== null, notHasVote: st.vote === null,
       voteUpper: voteName.toUpperCase(),
       caughtSpy: st.vote !== null && players.find(p => p.name === st.vote)?.spy,
