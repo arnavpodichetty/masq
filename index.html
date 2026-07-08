@@ -108,7 +108,7 @@
                 </div>
                 <div style="flex:1;">
                   <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:#9b8a63;">Jesters</div>
-                  <div style="font-family:'EB Garamond',serif; font-size:14px; color:#ddd0b0; margin-top:1px;">{{ spyLabel }}</div>
+                  <div style="font-family:'EB Garamond',serif; font-size:14px; color:#ddd0b0; margin-top:1px;">{{ jesterLabel }}</div>
                 </div>
                 <div style="color:#5a6a84; font-size:18px;">›</div>
               </div>
@@ -167,7 +167,7 @@
                 </div>
               </sc-if>
 
-              <!-- SPIES modal -->
+              <!-- JESTERS modal -->
               <sc-if value="{{ isModalJesters }}" hint-placeholder-val="{{ false }}">
                 <div style="background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;">
                   <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
@@ -175,12 +175,12 @@
                     <div onClick="{{ closeModal }}" style="font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;">×</div>
                   </div>
                   <div style="display:flex; align-items:center; justify-content:center; gap:32px;">
-                    <div onClick="{{ decSpy }}" style="width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(200,162,76,.3); display:flex; align-items:center; justify-content:center; font-size:26px; color:#caa64f; cursor:pointer; line-height:1;">−</div>
+                    <div onClick="{{ decJester }}" style="width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(200,162,76,.3); display:flex; align-items:center; justify-content:center; font-size:26px; color:#caa64f; cursor:pointer; line-height:1;">−</div>
                     <div style="text-align:center;">
-                      <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:#f0e6c9; line-height:1;">{{ spyCount }}</div>
-                      <div style="font-family:'EB Garamond',serif; font-size:15px; color:#9b8a63; margin-top:4px;">{{ spyLabel }}</div>
+                      <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:#f0e6c9; line-height:1;">{{ jesterCount }}</div>
+                      <div style="font-family:'EB Garamond',serif; font-size:15px; color:#9b8a63; margin-top:4px;">{{ jesterLabel }}</div>
                     </div>
-                    <div onClick="{{ incSpy }}" style="width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;">+</div>
+                    <div onClick="{{ incJester }}" style="width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;">+</div>
                   </div>
                   <!-- randomize toggle row -->
                   <div style="display:flex; align-items:center; gap:12px; margin:20px 0 14px;">
@@ -204,7 +204,7 @@
                         <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;">Min</div>
                         <div style="display:flex; align-items:center; gap:9px;">
                           <div onClick="{{ decRandMin }}" style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;" class="imp-btn">−</div>
-                          <div style="font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;">{{ spyRandMin }}</div>
+                          <div style="font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;">{{ jesterRandMin }}</div>
                           <div onClick="{{ incRandMin }}" style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;" class="imp-btn">+</div>
                         </div>
                       </div>
@@ -213,7 +213,7 @@
                         <div style="font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;">Max</div>
                         <div style="display:flex; align-items:center; gap:9px;">
                           <div onClick="{{ decRandMax }}" style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;" class="imp-btn">−</div>
-                          <div style="font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;">{{ spyRandMax }}</div>
+                          <div style="font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;">{{ jesterRandMax }}</div>
                           <div onClick="{{ incRandMax }}" style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;" class="imp-btn">+</div>
                         </div>
                       </div>
@@ -296,7 +296,7 @@
                       </div>
                       <div style="flex:1;">
                         <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">Jesters Know Each Other</div>
-                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">Multiple jesters are revealed to each other at the start</div>
+                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">Jesters can see their fellow jesters</div>
                       </div>
                       <div style="position:relative; width:44px; height:24px; border-radius:12px; background:{{ jestersKnowBg }}; transition:background .25s; flex:none;">
                         <div style="position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:{{ jestersKnowThumb }}; transition:transform .25s;"></div>
@@ -309,23 +309,23 @@
                       </div>
                       <div style="flex:1;">
                         <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">Show Word</div>
-                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">Players can see the word during reveal</div>
+                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">Players can see the word and their role</div>
                       </div>
                       <div style="position:relative; width:44px; height:24px; border-radius:12px; background:{{ showWordBg }}; transition:background .25s; flex:none;">
                         <div style="position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:{{ showWordThumb }}; transition:transform .25s;"></div>
                       </div>
                     </div>
 
-                    <div onClick="{{ toggleImposterGetsRole }}" style="display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); cursor:pointer; opacity:{{ imposterGetsRoleToggleOpacity }}; pointer-events:{{ imposterGetsRoleTogglePointerEvents }};">
+                    <div onClick="{{ toggleJesterGetsRole }}" style="display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); cursor:pointer; opacity:{{ jesterGetsRoleToggleOpacity }}; pointer-events:{{ jesterGetsRoleTogglePointerEvents }};">
                       <div style="flex:none; width:38px; height:38px; border-radius:10px; background:rgba(200,162,76,.15); display:flex; align-items:center; justify-content:center;">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="#e6cb7e" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="#caa64f" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="#caa64f" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>
                       </div>
                       <div style="flex:1;">
-                        <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">Imposter Gets Role</div>
-                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">{{ imposterGetsRoleDesc }}</div>
+                        <div style="font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;">Jester Gets Role</div>
+                        <div style="font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;">{{ jesterGetsRoleDesc }}</div>
                       </div>
-                      <div style="position:relative; width:44px; height:24px; border-radius:12px; background:{{ imposterGetsRoleBg }}; transition:background .25s; flex:none;">
-                        <div style="position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:{{ imposterGetsRoleThumb }}; transition:transform .25s;"></div>
+                      <div style="position:relative; width:44px; height:24px; border-radius:12px; background:{{ jesterGetsRoleBg }}; transition:background .25s; flex:none;">
+                        <div style="position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:{{ jesterGetsRoleThumb }}; transition:transform .25s;"></div>
                       </div>
                     </div>
 
@@ -343,11 +343,11 @@
                   <div style="display:flex; flex-direction:column; gap:10px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px;">
                       <div style="font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;">Sound Effects</div>
-                      <div style="font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;">Coming soon</div>
+                      <div style="font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;">Coming Soon</div>
                     </div>
                     <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px;">
                       <div style="font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;">Dark Theme</div>
-                      <div style="font-family:'Archivo',sans-serif; font-size:13px; color:#caa64f;">Always on</div>
+                      <div style="font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;">Coming Soon</div>
                     </div>
                     <div style="padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; text-align:center;">
                       <div style="font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:#e6cb7e;">MASQUERADE</div>
@@ -639,11 +639,11 @@
                 </div>
             </div>
             <div style="margin-top:26px; padding:0 30px; text-align:center;">
-              <sc-if value="{{ caughtSpy }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ caughtJester }}" hint-placeholder-val="{{ true }}">
                 <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;">The Cast wins! 🎉</div>
                 <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You unmasked the jester before the curtain fell.</div>
               </sc-if>
-              <sc-if value="{{ missedSpy }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ missedJester }}" hint-placeholder-val="{{ false }}">
                 <div style="font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;">The Jester escapes!</div>
                 <div style="font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;">You accused the wrong performer. The jester takes a bow.</div>
               </sc-if>
@@ -666,15 +666,15 @@ class Component extends DCLogic {
     modal: null,
     playerList: ['Arnav','Esha','Richard'],
     addingPlayer: false, newName: '', editingIdx: null, editingVal: '',
-    spyCount: 1, spyRandMin: 1, spyRandMax: 3, randJesters: false, showCategory: true, showWord: true, jestersKnow: false, imposterGetsRole: false,
+    jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: true, jestersKnow: false, jesterGetsRole: false,
     timeLimit: 5,
     categories: ['Locations','Biomes','Historical Eras','Movies'],
     selCategories: ['Locations','Biomes','Historical Eras','Movies'],
-    roundSpyIndices: null,
+    roundJesterIndices: null,
     roundCategory: 'Locations',
     roundWord: '',
     roundRoleMap: {},
-    roundSpyRoleMap: {},
+    roundJesterRoleMap: {},
     secondsLeft: null,
     timeUp: false,
   };
@@ -758,20 +758,20 @@ class Component extends DCLogic {
       }
       return next;
     };
-    const maxSpies = Math.max(0, st.playerList.length - 1);
-    const jesterCount = Math.min(st.spyCount, maxSpies);
-    const roundSpyIndices = Array.isArray(st.roundSpyIndices) ? st.roundSpyIndices : [];
-    const jesterIndices = new Set(roundSpyIndices);
+    const maxJesters = Math.max(0, st.playerList.length - 1);
+    const jesterCount = Math.min(st.jesterCount, maxJesters);
+    const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
+    const jesterIndices = new Set(roundJesterIndices);
     const players = st.playerList.map((name, i) => ({
       name,
       comedy: i % 2 === 0,
       tragedy: i % 2 !== 0,
       face: faceColors[i % faceColors.length],
       line: lineColors[i % lineColors.length],
-      spy: jesterIndices.has(i),
+      jester: jesterIndices.has(i),
       you: i === 0,
     }));
-    const jesterNames = players.filter(p => p.spy).map(p => p.name);
+    const jesterNames = players.filter(p => p.jester).map(p => p.name);
 
     const lobby = players.map((p, i) => ({ ...p, host: i === 0, notHost: i !== 0 }));
 
@@ -789,7 +789,7 @@ class Component extends DCLogic {
 
     const roundCategory = st.roundCategory || 'Locations';
     const roundRoleMap = st.roundRoleMap || {};
-    const roundSpyRoleMap = st.roundSpyRoleMap || {};
+    const roundJesterRoleMap = st.roundJesterRoleMap || {};
     const isBiomeRound = roundCategory === 'Biomes';
     const isLocationRound = roundCategory === 'Locations';
     const isHistoricalRound = roundCategory === 'Historical Eras';
@@ -807,18 +807,18 @@ class Component extends DCLogic {
     });
     const allSeen = players.every(p => st.viewed[p.name]);
     const ap = st.activePlayer;
-    const apIsSpy = ap && !!ap.spy;
-    const apRoundRole = ap && !apIsSpy ? (roundRoleMap[ap.name] || 'PERFORMER') : null;
-    const apDisguised = apIsSpy && st.gameMode === 'roles' && st.imposterGetsRole;
-    const apFakeRole = apDisguised ? (roundSpyRoleMap[ap.name] || null) : null;
-    const apIsUndisguisedJester = apIsSpy && !apDisguised;
+    const apIsJester = ap && !!ap.jester;
+    const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.name] || 'PERFORMER') : null;
+    const apDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole;
+    const apFakeRole = apDisguised ? (roundJesterRoleMap[ap.name] || null) : null;
+    const apIsUndisguisedJester = apIsJester && !apDisguised;
     const closeOverlay = () => {
       if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.name]: true } }));
     };
     const openCurtain = () => this.setState({ cardOpen: true });
 
     const voteName = st.vote || '';
-    const spyPlayer = players.find(p => p.spy);
+    const jesterPlayer = players.find(p => p.jester);
     return {
       actOnePlayers, allSeen, notAllSeen: !allSeen,
       showOverlay: !!ap,
@@ -826,16 +826,16 @@ class Component extends DCLogic {
       apName: ap ? ap.name.replace(' (You)', '') : '',
       apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
       apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
-      apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsSpy ? (apFakeRole || 'PERFORMER') : apRoundRole),
+      apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
       apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : '#caa64f'))),
       apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : '23px'),
-      apWord: apIsSpy ? null : st.roundWord,
+      apWord: apIsJester ? null : st.roundWord,
       apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : 'Location')),
       apWordSize: isBiomeRound ? '20px' : '22px',
       apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
       apIsUndisguisedJester,
       apIsDisguisedJester: apDisguised,
-      apIsPerformer: !apIsSpy,
+      apIsPerformer: !apIsJester,
       apHint: apIsUndisguisedJester
         ? 'You have no word. Blend in, bluff your clues, and avoid being unmasked before the curtain falls.'
         : isBiomeRound
@@ -875,7 +875,7 @@ class Component extends DCLogic {
       openHelp: () => this.setState({ modal: 'help' }),
       openSettings: () => this.setState({ modal: 'settings' }),
       openGameSettings: () => this.setState({ modal: 'gameSettings' }),
-      gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, (st.gameMode === 'roles' && st.imposterGetsRole) ? 'Imposter Gets Role' : null].filter(Boolean).join(' · ') || 'Default',
+      gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, (st.gameMode === 'roles' && st.jesterGetsRole) ? 'Jester Gets Role' : null].filter(Boolean).join(' · ') || 'Default',
       playerItems: st.playerList.map((name, i) => {
         const editing = st.editingIdx === i;
         const p = players[i] || players[0];
@@ -929,16 +929,16 @@ class Component extends DCLogic {
         },
       })),
       catSummary: st.selCategories.length === st.categories.length ? st.categories.join(', ') : st.selCategories.join(', '),
-      spyCount: st.spyCount,
-      incSpy: () => this.setState({ spyCount: Math.min(st.spyCount + 1, maxSpies) }),
-      decSpy: () => this.setState({ spyCount: Math.max(st.spyCount - 1, maxSpies > 0 ? 1 : 0) }),
-      spyLabel: st.spyCount === 1 ? '1 Jester' : st.spyCount + ' Jesters',
-      spyRandMin: st.spyRandMin,
-      spyRandMax: st.spyRandMax,
-      incRandMin: () => this.setState({ spyRandMin: Math.min(st.spyRandMin + 1, st.spyRandMax) }),
-      decRandMin: () => this.setState({ spyRandMin: Math.max(st.spyRandMin - 1, 1) }),
-      incRandMax: () => this.setState({ spyRandMax: Math.min(st.spyRandMax + 1, maxSpies) }),
-      decRandMax: () => this.setState({ spyRandMax: Math.max(st.spyRandMax - 1, st.spyRandMin) }),
+      jesterCount: st.jesterCount,
+      incJester: () => this.setState({ jesterCount: Math.min(st.jesterCount + 1, maxJesters) }),
+      decJester: () => this.setState({ jesterCount: Math.max(st.jesterCount - 1, maxJesters > 0 ? 1 : 0) }),
+      jesterLabel: st.jesterCount === 1 ? '1 Jester' : st.jesterCount + ' Jesters',
+      jesterRandMin: st.jesterRandMin,
+      jesterRandMax: st.jesterRandMax,
+      incRandMin: () => this.setState({ jesterRandMin: Math.min(st.jesterRandMin + 1, st.jesterRandMax) }),
+      decRandMin: () => this.setState({ jesterRandMin: Math.max(st.jesterRandMin - 1, 1) }),
+      incRandMax: () => this.setState({ jesterRandMax: Math.min(st.jesterRandMax + 1, maxJesters) }),
+      decRandMax: () => this.setState({ jesterRandMax: Math.max(st.jesterRandMax - 1, st.jesterRandMin) }),
       randJesters: st.randJesters,
       randJestersBg: st.randJesters ? '#b3202f' : 'rgba(255,255,255,.12)',
       randJestersThumb: st.randJesters ? 'translateX(22px)' : 'translateX(2px)',
@@ -960,15 +960,15 @@ class Component extends DCLogic {
       jestersKnowBg: st.jestersKnow ? '#b3202f' : 'rgba(255,255,255,.12)',
       jestersKnowThumb: st.jestersKnow ? 'translateX(22px)' : 'translateX(2px)',
       toggleJestersKnow: () => this.setState({ jestersKnow: !st.jestersKnow }),
-      imposterGetsRole: st.gameMode === 'roles' ? st.imposterGetsRole : false,
-      imposterGetsRoleDesc: st.gameMode === 'words' ? 'Roles-only setting — unavailable in Word Mode' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
-      imposterGetsRoleBg: (st.gameMode === 'roles' && st.imposterGetsRole) ? '#b3202f' : 'rgba(255,255,255,.12)',
-      imposterGetsRoleThumb: (st.gameMode === 'roles' && st.imposterGetsRole) ? 'translateX(22px)' : 'translateX(2px)',
-      imposterGetsRoleToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
-      imposterGetsRoleTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
-      toggleImposterGetsRole: () => {
+      jesterGetsRole: st.gameMode === 'roles' ? st.jesterGetsRole : false,
+      jesterGetsRoleDesc: st.gameMode === 'words' ? 'Roles-only setting — unavailable in Word Mode' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
+      jesterGetsRoleBg: (st.gameMode === 'roles' && st.jesterGetsRole) ? '#b3202f' : 'rgba(255,255,255,.12)',
+      jesterGetsRoleThumb: (st.gameMode === 'roles' && st.jesterGetsRole) ? 'translateX(22px)' : 'translateX(2px)',
+      jesterGetsRoleToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
+      jesterGetsRoleTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
+      toggleJesterGetsRole: () => {
         if (st.gameMode === 'words') return;
-        this.setState({ imposterGetsRole: !st.imposterGetsRole });
+        this.setState({ jesterGetsRole: !st.jesterGetsRole });
       },
       timeLimit: st.timeLimit,
       timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
@@ -995,7 +995,7 @@ class Component extends DCLogic {
       gameMode: st.gameMode,
       showRoleHeading: st.gameMode !== 'words',
       setRoleMode: () => this.setState({ gameMode: 'roles' }),
-      setWordMode: () => this.setState({ gameMode: 'words', showWord: true, imposterGetsRole: false }),
+      setWordMode: () => this.setState({ gameMode: 'words', showWord: true, jesterGetsRole: false }),
       roleTileBg: st.gameMode === 'roles' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.04)',
       roleTileBorder: st.gameMode === 'roles' ? '1.5px solid #caa64f' : '1px solid rgba(255,255,255,.08)',
       roleTileColor: st.gameMode === 'roles' ? '#f0e6c9' : '#8a9ab8',
@@ -1006,38 +1006,38 @@ class Component extends DCLogic {
       wordTileSubColor: st.gameMode === 'words' ? '#c6a96e' : '#5f6c86',
       wine, crimson, navy, goldFace, ivoryFace,
       lobby, votable,
-      revealedName: spyPlayer ? spyPlayer.name : 'Unknown',
+      revealedName: jesterPlayer ? jesterPlayer.name : 'Unknown',
       goReveal: () => {
-        let newSpyCount = st.spyCount;
+        let newJesterCount = st.jesterCount;
         if (st.randJesters) {
-          const min = st.spyRandMin;
-          const max = Math.min(st.spyRandMax, maxSpies);
-          newSpyCount = Math.floor(Math.random() * (max - min + 1)) + min;
+          const min = st.jesterRandMin;
+          const max = Math.min(st.jesterRandMax, maxJesters);
+          newJesterCount = Math.floor(Math.random() * (max - min + 1)) + min;
         }
         const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
-        const selectedSpyIndices = shuffledIndices.slice(0, Math.min(newSpyCount, maxSpies));
+        const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
         const pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
         const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
-        let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundSpyRoleMap: {} };
-        const rolePlayers = players.filter(p => !p.spy);
-        const spyIndexSet = new Set(selectedSpyIndices);
-        const spyPlayerNames = st.playerList.filter((_, i) => spyIndexSet.has(i));
-        const useImposterRole = st.gameMode === 'roles' && st.imposterGetsRole;
+        let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundJesterRoleMap: {} };
+        const rolePlayers = players.filter(p => !p.jester);
+        const jesterIndexSet = new Set(selectedJesterIndices);
+        const jesterPlayerNames = st.playerList.filter((_, i) => jesterIndexSet.has(i));
+        const useJesterRole = st.gameMode === 'roles' && st.jesterGetsRole;
         const buildRound = (roundCategory, wordName, roleCatalog, fakeRoleCatalog) => {
           const roles = shuffle(roleCatalog[wordName]);
           const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
             acc[player.name] = roles[index % roles.length];
             return acc;
           }, {});
-          let roundSpyRoleMap = {};
-          if (useImposterRole) {
+          let roundJesterRoleMap = {};
+          if (useJesterRole) {
             const fakeRoles = shuffle(fakeRoleCatalog[wordName] || []);
-            roundSpyRoleMap = spyPlayerNames.reduce((acc, name, index) => {
+            roundJesterRoleMap = jesterPlayerNames.reduce((acc, name, index) => {
               acc[name] = fakeRoles[index % fakeRoles.length];
               return acc;
             }, {});
           }
-          return { roundCategory, roundWord: wordName, roundRoleMap, roundSpyRoleMap };
+          return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
         };
         if (chosenCategory === 'Biomes') {
           const biomeName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
@@ -1052,19 +1052,19 @@ class Component extends DCLogic {
           const locationName = locationNames[Math.floor(Math.random() * locationNames.length)];
           nextRound = buildRound('Locations', locationName, locationCatalog, fakeLocationRoleCatalog);
         }
-        this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, spyCount: newSpyCount, roundSpyIndices: selectedSpyIndices, ...nextRound });
+        this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, jesterCount: newJesterCount, roundJesterIndices: selectedJesterIndices, ...nextRound });
       },
       goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
       goResults: () => { this.__clearTimer(); this.setState({ screen: 'results' }); },
-      backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null, secondsLeft: null, timeUp: false }); },
+      backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false }); },
       backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false }); },
-      playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundSpyIndices: null, secondsLeft: null, timeUp: false }); },
+      playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false }); },
       dismissTimeUp: () => this.setState({ timeUp: false }),
       showTimeUpPopup: st.timeUp,
       hasVote: st.vote !== null, notHasVote: st.vote === null,
       voteUpper: voteName.toUpperCase(),
-      caughtSpy: st.vote !== null && players.find(p => p.name === st.vote)?.spy,
-      missedSpy: st.vote !== null && !players.find(p => p.name === st.vote)?.spy,
+      caughtJester: st.vote !== null && players.find(p => p.name === st.vote)?.jester,
+      missedJester: st.vote !== null && !players.find(p => p.name === st.vote)?.jester,
     };
   }
 }
