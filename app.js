@@ -349,12 +349,12 @@
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
         jesterCount: st.jesterCount,
         incJester: () => this.setState({ jesterCount: Math.min(st.jesterCount + 1, maxJesters) }),
-        decJester: () => this.setState({ jesterCount: Math.max(st.jesterCount - 1, maxJesters > 0 ? 1 : 0) }),
-        jesterLabel: st.jesterCount === 1 ? '1 Jester' : st.jesterCount + ' Jesters',
+        decJester: () => this.setState({ jesterCount: Math.max(st.jesterCount - 1, 0) }),
+        jesterLabel: st.jesterCount === 0 ? 'No Jesters' : st.jesterCount === 1 ? '1 Jester' : st.jesterCount + ' Jesters',
         jesterRandMin: st.jesterRandMin,
         jesterRandMax: st.jesterRandMax,
         incRandMin: () => this.setState({ jesterRandMin: Math.min(st.jesterRandMin + 1, st.jesterRandMax) }),
-        decRandMin: () => this.setState({ jesterRandMin: Math.max(st.jesterRandMin - 1, 1) }),
+        decRandMin: () => this.setState({ jesterRandMin: Math.max(st.jesterRandMin - 1, 0) }),
         incRandMax: () => this.setState({ jesterRandMax: Math.min(st.jesterRandMax + 1, maxJesters) }),
         decRandMax: () => this.setState({ jesterRandMax: Math.max(st.jesterRandMax - 1, st.jesterRandMin) }),
         randJesters: st.randJesters,
@@ -426,7 +426,9 @@
         wordTileSubColor: st.gameMode === 'words' ? '#c6a96e' : '#5f6c86',
         wine, crimson, navy, goldFace, ivoryFace,
         lobby, votable,
-        revealedName: jesterPlayer ? jesterPlayer.name : 'Unknown',
+        hasJester: !!jesterPlayer,
+        revealedName: jesterPlayer ? jesterPlayer.name : 'No One',
+        jesterRevealHeading: jesterPlayer ? 'The Jester was…' : 'There Was No Jester',
         goReveal: () => {
           let newJesterCount = st.jesterCount;
           if (st.randJesters) {
@@ -523,8 +525,8 @@
         showTimeUpPopup: st.timeUp,
         hasVote: st.vote !== null, notHasVote: st.vote === null,
         voteUpper: voteName.toUpperCase(),
-        caughtJester: st.vote !== null && players.find(p => p.name === st.vote)?.jester,
-        missedJester: st.vote !== null && !players.find(p => p.name === st.vote)?.jester,
+        caughtJester: !!jesterPlayer && st.vote !== null && players.find(p => p.name === st.vote)?.jester,
+        missedJester: !!jesterPlayer && st.vote !== null && !players.find(p => p.name === st.vote)?.jester,
       };
     }
 
@@ -934,9 +936,9 @@
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:#caa64f;") }, 'The Final Curtain')
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:#f3ead0;") }, 'The Jester was…'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:#f3ead0;") }, v.jesterRevealHeading),
           h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite;') },
-            h(Mask, { comedy: false, tragedy: true, cracked: true, faceColor: v.ivoryFace, lineColor: v.crimson, size: 120 })
+            h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120 })
           ),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:#e6cb7e; margin-top:14px;") }, v.revealedName),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
@@ -959,6 +961,10 @@
             v.missedJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;") }, 'The Jester escapes!'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;") }, 'You accused the wrong performer. The jester takes a bow.')
+            ),
+            !v.hasJester && h(React.Fragment, null,
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'Every performer was genuine.'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;") }, 'No one was pretending — this round had no jester.')
             )
           )
         ),
