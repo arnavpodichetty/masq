@@ -633,9 +633,9 @@
 
     helpModal(v) {
       const cards = [
-        { border: '#caa64f', title: 'The Setup', body: 'Add your players, then choose from Role Categories (Locations, Biomes, Historical Eras, Movie Genres) or Word Categories (Food, Animals, Objects, Movies). Each round picks one category — role categories give the Jester a different role, word categories just hide the shared word.' },
+        { border: '#caa64f', title: 'The Setup', body: 'Add your players, then choose your categories. Each round picks one — role categories give the Jester a different role, word categories just hide the shared word.' },
         { border: '#7a1620', title: 'The Modes', body: 'Role Mode shows each player a role for the chosen word. Word Mode hides the role label and shows only the shared word for everyone except the Jester.' },
-        { border: '#14254a', title: 'The Clues', body: 'Take turns saying one clue related to the secret word, location, or biome. Be clear enough to seem informed, but not so clear that you give it away.' },
+        { border: '#14254a', title: 'The Questions', body: 'Starting with whoever opens the round, each player asks one question to one other player. That player answers, then asks the next question.' },
         { border: '#2e5bb0', title: 'The Trial', body: 'Discuss and vote. If the group picks the Jester correctly, the Cast wins. If not, the Jester escapes and wins. If the Jester is caught, they may still guess the word to steal the round.' },
       ];
       return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
@@ -884,9 +884,9 @@
 
     renderVoting(v) {
       const steps = [
-        { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round — go around the table.' },
-        { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: '#ecdfc0', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player says one clue word. Go around 2–3 times — watch for hesitation.' },
-        { badge: '#caa64f', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'rgba(200,162,76,.25)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'Discuss, point fingers, and vote on who you think is the jester. Majority rules.' },
+        { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round — asks question to someone else.' },
+        { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: '#ecdfc0', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player asks a question to another player who then gets to ask the next question.' },
+        { badge: '#caa64f', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'rgba(200,162,76,.25)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
         { badge: '#b3202f', bg: 'linear-gradient(135deg,#5c1117,#3c0a10)', border: 'rgba(178,32,47,.4)', num: '4', numColor: '#fff', icon: ICON_STEP4, title: 'Unmask the Jester', body: 'When ready, tap below to reveal who the jester really was.', panelBg: 'rgba(178,32,47,.08)' },
       ];
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:#0e0810; animation:imp-slide-in .3s ease both;') },
