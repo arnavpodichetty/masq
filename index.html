@@ -64,6 +64,68 @@
     0%, 100% { box-shadow: 0 8px 26px rgba(255,61,139,.5), 0 0 0 0 rgba(255,210,63,.35) }
     50%      { box-shadow: 0 10px 34px rgba(139,92,246,.6), 0 0 24px 4px rgba(255,210,63,.22) }
   }
+  /* periodic light sweep across the phone shell */
+  .jester-fx::before {
+    content: ''; position: absolute; inset: -50%;
+    background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.07) 47%, rgba(255,210,63,.13) 51%, transparent 60%);
+    animation: j-sweep 7s ease-in-out infinite;
+  }
+  @keyframes j-sweep { 0%, 55% { transform: translateX(-65%) } 100% { transform: translateX(65%) } }
+  /* dancing MASQ letters (shimmer + bounce share the animation slot) */
+  body.jester .j-dance {
+    display: inline-block;
+    animation: j-shimmer 3.2s linear infinite, j-dance 1.5s ease-in-out infinite;
+  }
+  @keyframes j-dance {
+    0%, 100% { transform: translateY(0) rotate(0deg) }
+    30%      { transform: translateY(-4px) rotate(-5deg) }
+    60%      { transform: translateY(1px) rotate(4deg) }
+  }
+  /* holographic-foil reveal card (tilt driven from JS via --hx/--hy) */
+  body.jester .j-card { transition: transform .18s ease; will-change: transform; }
+  .j-holo {
+    position: absolute; inset: 0; pointer-events: none;
+    mix-blend-mode: color-dodge; opacity: .5;
+    background:
+      radial-gradient(circle at var(--hx, 50%) var(--hy, 40%), rgba(255,255,255,.85), transparent 42%),
+      repeating-linear-gradient(115deg,
+        rgba(255,0,128,.28) 0 12px, rgba(255,210,63,.28) 12px 24px,
+        rgba(0,255,170,.28) 24px 36px, rgba(80,120,255,.28) 36px 48px);
+    filter: blur(1px) saturate(1.6);
+    animation: j-holo-idle 5s ease-in-out infinite alternate;
+  }
+  @keyframes j-holo-idle { from { background-position: 0 0, 0 0 } to { background-position: 0 0, 60px 30px } }
+  /* pointer spark trail */
+  .j-spark {
+    position: fixed; z-index: 9999; pointer-events: none;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 0 8px currentColor;
+    animation: j-spark .85s ease-out forwards;
+  }
+  @keyframes j-spark {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg) }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% - 48px)) scale(.35) rotate(170deg) }
+  }
+  /* results: rotating carnival ray-wheel behind the mask */
+  .j-rays {
+    position: absolute; inset: -70px; pointer-events: none; border-radius: 50%;
+    background: repeating-conic-gradient(rgba(255,210,63,.25) 0deg 12deg, transparent 12deg 24deg);
+    -webkit-mask-image: radial-gradient(circle, #000 28%, transparent 68%);
+    mask-image: radial-gradient(circle, #000 28%, transparent 68%);
+    animation: j-spin 14s linear infinite;
+  }
+  @keyframes j-spin { to { transform: rotate(360deg) } }
+  /* results: one-shot confetti explosion */
+  .j-burst { position: absolute; left: 50%; top: 38%; pointer-events: none; }
+  .jb { position: absolute; font-size: 15px; opacity: 0; animation: j-burst 1.1s cubic-bezier(.2,.7,.3,1) forwards; }
+  .jb.b0 { color: #ffd23f; text-shadow: 0 0 10px rgba(255,210,63,.9); }
+  .jb.b1 { color: #ff3d8b; text-shadow: 0 0 10px rgba(255,61,139,.9); }
+  .jb.b2 { color: #a78bfa; text-shadow: 0 0 10px rgba(139,92,246,.95); }
+  .jb.b3 { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,.9); }
+  @keyframes j-burst {
+    0%   { opacity: 1; transform: rotate(var(--ang)) translateX(6px) scale(1.1) }
+    100% { opacity: 0; transform: rotate(var(--ang)) translateX(var(--dist, 110px)) scale(.4) }
+  }
 </style>
 </head>
 <body>

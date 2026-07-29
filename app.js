@@ -218,7 +218,7 @@
   const ICON_STEP4 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#f4a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 16 16 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 16 22 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 23 Q16 17 21 23" fill="none" stroke="#f4a0a8" stroke-width="2" stroke-linecap="round"></path><path d="M23 6 L26 3 M26 3 L29 6 M26 3 L26 8" stroke="#f4a0a8" stroke-width="1.5" stroke-linecap="round"></path></svg>';
 
   // ---- Mask (was Mask.dc.html, imported via dc-import) ----
-  function Mask({ comedy, tragedy, cracked, faceColor, lineColor, size }) {
+  function Mask({ comedy, tragedy, cracked, faceColor, lineColor, size, hat }) {
     const FACE_D = 'M50 6 C26 6 13 26 13 52 C13 82 30 108 50 108 C70 108 87 82 87 52 C87 26 74 6 50 6 Z';
     return h('svg', { viewBox: '0 0 100 110', width: size, height: size, style: { display: 'block', overflow: 'visible' } },
       h('path', { key: 'face', d: FACE_D, fill: faceColor, stroke: lineColor, strokeWidth: 2.5 }),
@@ -244,6 +244,15 @@
       cracked && h(React.Fragment, { key: 'crack' },
         h('path', { d: 'M54 6 L46 28 L60 48 L44 68 L58 92 L48 108', fill: 'none', stroke: '#0c0608', strokeWidth: 3, strokeLinejoin: 'round', opacity: 0.85 }),
         h('path', { d: 'M54 6 L46 28 L60 48 L44 68 L58 92 L48 108', fill: 'none', stroke: 'rgba(255,80,60,.3)', strokeWidth: 1.2, strokeLinejoin: 'round' })
+      ),
+      hat && h('g', { key: 'hat' },
+        h('path', { d: 'M24 28 C18 20 10 10 4 6 C10 16 12 24 16 34 Z', fill: '#7b2ff7' }),
+        h('path', { d: 'M40 20 C40 10 46 2 50 -2 C54 2 60 10 60 20 Z', fill: '#ff3d8b' }),
+        h('path', { d: 'M76 28 C82 20 90 10 96 6 C90 16 88 24 84 34 Z', fill: '#4ade80' }),
+        h('path', { d: 'M16 32 Q50 4 84 32 Q50 20 16 32 Z', fill: '#8b5cf6' }),
+        h('circle', { cx: 5, cy: 6, r: 4, fill: '#ffd23f', stroke: '#b98a12', strokeWidth: 0.8 }),
+        h('circle', { cx: 50, cy: -1, r: 4, fill: '#ffd23f', stroke: '#b98a12', strokeWidth: 0.8 }),
+        h('circle', { cx: 95, cy: 6, r: 4, fill: '#ffd23f', stroke: '#b98a12', strokeWidth: 0.8 })
       )
     );
   }
@@ -282,6 +291,25 @@
       this.__fitPhoneShell = this.__fitPhoneShell.bind(this);
       this.__fitPhoneShell();
       window.addEventListener('resize', this.__fitPhoneShell);
+      // Jester mode: neon spark trail that follows the pointer (decorative,
+      // rendered outside React so it never triggers re-renders).
+      this.__spark = (e) => {
+        if (!this.state.jesterMode) return;
+        const now = performance.now();
+        if (this.__lastSpark && now - this.__lastSpark < 50) return;
+        this.__lastSpark = now;
+        const s = document.createElement('span');
+        s.className = 'j-spark';
+        s.textContent = ['✦', '✧', '◆', '✺'][(Math.random() * 4) | 0];
+        s.style.left = e.clientX + 'px';
+        s.style.top = e.clientY + 'px';
+        s.style.color = ['#ffd23f', '#ff3d8b', '#a78bfa', '#4ade80'][(Math.random() * 4) | 0];
+        s.style.fontSize = (9 + Math.random() * 9) + 'px';
+        s.style.setProperty('--dx', (Math.random() * 44 - 22) + 'px');
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 900);
+      };
+      window.addEventListener('pointermove', this.__spark);
     }
 
     componentDidUpdate(_, prev) {
@@ -291,8 +319,26 @@
     componentWillUnmount() {
       this.__clearTimer();
       window.removeEventListener('resize', this.__fitPhoneShell);
+      window.removeEventListener('pointermove', this.__spark);
       if (this.__audioCtx) this.__audioCtx.close();
     }
+
+    // Jester mode: holographic-foil card. Tilts in 3D toward the pointer and
+    // slides the rainbow sheen (--hx/--hy feed the .j-holo gradient).
+    __holoMove = (e) => {
+      if (!this.state.jesterMode) return;
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      const px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      const py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+      el.style.transform = `perspective(700px) rotateY(${((px - 0.5) * 14).toFixed(2)}deg) rotateX(${((0.5 - py) * 14).toFixed(2)}deg)`;
+      el.style.setProperty('--hx', (px * 100).toFixed(1) + '%');
+      el.style.setProperty('--hy', (py * 100).toFixed(1) + '%');
+    };
+
+    __holoLeave = (e) => {
+      e.currentTarget.style.transform = '';
+    };
 
     __fitPhoneShell() {
       const el = document.getElementById('phone-shell');
@@ -1058,7 +1104,11 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
           h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;"), className: 'j-title' }, 'MASQ'),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;"), className: 'j-title' },
+            v.jesterMode
+              ? 'MASQ'.split('').map((ch, i) => h('span', { key: i, className: 'j-title j-dance', style: { animationDelay: (i * 0.13) + 's, ' + (i * 0.13) + 's' } }, ch))
+              : 'MASQ'
+          ),
           h('div', { onClick: v.openSettings, className: 'imp-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
@@ -1117,7 +1167,7 @@
               h('div', { style: css('overflow:hidden; min-height:0;') },
                 h('div', { style: css('display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); animation:imp-rise .25s ease both;') },
                   h('div', { style: css('flex:none; width:40px; height:40px; border-radius:50%; background:var(--m-avatar-bg); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center;') },
-                    h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 26 })
+                    h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 26, hat: v.jesterMode })
                   ),
                   p.editing
                     ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:var(--m-lift-strong); border:1px solid var(--m-accent); border-radius:8px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
@@ -1159,7 +1209,7 @@
           h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
             v.actOnePlayers.map((p, i) => h('div', { key: i, onClick: p.onTap, className: 'imp-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
               h('div', { style: css('flex:none; width:44px; height:44px; border-radius:50%; background:var(--m-avatar-bg); display:flex; align-items:center; justify-content:center; border:1px solid var(--m-border-strong);') },
-                h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 30 })
+                h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 30, hat: v.jesterMode })
               ),
               h('div', { style: css("flex:1; font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:var(--m-text);") }, p.shortName),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:12px; color:${p.labelColor};`) }, p.label)
@@ -1175,10 +1225,10 @@
         v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
-          h('div', { onClick: v.openCurtain, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
+          h('div', { onClick: v.openCurtain, className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
-                h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60 })
+                h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
               ),
               v.apIsUndisguisedJester && h(React.Fragment, null,
                 h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; text-decoration:underline; color:${v.apRoleColor};`) }, 'Role'),
@@ -1203,6 +1253,7 @@
                 )
               )
             ),
+            v.jesterMode && h('div', { className: 'j-holo' }),
             h('div', { style: v.leftCurtain },
               h('div', { style: css('width:3px; height:84%; background:linear-gradient(180deg,transparent,#e6cb7e,transparent); opacity:.55;') })
             ),
@@ -1266,6 +1317,13 @@
 
     renderResults(v) {
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:imp-scale-in .35s ease both;') },
+        v.jesterMode && h('div', { className: 'j-burst' },
+          Array.from({ length: 14 }, (_, i) => h('span', {
+            key: i,
+            className: 'jb b' + (i % 4),
+            style: { '--ang': (i * 25.7) + 'deg', '--dist': (90 + (i % 4) * 45) + 'px', animationDelay: (i * 0.035) + 's' },
+          }, ['◆', '✦', '♦', '✧'][i % 4]))
+        ),
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:2px;') },
           h('div', { onClick: v.backToLobby, style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
@@ -1273,8 +1331,9 @@
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:var(--m-text-bright);") }, v.jesterRevealHeading),
-          h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite;') },
-            h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120 })
+          h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite; position:relative;') },
+            v.jesterMode && h('div', { className: 'j-rays' }),
+            h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120, hat: v.jesterMode })
           ),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, v.revealedName),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
