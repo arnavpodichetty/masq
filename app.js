@@ -178,7 +178,7 @@
       playerList: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
       playerKeys: [0, 1, 2, 3],
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
-      jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: true, jestersKnow: false, jesterGetsRole: false,
+      jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
       timeLimit: 5,
       categories: ['Locations', 'Biomes', 'Historical Eras', 'Movie Genres'],
       wordCategories: ['Food', 'Animals', 'Objects', 'Movies'],
@@ -421,7 +421,7 @@
               ? 'The era is your secret. Give clues that fit your role without making the answer obvious.'
             : isMovieRound
               ? 'The genre is your secret. Give clues that fit your movie without making the answer obvious.'
-            : 'Give clues that prove you know the word — without giving it away to the Jester.',
+            : 'Give clues that prove you know the word without giving it away to the Jester.',
         apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterNames.length > 1
           ? jesterNames.filter(n => n !== (ap ? ap.name : '')).join(', ')
           : null,
@@ -816,10 +816,10 @@
 
     helpModal(v) {
       const cards = [
-        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add your players, then choose your categories. Each round picks one — role categories give the Jester a different role, word categories just hide the shared word.' },
-        { border: '#7a1620', title: 'The Modes', body: 'Role Mode shows each player a role for the chosen word. Word Mode hides the role label and shows only the shared word for everyone except the Jester.' },
-        { border: '#14254a', title: 'The Questions', body: 'Starting with whoever opens the round, each player asks one question to one other player. That player answers, then asks the next question.' },
-        { border: '#2e5bb0', title: 'The Trial', body: 'Discuss and vote. If the group picks the Jester correctly, the Cast wins. If not, the Jester escapes and wins. If the Jester is caught, they may still guess the word to steal the round.' },
+        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add your players, pick Role Mode or Word Mode, and choose categories. Each round picks one category at random from what you selected.' },
+        { border: '#7a1620', title: 'Role Mode', body: 'The default. Everyone but the Jester gets a secret role. The word stays hidden (you can turn it on in Options). Use your role to ask and answer questions without giving yourself away. The Jester has no role and has to bluff.' },
+        { border: '#14254a', title: 'Word Mode', body: 'Everyone but the Jester sees the same secret word, with no roles. Ask questions that prove you know it without saying it outright. The Jester sees nothing and has to fake it.' },
+        { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so each player privately sees their card. Then take turns asking one question to someone else. When you’re ready (or the timer ends), discuss and vote. Catch the Jester and the Cast wins; miss them and the Jester wins.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
@@ -915,7 +915,7 @@
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
           h('div', { onClick: v.toggleSoundEffects, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Sound Effects'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
             )
@@ -1124,7 +1124,7 @@
 
     renderVoting(v) {
       const steps = [
-        { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round — asks question to someone else.' },
+        { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round and asks a question to someone else.' },
         { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: 'var(--m-text-title)', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player asks a question to another player who then gets to ask the next question.' },
         { badge: 'var(--m-accent)', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'var(--m-border-strong)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
         { badge: '#b3202f', bg: 'linear-gradient(135deg,#5c1117,#3c0a10)', border: 'rgba(178,32,47,.4)', num: '4', numColor: '#fff', icon: ICON_STEP4, title: 'Unmask the Jester', body: 'When ready, tap below to reveal who the jester really was.', panelBg: 'rgba(178,32,47,.08)' },
@@ -1161,7 +1161,7 @@
         v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
           h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:imp-rise .3s ease both;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out — cast your votes and unmask the jester.'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out. Cast your votes and unmask the jester.'),
             h('div', { onClick: v.dismissTimeUp, className: 'imp-btn', style: css("margin-top:22px; padding:14px; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
@@ -1204,7 +1204,7 @@
             ),
             !v.hasJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'Every performer was genuine.'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'No one was pretending — this round had no jester.')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'No one was pretending. This round had no jester.')
             )
           )
         ),
