@@ -17,21 +17,126 @@
     return o;
   }
 
+
+  const THEME_DARK = {
+    '--m-page': '#05020a',
+    '--m-page-glow': 'rgba(46,91,176,.12)',
+    '--m-shell': '#1a070b',
+    '--m-screen': '#0e0810',
+    '--m-modal': '#16101a',
+    '--m-text': '#f0e6c9',
+    '--m-text-title': '#ecdfc0',
+    '--m-text-bright': '#f3ead0',
+    '--m-brand': '#e6cb7e',
+    '--m-accent': '#caa64f',
+    '--m-label': '#9b8a63',
+    '--m-muted': '#8a9ab8',
+    '--m-dim': '#5f6c86',
+    '--m-dim2': '#5a6a84',
+    '--m-body': '#ddd0b0',
+    '--m-soft': '#c6b489',
+    '--m-soft2': '#7a6a4a',
+    '--m-help': '#b9c6df',
+    '--m-lift': 'rgba(255,255,255,.05)',
+    '--m-lift-soft': 'rgba(255,255,255,.04)',
+    '--m-lift-med': 'rgba(255,255,255,.07)',
+    '--m-lift-input': 'rgba(255,255,255,.08)',
+    '--m-lift-strong': 'rgba(255,255,255,.1)',
+    '--m-lift-toggle': 'rgba(255,255,255,.12)',
+    '--m-border': 'rgba(200,162,76,.12)',
+    '--m-border-med': 'rgba(200,162,76,.15)',
+    '--m-border-btn': 'rgba(200,162,76,.2)',
+    '--m-border-strong': 'rgba(200,162,76,.25)',
+    '--m-border-hard': 'rgba(200,162,76,.3)',
+    '--m-border-soft': 'rgba(200,162,76,.08)',
+    '--m-border-white': 'rgba(255,255,255,.08)',
+    '--m-backdrop': 'rgba(8,4,12,.7)',
+    '--m-overlay': 'rgba(8,4,10,.88)',
+    '--m-overlay-vote': 'rgba(8,4,10,.85)',
+    '--m-avatar-bg': 'rgba(0,0,0,.3)',
+    '--m-arrow': '#5a4a2a',
+    '--m-results-bg': 'radial-gradient(80% 45% at 50% 26%, rgba(230,203,126,.28), transparent 60%), #14070c',
+    '--m-results-sub': '#d8c79f',
+    '--m-shell-shadow': '0 30px 90px rgba(0,0,0,.6)',
+    '--m-ready-bg': 'rgba(144,200,144,.07)',
+    '--m-ready-border': '1px solid rgba(144,200,144,.3)',
+    '--m-ready-color': '#7fcf8a',
+    '--m-idle-label': '#caa64f',
+    '--m-timer': '#f0e6c9',
+  };
+  const THEME_LIGHT = {
+    '--m-page': '#e4ddd0',
+    '--m-page-glow': 'rgba(46,91,176,.08)',
+    '--m-shell': '#f3eee4',
+    '--m-screen': '#f7f2e8',
+    '--m-modal': '#faf6ef',
+    '--m-text': '#2a1f14',
+    '--m-text-title': '#1f1610',
+    '--m-text-bright': '#1a120c',
+    '--m-brand': '#8a6a28',
+    '--m-accent': '#9a7528',
+    '--m-label': '#8a7340',
+    '--m-muted': '#5a6578',
+    '--m-dim': '#7a6e5c',
+    '--m-dim2': '#6a6258',
+    '--m-body': '#3d3228',
+    '--m-soft': '#6b5a40',
+    '--m-soft2': '#8a7348',
+    '--m-help': '#4a5568',
+    '--m-lift': 'rgba(60,40,20,.05)',
+    '--m-lift-soft': 'rgba(60,40,20,.04)',
+    '--m-lift-med': 'rgba(60,40,20,.07)',
+    '--m-lift-input': 'rgba(60,40,20,.06)',
+    '--m-lift-strong': 'rgba(60,40,20,.08)',
+    '--m-lift-toggle': 'rgba(60,40,20,.15)',
+    '--m-border': 'rgba(140,110,40,.18)',
+    '--m-border-med': 'rgba(140,110,40,.22)',
+    '--m-border-btn': 'rgba(140,110,40,.28)',
+    '--m-border-strong': 'rgba(140,110,40,.32)',
+    '--m-border-hard': 'rgba(140,110,40,.38)',
+    '--m-border-soft': 'rgba(140,110,40,.12)',
+    '--m-border-white': 'rgba(60,40,20,.1)',
+    '--m-backdrop': 'rgba(40,30,20,.4)',
+    '--m-overlay': 'rgba(40,30,20,.72)',
+    '--m-overlay-vote': 'rgba(40,30,20,.7)',
+    '--m-avatar-bg': 'rgba(60,40,20,.08)',
+    '--m-arrow': '#9a8560',
+    '--m-results-bg': 'radial-gradient(80% 45% at 50% 26%, rgba(200,162,76,.22), transparent 60%), #efe6d6',
+    '--m-results-sub': '#6b5a40',
+    '--m-shell-shadow': '0 30px 90px rgba(60,40,20,.22)',
+    '--m-ready-bg': 'rgba(60,140,80,.1)',
+    '--m-ready-border': '1px solid rgba(60,140,80,.35)',
+    '--m-ready-color': '#2e7a40',
+    '--m-idle-label': '#9a7528',
+    '--m-timer': '#2a1f14',
+  };
+  function applyTheme(darkMode) {
+    const theme = darkMode ? THEME_DARK : THEME_LIGHT;
+    const root = document.documentElement;
+    Object.keys(theme).forEach((k) => root.style.setProperty(k, theme[k]));
+    document.body.style.background = theme['--m-page'];
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme['--m-page']);
+    const scheme = document.querySelector('meta[name="color-scheme"]');
+    if (scheme) scheme.setAttribute('content', darkMode ? 'dark' : 'light');
+  }
+  applyTheme(true);
+
   // ---- static icon markup (no dynamic bindings, safe as raw SVG) ----
-  const ICON_ROLE_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="#e6cb7e" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="#caa64f" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="#caa64f" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>';
-  const ICON_ROLE_18 = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="#e6cb7e" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="#caa64f" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="#caa64f" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>';
-  const ICON_WORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" stroke="#e6cb7e" stroke-width="1.7"></rect><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L12 16" stroke="#e6cb7e" stroke-width="1.4" stroke-linecap="round"></path><path d="M14 15 L18 19 M16 15 L18 17" stroke="#caa64f" stroke-width="1.3" stroke-linecap="round" opacity=".7"></path></svg>';
-  const ICON_PLAYERS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="8" cy="8" r="4" stroke="#caa64f" stroke-width="1.8"></circle><circle cx="16" cy="8" r="4" stroke="#caa64f" stroke-width="1.8"></circle><path d="M2 20 C2 16 5 14 8 14 C10 14 12 14.8 13 16" stroke="#caa64f" stroke-width="1.8" stroke-linecap="round"></path><path d="M22 20 C22 16 19 14 16 14 C14 14 12 14.8 11 16" stroke="#caa64f" stroke-width="1.8" stroke-linecap="round"></path></svg>';
-  const ICON_CATEGORIES_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 5 L4 19 Q4 20 5 20 L19 20 Q20 20 20 19 L20 5 Q20 4 19 4 L5 4 Q4 4 4 5 Z" stroke="#caa64f" stroke-width="1.8"></path><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L13 16" stroke="#caa64f" stroke-width="1.8" stroke-linecap="round"></path></svg>';
-  const ICON_CATEGORIES_18 = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M4 5 L4 19 Q4 20 5 20 L19 20 Q20 20 20 19 L20 5 Q20 4 19 4 L5 4 Q4 4 4 5 Z" stroke="#caa64f" stroke-width="1.8"></path><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L13 16" stroke="#caa64f" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  const ICON_ROLE_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="var(--m-brand)" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="var(--m-accent)" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>';
+  const ICON_ROLE_18 = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="var(--m-brand)" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="var(--m-accent)" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>';
+  const ICON_WORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="4" y="3" width="16" height="18" rx="3" stroke="var(--m-brand)" stroke-width="1.7"></rect><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L12 16" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M14 15 L18 19 M16 15 L18 17" stroke="var(--m-accent)" stroke-width="1.3" stroke-linecap="round" opacity=".7"></path></svg>';
+  const ICON_PLAYERS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="8" cy="8" r="4" stroke="var(--m-accent)" stroke-width="1.8"></circle><circle cx="16" cy="8" r="4" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M2 20 C2 16 5 14 8 14 C10 14 12 14.8 13 16" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path><path d="M22 20 C22 16 19 14 16 14 C14 14 12 14.8 11 16" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  const ICON_CATEGORIES_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 5 L4 19 Q4 20 5 20 L19 20 Q20 20 20 19 L20 5 Q20 4 19 4 L5 4 Q4 4 4 5 Z" stroke="var(--m-accent)" stroke-width="1.8"></path><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L13 16" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  const ICON_CATEGORIES_18 = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M4 5 L4 19 Q4 20 5 20 L19 20 Q20 20 20 19 L20 5 Q20 4 19 4 L5 4 Q4 4 4 5 Z" stroke="var(--m-accent)" stroke-width="1.8"></path><path d="M8 8 L16 8 M8 12 L16 12 M8 16 L13 16" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   const ICON_JESTERS_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><ellipse cx="12" cy="13" rx="8" ry="9" stroke="#e6a0a8" stroke-width="1.8"></ellipse><path d="M9 10 Q10.5 8.5 12 10" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 10 Q13.5 8.5 15 10" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M9 16 Q12 20 15 16" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M13 4 L11.5 9 L13.5 12 L11 16" stroke="#e6a0a8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></path></svg>';
   const ICON_JESTERS_18 = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="12" cy="13" rx="8" ry="9" stroke="#e6a0a8" stroke-width="1.8"></ellipse><path d="M9 10 Q10.5 8.5 12 10" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 10 Q13.5 8.5 15 10" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M9 16 Q12 20 15 16" stroke="#e6a0a8" stroke-width="1.5" stroke-linecap="round"></path><path d="M13 4 L11.5 9 L13.5 12 L11 16" stroke="#e6a0a8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"></path></svg>';
   const ICON_TIME = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M7 4 L17 4 L17 8 Q17 11 12 12 Q7 13 7 16 L7 20 L17 20 L17 16 Q17 13 12 12 Q7 11 7 8 Z" stroke="#9fb0cf" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 18 Q12 16 15 18" stroke="#9fb0cf" stroke-width="1.5" stroke-linecap="round"></path><path d="M9 6 Q12 7.5 15 6" stroke="#9fb0cf" stroke-width="1.5" stroke-linecap="round"></path></svg>';
-  const ICON_OPTIONS = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="3" stroke="#caa64f" stroke-width="1.8"></circle><path d="M12 2 L12 5 M12 19 L12 22 M2 12 L5 12 M19 12 L22 12 M4.93 4.93 L7.05 7.05 M16.95 16.95 L19.07 19.07 M19.07 4.93 L16.95 7.05 M7.05 16.95 L4.93 19.07" stroke="#caa64f" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  const ICON_OPTIONS = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="3" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M12 2 L12 5 M12 19 L12 22 M2 12 L5 12 M19 12 L22 12 M4.93 4.93 L7.05 7.05 M16.95 16.95 L19.07 19.07 M19.07 4.93 L16.95 7.05 M7.05 16.95 L4.93 19.07" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   const ICON_SHOW_WORD = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 12 C5.5 7.5 9 5 12 5 C15 5 18.5 7.5 21 12 C18.5 16.5 15 19 12 19 C9 19 5.5 16.5 3 12 Z" stroke="#9fb0cf" stroke-width="1.8"></path><circle cx="12" cy="12" r="2.5" stroke="#9fb0cf" stroke-width="1.4"></circle><path d="M5 19 L19 5" stroke="#9fb0cf" stroke-width="1.8" stroke-linecap="round"></path></svg>';
-  const ICON_STEP1 = '<svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="10" r="5" fill="none" stroke="#9fb0cf" stroke-width="2"></circle><path d="M11 14 L6 28 M21 14 L26 28 M8 28 L24 28" stroke="#9fb0cf" stroke-width="2" stroke-linecap="round"></path><path d="M13 18 L19 18" stroke="#e6cb7e" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 22 L20 22" stroke="#e6cb7e" stroke-width="1.5" stroke-linecap="round"></path><circle cx="16" cy="10" r="2.5" fill="#e6cb7e"></circle></svg>';
+  const ICON_STEP1 = '<svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="10" r="5" fill="none" stroke="#9fb0cf" stroke-width="2"></circle><path d="M11 14 L6 28 M21 14 L26 28 M8 28 L24 28" stroke="#9fb0cf" stroke-width="2" stroke-linecap="round"></path><path d="M13 18 L19 18" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 22 L20 22" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><circle cx="16" cy="10" r="2.5" fill="var(--m-brand)"></circle></svg>';
   const ICON_STEP2 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#e6a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 10 16 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 10 22 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 21 Q16 27 21 21" fill="none" stroke="#e6a0a8" stroke-width="2" stroke-linecap="round"></path></svg>';
-  const ICON_STEP3 = '<svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 6 L16 20" stroke="#e6cb7e" stroke-width="2.5" stroke-linecap="round"></path><path d="M10 14 L16 20 L22 14" fill="none" stroke="#e6cb7e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><rect x="8" y="24" width="16" height="3" rx="1.5" fill="#e6cb7e" opacity="0.5"></rect></svg>';
+  const ICON_STEP3 = '<svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 6 L16 20" stroke="var(--m-brand)" stroke-width="2.5" stroke-linecap="round"></path><path d="M10 14 L16 20 L22 14" fill="none" stroke="var(--m-brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><rect x="8" y="24" width="16" height="3" rx="1.5" fill="var(--m-brand)" opacity="0.5"></rect></svg>';
   const ICON_STEP4 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#f4a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 16 16 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 16 22 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 23 Q16 17 21 23" fill="none" stroke="#f4a0a8" stroke-width="2" stroke-linecap="round"></path><path d="M23 6 L26 3 M26 3 L29 6 M26 3 L26 8" stroke="#f4a0a8" stroke-width="1.5" stroke-linecap="round"></path></svg>';
 
   // ---- Mask (was Mask.dc.html, imported via dc-import) ----
@@ -87,14 +192,21 @@
       roundJesterWordMap: {},
       secondsLeft: null,
       timeUp: false,
+      darkMode: true,
+      soundEffects: true,
     };
 
     __nextPlayerId = 4;
 
     componentDidMount() {
+      applyTheme(this.state.darkMode);
       this.__fitPhoneShell = this.__fitPhoneShell.bind(this);
       this.__fitPhoneShell();
       window.addEventListener('resize', this.__fitPhoneShell);
+    }
+
+    componentDidUpdate(_, prev) {
+      if (prev.darkMode !== this.state.darkMode) applyTheme(this.state.darkMode);
     }
 
     componentWillUnmount() {
@@ -140,6 +252,7 @@
     }
 
     __playTimerSound() {
+      if (!this.state.soundEffects) return;
       const ctx = this.__ensureAudioCtx();
       if (!ctx) return;
       const now = ctx.currentTime;
@@ -166,7 +279,7 @@
         this.setState({ secondsLeft: null, timeUp: false });
         return;
       }
-      this.__ensureAudioCtx();
+      if (this.state.soundEffects) this.__ensureAudioCtx();
       this.setState({ secondsLeft: minutes * 60, timeUp: false });
       this.__timerId = setInterval(() => {
         const left = (this.state.secondsLeft || 0) - 1;
@@ -204,9 +317,9 @@
       const mapCategoryItem = (cat) => ({
         cat,
         sel: st.selCategories.includes(cat),
-        tileBg: st.selCategories.includes(cat) ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.05)',
-        tileBorder: st.selCategories.includes(cat) ? '1.5px solid #caa64f' : '1px solid rgba(200,162,76,.15)',
-        color: st.selCategories.includes(cat) ? '#f0e6c9' : '#8a9ab8',
+        tileBg: st.selCategories.includes(cat) ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift)',
+        tileBorder: st.selCategories.includes(cat) ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-med)',
+        color: st.selCategories.includes(cat) ? '#f0e6c9' : 'var(--m-muted)',
         onToggle: () => {
           const s = st.selCategories;
           const next = s.includes(cat) ? (s.length > 1 ? s.filter(c => c !== cat) : s) : [...s, cat];
@@ -236,8 +349,8 @@
         return {
           ...p, selected,
           voteLabel: votes === 1 ? '1 vote' : votes + ' votes',
-          tileBg: selected ? 'rgba(230,203,126,.16)' : 'rgba(255,255,255,.04)',
-          tileBorder: selected ? '2px solid #e6cb7e' : '1px solid rgba(200,162,76,.2)',
+          tileBg: selected ? 'rgba(230,203,126,.16)' : 'var(--m-lift-soft)',
+          tileBorder: selected ? '2px solid var(--m-brand)' : '1px solid var(--m-border-btn)',
           onVote: () => this.setState({ vote: p.name }),
         };
       });
@@ -258,9 +371,9 @@
         const seen = !!st.viewed[p.name];
         return {
           ...p, shortName: p.name.replace(' (You)', ''), seen,
-          rowBg: seen ? 'rgba(144,200,144,.07)' : 'rgba(255,255,255,.05)',
-          rowBorder: seen ? '1px solid rgba(144,200,144,.3)' : '1px solid rgba(200,162,76,.15)',
-          labelColor: seen ? '#7fcf8a' : '#caa64f',
+          rowBg: seen ? 'var(--m-ready-bg)' : 'var(--m-lift)',
+          rowBorder: seen ? 'var(--m-ready-border)' : '1px solid var(--m-border-med)',
+          labelColor: seen ? 'var(--m-ready-color)' : 'var(--m-idle-label)',
           label: seen ? '✓ Ready' : 'Tap →',
           onTap: () => this.setState({ activePlayer: p, cardOpen: false }),
         };
@@ -289,7 +402,7 @@
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
-        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : '#caa64f'))),
+        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : 'var(--m-accent)'))),
         apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : '23px'),
         apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
         apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))),
@@ -421,15 +534,15 @@
         incRandMax: () => this.setState({ jesterRandMax: Math.min(st.jesterRandMax + 1, maxJesters) }),
         decRandMax: () => this.setState({ jesterRandMax: Math.max(st.jesterRandMax - 1, st.jesterRandMin) }),
         randJesters: st.randJesters,
-        randJestersBg: st.randJesters ? '#b3202f' : 'rgba(255,255,255,.12)',
+        randJestersBg: st.randJesters ? '#b3202f' : 'var(--m-lift-toggle)',
         randJestersThumb: st.randJesters ? 'translateX(22px)' : 'translateX(2px)',
         toggleRandJesters: () => this.setState({ randJesters: !st.randJesters }),
         showCategory: st.showCategory,
-        showCatBg: st.showCategory ? '#b3202f' : 'rgba(255,255,255,.12)',
+        showCatBg: st.showCategory ? '#b3202f' : 'var(--m-lift-toggle)',
         showCatThumb: st.showCategory ? 'translateX(22px)' : 'translateX(2px)',
         toggleShowCat: () => this.setState({ showCategory: !st.showCategory }),
         showWord: st.gameMode === 'words' ? true : st.showWord,
-        showWordBg: (st.gameMode === 'words' || st.showWord) ? '#b3202f' : 'rgba(255,255,255,.12)',
+        showWordBg: (st.gameMode === 'words' || st.showWord) ? '#b3202f' : 'var(--m-lift-toggle)',
         showWordThumb: (st.gameMode === 'words' || st.showWord) ? 'translateX(22px)' : 'translateX(2px)',
         showWordToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
         showWordTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
@@ -438,13 +551,13 @@
           this.setState({ showWord: !st.showWord });
         },
         jestersKnow: st.jestersKnow,
-        jestersKnowBg: st.jestersKnow ? '#b3202f' : 'rgba(255,255,255,.12)',
+        jestersKnowBg: st.jestersKnow ? '#b3202f' : 'var(--m-lift-toggle)',
         jestersKnowThumb: st.jestersKnow ? 'translateX(22px)' : 'translateX(2px)',
         toggleJestersKnow: () => this.setState({ jestersKnow: !st.jestersKnow }),
         jesterGetsRole: st.jesterGetsRole,
         jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
         jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a similar but fake word instead of being told they’re the Jester' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
-        jesterGetsRoleBg: st.jesterGetsRole ? '#b3202f' : 'rgba(255,255,255,.12)',
+        jesterGetsRoleBg: st.jesterGetsRole ? '#b3202f' : 'var(--m-lift-toggle)',
         jesterGetsRoleThumb: st.jesterGetsRole ? 'translateX(22px)' : 'translateX(2px)',
         jesterGetsRoleToggleOpacity: '1',
         jesterGetsRoleTogglePointerEvents: 'auto',
@@ -462,7 +575,16 @@
           const s = total % 60;
           return m + ':' + String(s).padStart(2, '0');
         })(),
-        timerColor: st.secondsLeft !== null && st.secondsLeft <= 30 ? '#e8a0a8' : '#f0e6c9',
+        timerColor: st.secondsLeft !== null && st.secondsLeft <= 30 ? '#e8a0a8' : 'var(--m-timer)',
+        darkMode: st.darkMode,
+        lightMode: !st.darkMode,
+        lightModeBg: !st.darkMode ? '#b3202f' : 'var(--m-lift-toggle)',
+        lightModeThumb: !st.darkMode ? 'translateX(22px)' : 'translateX(2px)',
+        toggleLightMode: () => this.setState({ darkMode: !st.darkMode }),
+        soundEffects: st.soundEffects,
+        soundEffectsBg: st.soundEffects ? '#b3202f' : 'var(--m-lift-toggle)',
+        soundEffectsThumb: st.soundEffects ? 'translateX(22px)' : 'translateX(2px)',
+        toggleSoundEffects: () => this.setState({ soundEffects: !st.soundEffects }),
         playerNames: st.playerList.join(', '),
         playerCount: st.playerList.length,
         isLobby: st.screen === 'lobby',
@@ -477,14 +599,14 @@
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
         setWordMode: () => this.setState({ gameMode: 'words', showWord: true }),
-        roleTileBg: st.gameMode === 'roles' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.04)',
-        roleTileBorder: st.gameMode === 'roles' ? '1.5px solid #caa64f' : '1px solid rgba(255,255,255,.08)',
-        roleTileColor: st.gameMode === 'roles' ? '#f0e6c9' : '#8a9ab8',
-        roleTileSubColor: st.gameMode === 'roles' ? '#c6a96e' : '#5f6c86',
-        wordTileBg: st.gameMode === 'words' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'rgba(255,255,255,.04)',
-        wordTileBorder: st.gameMode === 'words' ? '1.5px solid #caa64f' : '1px solid rgba(255,255,255,.08)',
-        wordTileColor: st.gameMode === 'words' ? '#f0e6c9' : '#8a9ab8',
-        wordTileSubColor: st.gameMode === 'words' ? '#c6a96e' : '#5f6c86',
+        roleTileBg: st.gameMode === 'roles' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift-soft)',
+        roleTileBorder: st.gameMode === 'roles' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
+        roleTileColor: st.gameMode === 'roles' ? '#f0e6c9' : 'var(--m-muted)',
+        roleTileSubColor: st.gameMode === 'roles' ? '#c6a96e' : 'var(--m-dim)',
+        wordTileBg: st.gameMode === 'words' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift-soft)',
+        wordTileBorder: st.gameMode === 'words' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
+        wordTileColor: st.gameMode === 'words' ? '#f0e6c9' : 'var(--m-muted)',
+        wordTileSubColor: st.gameMode === 'words' ? '#c6a96e' : 'var(--m-dim)',
         wine, crimson, navy, goldFace, ivoryFace,
         lobby, votable,
         hasJester: !!jesterPlayer,
@@ -592,30 +714,30 @@
     }
 
     settingsRow({ onClick, iconBg, icon, label, value }) {
-      return h('div', { onClick, className: 'imp-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(200,162,76,.12); cursor:pointer;') },
+      return h('div', { onClick, className: 'imp-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
         h('div', { style: css(`width:34px; height:34px; border-radius:9px; background:${iconBg}; display:flex; align-items:center; justify-content:center; flex:none;`), dangerouslySetInnerHTML: { __html: icon } }),
         h('div', { style: css('flex:1;') },
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:#9b8a63;") }, label),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#ddd0b0; margin-top:1px;") }, value)
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--m-label);") }, label),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-body); margin-top:1px;") }, value)
         ),
-        h('div', { style: css('color:#5a6a84; font-size:18px;') }, '›')
+        h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
       );
     }
 
     categoriesModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Categories'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Categories'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
-        h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63; margin-bottom:8px;") }, 'Role Categories'),
+        h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:8px;") }, 'Role Categories'),
         h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
           v.categoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
             h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
           ))
         ),
         v.isWordsMode && h(React.Fragment, null,
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63; margin:18px 0 8px;") }, 'Word Categories'),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 8px;") }, 'Word Categories'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
             v.wordCategoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
@@ -626,28 +748,28 @@
     }
 
     jestersModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Number of Jesters'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Number of Jesters'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:32px;') },
-          h('div', { onClick: v.decJester, style: css('width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(200,162,76,.3); display:flex; align-items:center; justify-content:center; font-size:26px; color:#caa64f; cursor:pointer; line-height:1;') }, '−'),
+          h('div', { onClick: v.decJester, style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
           h('div', { style: css('text-align:center;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:#f0e6c9; line-height:1;") }, v.jesterCount),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#9b8a63; margin-top:4px;") }, v.jesterLabel)
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:var(--m-text); line-height:1;") }, v.jesterCount),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-label); margin-top:4px;") }, v.jesterLabel)
           ),
           h('div', { onClick: v.incJester, style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
         ),
         h('div', { style: css('display:flex; align-items:center; gap:12px; margin:20px 0 14px;') },
-          h('div', { style: css('flex:1; height:1px; background:rgba(200,162,76,.15);') }),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#7a6a4a;") }, 'or randomize'),
-          h('div', { style: css('flex:1; height:1px; background:rgba(200,162,76,.15);') })
+          h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') }),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-soft2);") }, 'or randomize'),
+          h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') })
         ),
-        h('div', { onClick: v.toggleRandJesters, className: 'imp-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(200,162,76,.12); cursor:pointer; margin-bottom:14px;') },
+        h('div', { onClick: v.toggleRandJesters, className: 'imp-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:14px;') },
           h('div', { style: css('flex:1;') },
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;") }, 'Random Count'),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;") }, 'Pick a random number of jesters each round')
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Random Count'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Pick a random number of jesters each round')
           ),
           h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.randJestersBg}; transition:background .25s; flex:none;`) },
             h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.randJestersThumb}; transition:transform .25s;`) })
@@ -655,20 +777,20 @@
         ),
         v.randJesters && h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:18px; animation:imp-rise .2s ease both;') },
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;") }, 'Min'),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Min'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;') }, '−'),
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMin),
-              h('div', { onClick: v.incRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;') }, '+')
+              h('div', { onClick: v.decRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMin),
+              h('div', { onClick: v.incRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           ),
-          h('div', { style: css("font-family:'Cinzel',serif; font-size:16px; color:#5a4a2a; padding-top:20px;") }, '→'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-size:16px; color:var(--m-arrow); padding-top:20px;") }, '→'),
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;") }, 'Max'),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Max'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;') }, '−'),
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:#f0e6c9; min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMax),
-              h('div', { onClick: v.incRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center; font-size:17px; color:#caa64f; cursor:pointer; line-height:1;') }, '+')
+              h('div', { onClick: v.decRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMax),
+              h('div', { onClick: v.incRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           )
         )
@@ -676,16 +798,16 @@
     }
 
     timeModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Time Limit'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Time Limit'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:32px; padding:10px 0 6px;') },
-          h('div', { onClick: v.decTime, style: css('width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.08); border:1px solid rgba(200,162,76,.3); display:flex; align-items:center; justify-content:center; font-size:26px; color:#caa64f; cursor:pointer; line-height:1;') }, '−'),
+          h('div', { onClick: v.decTime, style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
           h('div', { style: css('text-align:center; min-width:100px;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:#f0e6c9; line-height:1;") }, v.timeLimitDisplay),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#9b8a63; margin-top:4px;") }, v.timeLimitUnit)
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:var(--m-text); line-height:1;") }, v.timeLimitDisplay),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-label); margin-top:4px;") }, v.timeLimitUnit)
           ),
           h('div', { onClick: v.incTime, style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
         )
@@ -694,67 +816,67 @@
 
     helpModal(v) {
       const cards = [
-        { border: '#caa64f', title: 'The Setup', body: 'Add your players, then choose your categories. Each round picks one — role categories give the Jester a different role, word categories just hide the shared word.' },
+        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add your players, then choose your categories. Each round picks one — role categories give the Jester a different role, word categories just hide the shared word.' },
         { border: '#7a1620', title: 'The Modes', body: 'Role Mode shows each player a role for the chosen word. Word Mode hides the role label and shows only the shared word for everyone except the Jester.' },
         { border: '#14254a', title: 'The Questions', body: 'Starting with whoever opens the round, each player asks one question to one other player. That player answers, then asks the next question.' },
         { border: '#2e5bb0', title: 'The Trial', body: 'Discuss and vote. If the group picks the Jester correctly, the Cast wins. If not, the Jester escapes and wins. If the Jester is caught, they may still guess the word to steal the round.' },
       ];
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'How to Play'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'How to Play'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
-          cards.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid ${c.border};`) },
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e; margin-bottom:4px;") }, c.title),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; line-height:1.5;") }, c.body)
+          cards.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--m-brand); margin-bottom:4px;") }, c.title),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); line-height:1.5;") }, c.body)
           ))
         )
       );
     }
 
     gameSettingsModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Game Options'),
-          h('div', { onClick: v.closeModal, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Game Options'),
+          h('div', { onClick: v.closeModal, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
-        h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid rgba(200,162,76,.12);') },
-          h('div', { onClick: v.toggleShowCat, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(200,162,76,.08); cursor:pointer;') },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(200,162,76,.15); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
+        h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid var(--m-border);') },
+          h('div', { onClick: v.toggleShowCat, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;") }, 'Show Category'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;") }, 'Players can see the category of the secret word')
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Category'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Players can see the category of the secret word')
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showCatBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showCatThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleJestersKnow, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(200,162,76,.08); cursor:pointer;') },
+          h('div', { onClick: v.toggleJestersKnow, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(178,32,47,.2); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;") }, 'Jesters Know Each Other'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;") }, 'Jesters can see their fellow jesters')
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jesters Know Each Other'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Jesters can see their fellow jesters')
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jestersKnowBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jestersKnowThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleShowWord, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(200,162,76,.08); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
+          h('div', { onClick: v.toggleShowWord, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(46,91,176,.18); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_SHOW_WORD } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;") }, 'Show Word'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;") }, 'Players can see the word and their role')
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Word'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Players can see the word and their role')
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showWordBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showWordThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleJesterGetsRole, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:rgba(255,255,255,.04); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(200,162,76,.15); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
+          h('div', { onClick: v.toggleJesterGetsRole, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:#f0e6c9;") }, v.jesterGetsRoleLabel),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:#8a9ab8; margin-top:2px;") }, v.jesterGetsRoleDesc)
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jesterGetsRoleDesc)
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterGetsRoleBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterGetsRoleThumb}; transition:transform .25s;`) })
@@ -765,16 +887,16 @@
     }
 
     wordListModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'All Words'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'All Words'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:18px;') },
           v.wordListGroups.map((g, i) => h('div', { key: i },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63; margin-bottom:8px;") }, `${g.cat} (${g.words.length})`),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:8px;") }, `${g.cat} (${g.words.length})`),
             h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px;') },
-              g.words.map((w, j) => h('div', { key: j, style: css("font-family:'EB Garamond',serif; font-size:13px; color:#ddd0b0; background:rgba(255,255,255,.05); border:1px solid rgba(200,162,76,.12); border-radius:8px; padding:5px 10px;") }, w))
+              g.words.map((w, j) => h('div', { key: j, style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-body); background:var(--m-lift); border:1px solid var(--m-border); border-radius:8px; padding:5px 10px;") }, w))
             )
           ))
         )
@@ -782,31 +904,35 @@
     }
 
     settingsModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Settings'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Settings'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
-          h('div', { onClick: v.openWordList, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; cursor:pointer;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'View All Words'),
-            h('div', { style: css('color:#5a6a84; font-size:18px;') }, '›')
+          h('div', { onClick: v.openWordList, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'View All Words'),
+            h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
-          h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'Sound Effects'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;") }, 'Coming Soon')
+          h('div', { onClick: v.toggleSoundEffects, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Sound Effects'),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
+            )
           ),
-          h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'Dark Theme'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;") }, 'Coming Soon')
+          h('div', { onClick: v.toggleLightMode, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Light Mode'),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.lightModeBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
+            )
           ),
-          h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; cursor:pointer;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'Credits'),
-            h('div', { style: css('color:#5a6a84; font-size:18px;') }, '›')
+          h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
+            h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
-          h('div', { style: css('padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; text-align:center;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:#e6cb7e;") }, 'MASQ'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:#5f6c86; margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.0')
+          h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);") }, 'MASQ'),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.0')
           )
         )
       );
@@ -814,33 +940,33 @@
 
     creditsModal(v) {
       const company = [
-        { border: '#caa64f', name: 'Arnav Podichetty', role: 'Creator & Code' },
+        { border: 'var(--m-accent)', name: 'Arnav Podichetty', role: 'Creator & Code' },
         { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
         { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
       ];
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Credits'),
-          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Credits'),
+          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
-          company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid ${c.border};`) },
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:#e6cb7e;") }, c.name),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b8a63; margin-top:4px;") }, c.role)
+          company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-brand);") }, c.name),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--m-label); margin-top:4px;") }, c.role)
           ))
         )
       );
     }
 
     renderLobby(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:#0e0810; animation:imp-fade-in .25s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
-          h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:#caa64f;") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:#ecdfc0; letter-spacing:.04em;") }, 'MASQ'),
-          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css('width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:#caa64f;') }, '⚙')
+          h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;") }, 'MASQ'),
+          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:#9b8a63; margin-bottom:10px;") }, 'Game Mode'),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Mode'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px;') },
             h('div', { onClick: v.setRoleMode, className: 'imp-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_20 } }),
@@ -853,19 +979,19 @@
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.wordTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Everyone gets the word but the Jester')
             )
           ),
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:#9b8a63; margin-bottom:10px;") }, 'Game Settings'),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Settings'),
           h('div', { style: css('display:flex; flex-direction:column; gap:8px; margin-bottom:8px;') },
-            this.settingsRow({ onClick: v.openPlayers, iconBg: 'rgba(200,162,76,.15)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
-            this.settingsRow({ onClick: v.openCategories, iconBg: 'rgba(200,162,76,.15)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
+            this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-border-med)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
+            this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-border-med)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
             this.settingsRow({ onClick: v.openJesters, iconBg: 'rgba(178,32,47,.2)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterLabel }),
             this.settingsRow({ onClick: v.openTime, iconBg: 'rgba(46,91,176,.2)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
-            this.settingsRow({ onClick: v.openGameSettings, iconBg: 'rgba(200,162,76,.15)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
+            this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-border-med)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
           )
         ),
-        h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,#0e0810 70%,transparent);') },
+        h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
           h('div', { onClick: v.goReveal, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
-        v.hasModal && h('div', { style: css('position:absolute; inset:0; background:rgba(8,4,12,.7); display:flex; flex-direction:column; justify-content:flex-end; animation:imp-backdrop .2s ease both;') },
+        v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:imp-backdrop .2s ease both;') },
           h('div', { onClick: v.closeModal, style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
@@ -881,10 +1007,10 @@
     }
 
     playersModal(v) {
-      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; display:flex; flex-direction:column; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'The Cast'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'The Cast'),
+          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
           h('div', { style: css('display:flex; flex-direction:column;') },
@@ -893,13 +1019,13 @@
               style: css(`display:grid; grid-template-rows:${p.removing ? '0fr' : '1fr'}; opacity:${p.removing ? 0 : 1}; margin-bottom:${p.removing ? '0px' : '8px'}; overflow:hidden; transition:grid-template-rows .28s ease, opacity .22s ease, margin-bottom .28s ease; pointer-events:${p.removing ? 'none' : 'auto'};`)
             },
               h('div', { style: css('overflow:hidden; min-height:0;') },
-                h('div', { style: css('display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(255,255,255,.05); border-radius:14px; border:1px solid rgba(200,162,76,.15); animation:imp-rise .25s ease both;') },
-                  h('div', { style: css('flex:none; width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,.3); border:1px solid rgba(200,162,76,.25); display:flex; align-items:center; justify-content:center;') },
+                h('div', { style: css('display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); animation:imp-rise .25s ease both;') },
+                  h('div', { style: css('flex:none; width:40px; height:40px; border-radius:50%; background:var(--m-avatar-bg); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center;') },
                     h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 26 })
                   ),
                   p.editing
-                    ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:rgba(255,255,255,.1); border:1px solid #caa64f; border-radius:8px; color:#f0e6c9; font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
-                    : h('div', { onClick: p.onEditTap, style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:#f0e6c9; cursor:text; padding:6px 2px;") }, p.name),
+                    ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:var(--m-lift-strong); border:1px solid var(--m-accent); border-radius:8px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
+                    : h('div', { onClick: p.onEditTap, style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:var(--m-text); cursor:text; padding:6px 2px;") }, p.name),
                   h('div', { onClick: p.onRemove, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
                 )
               )
@@ -909,37 +1035,37 @@
         h('div', { style: css('padding-top:14px;') },
           v.addingPlayer
             ? h('div', { style: css('display:flex; gap:8px; align-items:center; animation:imp-rise .2s ease both;') },
-                h('input', { onKeyDown: v.onNameKeyDown, onChange: v.onNameChange, value: v.newName, placeholder: 'Enter player name…', style: css("flex:1; padding:14px 16px; background:rgba(255,255,255,.08); border:1px solid #caa64f; border-radius:12px; color:#f0e6c9; font-family:'EB Garamond',serif; font-size:16px; outline:none;") }),
+                h('input', { onKeyDown: v.onNameKeyDown, onChange: v.onNameChange, value: v.newName, placeholder: 'Enter player name…', style: css("flex:1; padding:14px 16px; background:var(--m-lift-input); border:1px solid var(--m-accent); border-radius:12px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:16px; outline:none;") }),
                 h('div', { onClick: v.confirmAdd, className: 'imp-btn', style: css("padding:14px 16px; background:linear-gradient(180deg,#b3202f,#7a1620); border-radius:12px; color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
                 h('div', { onClick: v.cancelAdd, className: 'imp-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
               )
             : h('div', { onClick: v.onAddTap, className: 'imp-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
-                h('div', { style: css("font-size:22px; color:#caa64f; line-height:1; font-family:'EB Garamond',serif;") }, '+'),
-                h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#c6b489;") }, 'Add a player…')
+                h('div', { style: css("font-size:22px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-soft);") }, 'Add a player…')
               )
         )
       );
     }
 
     renderReveal(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:#0e0810; animation:imp-slide-in .3s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToLobby, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;") }, '‹'),
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:#f0e6c9;") }, 'Tap your name in secret'),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#8a9ab8; margin-top:4px;") }, 'Each player privately sees their role, then passes the phone.'),
-          v.showCategory && h('div', { style: css('display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; border:1px solid rgba(200,162,76,.3);') },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#9b8a63;") }, 'Category'),
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:#e6cb7e;") }, v.gameCategory)
+          h('div', { onClick: v.backToLobby, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'Tap your name in secret'),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Each player privately sees their role, then passes the phone.'),
+          v.showCategory && h('div', { style: css('display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; border:1px solid var(--m-border-hard);') },
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Category'),
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--m-brand);") }, v.gameCategory)
           )
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px;') },
           h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
             v.actOnePlayers.map((p, i) => h('div', { key: i, onClick: p.onTap, className: 'imp-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
-              h('div', { style: css('flex:none; width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center; border:1px solid rgba(200,162,76,.25);') },
+              h('div', { style: css('flex:none; width:44px; height:44px; border-radius:50%; background:var(--m-avatar-bg); display:flex; align-items:center; justify-content:center; border:1px solid var(--m-border-strong);') },
                 h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 30 })
               ),
-              h('div', { style: css("flex:1; font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:#f0e6c9;") }, p.shortName),
+              h('div', { style: css("flex:1; font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:var(--m-text);") }, p.shortName),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:12px; color:${p.labelColor};`) }, p.label)
             ))
           ),
@@ -948,12 +1074,12 @@
         h('div', { style: css('padding:12px 20px 28px;') },
           v.allSeen
             ? h('div', { onClick: v.goVoting, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer; animation:imp-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
-            : h('div', { style: css("padding:17px; text-align:center; border:1px dashed rgba(200,162,76,.3); color:#7a6a4a; font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
+            : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
-        v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:rgba(8,4,10,.88); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:#caa64f; margin-bottom:6px;") }, 'Your Role'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:#f3ead0; margin-bottom:22px;") }, v.apName),
-          h('div', { onClick: v.openCurtain, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(230,203,126,.4);') },
+        v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
+          h('div', { onClick: v.openCurtain, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:radial-gradient(120% 80% at 50% 0%, #f6ecd2, #e6d6b0); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
                 h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60 })
@@ -990,8 +1116,8 @@
             h('div', { style: css("position:absolute; top:12px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:12px; letter-spacing:.2em; color:#e6cb7e; pointer-events:none;") }, v.curtainHint)
           ),
           v.cardOpen
-            ? h('div', { onClick: v.closeOverlay, style: css("margin-top:22px; padding:14px 32px; background:rgba(255,255,255,.07); border:1px solid rgba(200,162,76,.4); color:#ecdfc0; font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:imp-rise .35s ease both;") }, 'GOT IT')
-            : h('div', { style: css("margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:#caa64f;") }, 'Tap the curtain to reveal')
+            ? h('div', { onClick: v.closeOverlay, style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:imp-rise .35s ease both;") }, 'GOT IT')
+            : h('div', { style: css("margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-accent);") }, 'Tap the curtain to reveal')
         )
       );
     }
@@ -999,43 +1125,43 @@
     renderVoting(v) {
       const steps = [
         { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round — asks question to someone else.' },
-        { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: '#ecdfc0', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player asks a question to another player who then gets to ask the next question.' },
-        { badge: '#caa64f', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'rgba(200,162,76,.25)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
+        { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: 'var(--m-text-title)', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player asks a question to another player who then gets to ask the next question.' },
+        { badge: 'var(--m-accent)', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'var(--m-border-strong)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
         { badge: '#b3202f', bg: 'linear-gradient(135deg,#5c1117,#3c0a10)', border: 'rgba(178,32,47,.4)', num: '4', numColor: '#fff', icon: ICON_STEP4, title: 'Unmask the Jester', body: 'When ready, tap below to reveal who the jester really was.', panelBg: 'rgba(178,32,47,.08)' },
       ];
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:#0e0810; animation:imp-slide-in .3s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToReveal, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;") }, '‹'),
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:#f0e6c9;") }, 'The Trial'),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#8a9ab8; margin-top:4px;") }, 'Debate, accuse, unmask the jester.')
+          h('div', { onClick: v.backToReveal, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'The Trial'),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Debate, accuse, unmask the jester.')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px; display:flex; flex-direction:column;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#ecdfc0; margin-bottom:14px;") }, 'How It Works'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text-title); margin-bottom:14px;") }, 'How It Works'),
           h('div', { style: css('display:flex; flex-direction:column; gap:10px; margin-bottom:22px;') },
-            steps.map((s, i) => h('div', { key: i, style: css(`display:flex; align-items:center; gap:14px; padding:16px; border-radius:14px; background:${s.panelBg || 'rgba(255,255,255,.05)'}; border:1px solid ${s.border};`) },
+            steps.map((s, i) => h('div', { key: i, style: css(`display:flex; align-items:center; gap:14px; padding:16px; border-radius:14px; background:${s.panelBg || 'var(--m-lift)'}; border:1px solid ${s.border};`) },
               h('div', { style: css(`position:relative; flex:none; width:52px; height:52px; border-radius:12px; background:${s.bg}; display:flex; align-items:center; justify-content:center;`) },
                 h('div', { style: css('display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: s.icon } }),
                 h('div', { style: css(`position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:${s.badge}; font-family:'Cinzel',serif; font-weight:700; font-size:11px; color:${s.numColor}; display:flex; align-items:center; justify-content:center;`) }, s.num)
               ),
               h('div', {},
-                h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f0e6c9;") }, s.title),
-                h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#8a9ab8; margin-top:2px;") }, s.body)
+                h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text);") }, s.title),
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:2px;") }, s.body)
               )
             ))
           ),
           v.hasTimeLimit && h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;') },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:#9b8a63;") }, 'Time Remaining'),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--m-label);") }, 'Time Remaining'),
             h('div', { style: css(`font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:${v.timerColor}; line-height:1.2;`) }, v.timerDisplay)
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
           h('div', { onClick: v.goResults, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer;") }, 'REVEAL THE JESTER')
         ),
-        v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:rgba(8,4,10,.85); display:flex; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
-          h('div', { style: css('background:#16101a; border-radius:18px; padding:30px 26px; text-align:center; border:1px solid rgba(200,162,76,.3); max-width:300px; animation:imp-rise .3s ease both;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:#e6cb7e;") }, 'Time to Vote!'),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:#b9c6df; margin-top:8px; line-height:1.4;") }, 'The clock has run out — cast your votes and unmask the jester.'),
+        v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
+          h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:imp-rise .3s ease both;') },
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out — cast your votes and unmask the jester.'),
             h('div', { onClick: v.dismissTimeUp, className: 'imp-btn', style: css("margin-top:22px; padding:14px; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
@@ -1043,18 +1169,18 @@
     }
 
     renderResults(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:radial-gradient(80% 45% at 50% 26%, rgba(230,203,126,.28), transparent 60%), #14070c; animation:imp-scale-in .35s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:imp-scale-in .35s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:2px;') },
-          h('div', { onClick: v.backToLobby, style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:#caa64f; cursor:pointer; opacity:.8;") }, '‹'),
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:#caa64f;") }, 'The Final Curtain')
+          h('div', { onClick: v.backToLobby, style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent);") }, 'The Final Curtain')
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:#f3ead0;") }, v.jesterRevealHeading),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:var(--m-text-bright);") }, v.jesterRevealHeading),
           h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite;') },
             h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120 })
           ),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:#e6cb7e; margin-top:14px;") }, v.revealedName),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;") }, v.revealedName),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
             h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
@@ -1070,15 +1196,15 @@
           h('div', { style: css('margin-top:26px; padding:0 30px; text-align:center;') },
             v.caughtJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'The Cast wins! 🎉'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;") }, 'You unmasked the jester before the curtain fell.')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'You unmasked the jester before the curtain fell.')
             ),
             v.missedJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;") }, 'The Jester escapes!'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;") }, 'You accused the wrong performer. The jester takes a bow.')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'You accused the wrong performer. The jester takes a bow.')
             ),
             !v.hasJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'Every performer was genuine.'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:#d8c79f; margin-top:6px;") }, 'No one was pretending — this round had no jester.')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'No one was pretending — this round had no jester.')
             )
           )
         ),
@@ -1090,8 +1216,8 @@
 
     render() {
       const v = this.renderVals();
-      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, rgba(46,91,176,.12), transparent 60%), #05020a; display:flex; align-items:center; justify-content:center;') },
-        h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:#1a070b; box-shadow:0 30px 90px rgba(0,0,0,.6); transform-origin:center center;') },
+      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), var(--m-page); display:flex; align-items:center; justify-content:center;') },
+        h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
           v.isReveal && this.renderReveal(v),
           v.isVoting && this.renderVoting(v),
