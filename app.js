@@ -63,6 +63,18 @@
     '--m-ready-color': '#7fcf8a',
     '--m-idle-label': '#caa64f',
     '--m-timer': '#f0e6c9',
+    '--m-cta': 'linear-gradient(180deg,#b3202f,#7a1620)',
+    '--m-cta-text': '#f6ecd2',
+    '--m-cta-glow': '0 8px 28px rgba(178,32,47,.4)',
+    '--m-tile-sel': 'var(--m-tile-sel)',
+    '--m-tile-sel-text': '#f0e6c9',
+    '--m-tile-sel-sub': '#c6a96e',
+    '--m-toggle-on': '#b3202f',
+    '--m-curt1': '#6e141c',
+    '--m-curt2': '#56101a',
+    '--m-card-bg': 'radial-gradient(120% 80% at 50% 0%, #f6ecd2, #e6d6b0)',
+    '--m-encore': 'linear-gradient(180deg,#ecdfc0,#d3bf93)',
+    '--m-encore-text': '#3c0a10',
   };
   const THEME_LIGHT = {
     '--m-page': '#e4ddd0',
@@ -109,18 +121,84 @@
     '--m-ready-color': '#2e7a40',
     '--m-idle-label': '#9a7528',
     '--m-timer': '#2a1f14',
+    '--m-cta': 'linear-gradient(180deg,#b3202f,#7a1620)',
+    '--m-cta-text': '#f6ecd2',
+    '--m-cta-glow': '0 8px 28px rgba(178,32,47,.4)',
+    '--m-tile-sel': 'var(--m-tile-sel)',
+    '--m-tile-sel-text': '#f0e6c9',
+    '--m-tile-sel-sub': '#c6a96e',
+    '--m-toggle-on': '#b3202f',
+    '--m-curt1': '#6e141c',
+    '--m-curt2': '#56101a',
+    '--m-card-bg': 'radial-gradient(120% 80% at 50% 0%, #f6ecd2, #e6d6b0)',
+    '--m-encore': 'linear-gradient(180deg,#ecdfc0,#d3bf93)',
+    '--m-encore-text': '#3c0a10',
   };
-  function applyTheme(darkMode) {
-    const theme = darkMode ? THEME_DARK : THEME_LIGHT;
+  // Jester Mode — a chaotic neon-carnival take on the whole stage.
+  const THEME_JESTER = {
+    ...THEME_DARK,
+    '--m-page': '#07010f',
+    '--m-page-glow': 'rgba(123,47,247,.25)',
+    '--m-shell': '#150627',
+    '--m-screen': '#100420',
+    '--m-modal': '#1a0930',
+    '--m-text': '#f3e8ff',
+    '--m-text-title': '#f2e6ff',
+    '--m-text-bright': '#fdf8ff',
+    '--m-brand': '#ffd23f',
+    '--m-accent': '#ff3d8b',
+    '--m-label': '#b18cff',
+    '--m-muted': '#a78bfa',
+    '--m-dim': '#7d6aa8',
+    '--m-dim2': '#8a76b5',
+    '--m-body': '#e6d9ff',
+    '--m-soft': '#c9a8ff',
+    '--m-soft2': '#8d6fc0',
+    '--m-help': '#d6c6f5',
+    '--m-border': 'rgba(255,61,139,.18)',
+    '--m-border-med': 'rgba(255,61,139,.24)',
+    '--m-border-btn': 'rgba(255,210,63,.3)',
+    '--m-border-strong': 'rgba(255,210,63,.35)',
+    '--m-border-hard': 'rgba(255,61,139,.42)',
+    '--m-border-soft': 'rgba(255,61,139,.12)',
+    '--m-border-white': 'rgba(255,255,255,.1)',
+    '--m-backdrop': 'rgba(10,2,20,.72)',
+    '--m-overlay': 'rgba(10,2,20,.9)',
+    '--m-overlay-vote': 'rgba(10,2,20,.86)',
+    '--m-arrow': '#8b5cf6',
+    '--m-results-bg': 'radial-gradient(80% 45% at 50% 26%, rgba(255,61,139,.32), transparent 60%), radial-gradient(70% 45% at 50% 85%, rgba(76,222,128,.14), transparent 60%), #12041f',
+    '--m-results-sub': '#d9c6f0',
+    '--m-shell-shadow': '0 0 0 1px rgba(255,210,63,.22), 0 0 44px rgba(255,61,139,.32), 0 0 100px rgba(123,47,247,.4), 0 30px 90px rgba(0,0,0,.7)',
+    '--m-ready-bg': 'rgba(76,222,128,.1)',
+    '--m-ready-border': '1px solid rgba(76,222,128,.45)',
+    '--m-ready-color': '#4ade80',
+    '--m-idle-label': '#ffd23f',
+    '--m-timer': '#ffd23f',
+    '--m-cta': 'linear-gradient(135deg,#ff3d8b 0%,#8b5cf6 55%,#7b2ff7 100%)',
+    '--m-cta-text': '#fff',
+    '--m-cta-glow': '0 8px 28px rgba(139,92,246,.55)',
+    '--m-tile-sel': 'linear-gradient(135deg,#7b2ff7,#3b1470)',
+    '--m-tile-sel-text': '#ffffff',
+    '--m-tile-sel-sub': '#e8d5ff',
+    '--m-toggle-on': '#ff3d8b',
+    '--m-curt1': '#5b21b6',
+    '--m-curt2': '#166534',
+    '--m-card-bg': 'radial-gradient(120% 80% at 50% 0%, #fff7fd, #ecd9ff)',
+    '--m-encore': 'linear-gradient(135deg,#ffd23f,#ff3d8b)',
+    '--m-encore-text': '#2a0440',
+  };
+  function applyTheme(darkMode, jesterMode) {
+    const theme = jesterMode ? THEME_JESTER : (darkMode ? THEME_DARK : THEME_LIGHT);
     const root = document.documentElement;
     Object.keys(theme).forEach((k) => root.style.setProperty(k, theme[k]));
+    document.body.classList.toggle('jester', !!jesterMode);
     document.body.style.background = theme['--m-page'];
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', theme['--m-page']);
     const scheme = document.querySelector('meta[name="color-scheme"]');
-    if (scheme) scheme.setAttribute('content', darkMode ? 'dark' : 'light');
+    if (scheme) scheme.setAttribute('content', (darkMode || jesterMode) ? 'dark' : 'light');
   }
-  applyTheme(true);
+  applyTheme(true, false);
 
   // ---- static icon markup (no dynamic bindings, safe as raw SVG) ----
   const ICON_ROLE_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><ellipse cx="9" cy="13" rx="6" ry="7" stroke="var(--m-brand)" stroke-width="1.7"></ellipse><path d="M7 11 Q9 9 11 11" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M7 15.5 Q9 18 11 15.5" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><ellipse cx="17" cy="11" rx="5" ry="6" stroke="var(--m-accent)" stroke-width="1.4" opacity=".6"></ellipse><path d="M15 9 Q17 7.5 19 9" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".6"></path></svg>';
@@ -194,19 +272,20 @@
       timeUp: false,
       darkMode: true,
       soundEffects: true,
+      jesterMode: false,
     };
 
     __nextPlayerId = 4;
 
     componentDidMount() {
-      applyTheme(this.state.darkMode);
+      applyTheme(this.state.darkMode, this.state.jesterMode);
       this.__fitPhoneShell = this.__fitPhoneShell.bind(this);
       this.__fitPhoneShell();
       window.addEventListener('resize', this.__fitPhoneShell);
     }
 
     componentDidUpdate(_, prev) {
-      if (prev.darkMode !== this.state.darkMode) applyTheme(this.state.darkMode);
+      if (prev.darkMode !== this.state.darkMode || prev.jesterMode !== this.state.jesterMode) applyTheme(this.state.darkMode, this.state.jesterMode);
     }
 
     componentWillUnmount() {
@@ -298,8 +377,12 @@
       const wine = '#6e141c', crimson = '#b3202f', navy = '#14254a';
       const goldFace = '#e6cb7e', ivoryFace = '#efe4c8';
 
-      const faceColors = ['#efe4c8', '#e7d9b6', '#e0cfa6', '#ecdfc0', '#e8ddb5', '#f0e6c9'];
-      const lineColors = ['#7a1620', '#14254a', '#2e5bb0', '#6e141c', '#4a3010', '#7a1620'];
+      const faceColors = st.jesterMode
+        ? ['#fdf4ff', '#f3e8ff', '#fef9c3', '#fce7f3', '#ecfccb', '#e0f2fe']
+        : ['#efe4c8', '#e7d9b6', '#e0cfa6', '#ecdfc0', '#e8ddb5', '#f0e6c9'];
+      const lineColors = st.jesterMode
+        ? ['#7b2ff7', '#db2777', '#16a34a', '#d97706', '#7c3aed', '#be185d']
+        : ['#7a1620', '#14254a', '#2e5bb0', '#6e141c', '#4a3010', '#7a1620'];
       const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieCatalog, fakeMovieRoleCatalog, wordOnlyCatalog } = window.MASQ_LOCATIONS_DATA;
       const biomeNames = Object.keys(biomeCatalog);
       const locationNames = Object.keys(locationCatalog);
@@ -317,9 +400,9 @@
       const mapCategoryItem = (cat) => ({
         cat,
         sel: st.selCategories.includes(cat),
-        tileBg: st.selCategories.includes(cat) ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift)',
+        tileBg: st.selCategories.includes(cat) ? 'var(--m-tile-sel)' : 'var(--m-lift)',
         tileBorder: st.selCategories.includes(cat) ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-med)',
-        color: st.selCategories.includes(cat) ? '#f0e6c9' : 'var(--m-muted)',
+        color: st.selCategories.includes(cat) ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
         onToggle: () => {
           const s = st.selCategories;
           const next = s.includes(cat) ? (s.length > 1 ? s.filter(c => c !== cat) : s) : [...s, cat];
@@ -432,8 +515,8 @@
         roundWordDisplay: st.roundWord,
         cardOpen: st.cardOpen, cardNotOpen: !st.cardOpen,
         openCurtain, closeOverlay,
-        leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,#6e141c 0 12px,#56101a 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
-        rightCurtain: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,#56101a 0 12px,#6e141c 12px 22px)', boxShadow: 'inset 16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', transform: st.cardOpen ? 'translateX(104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
+        leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt1) 0 12px,var(--m-curt2) 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
+        rightCurtain: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt2) 0 12px,var(--m-curt1) 12px 22px)', boxShadow: 'inset 16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', transform: st.cardOpen ? 'translateX(104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
         curtainHint: st.cardOpen ? '' : 'TAP TO REVEAL',
         modal: st.modal,
         hasModal: !!st.modal,
@@ -534,15 +617,15 @@
         incRandMax: () => this.setState({ jesterRandMax: Math.min(st.jesterRandMax + 1, maxJesters) }),
         decRandMax: () => this.setState({ jesterRandMax: Math.max(st.jesterRandMax - 1, st.jesterRandMin) }),
         randJesters: st.randJesters,
-        randJestersBg: st.randJesters ? '#b3202f' : 'var(--m-lift-toggle)',
+        randJestersBg: st.randJesters ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         randJestersThumb: st.randJesters ? 'translateX(22px)' : 'translateX(2px)',
         toggleRandJesters: () => this.setState({ randJesters: !st.randJesters }),
         showCategory: st.showCategory,
-        showCatBg: st.showCategory ? '#b3202f' : 'var(--m-lift-toggle)',
+        showCatBg: st.showCategory ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         showCatThumb: st.showCategory ? 'translateX(22px)' : 'translateX(2px)',
         toggleShowCat: () => this.setState({ showCategory: !st.showCategory }),
         showWord: st.gameMode === 'words' ? true : st.showWord,
-        showWordBg: (st.gameMode === 'words' || st.showWord) ? '#b3202f' : 'var(--m-lift-toggle)',
+        showWordBg: (st.gameMode === 'words' || st.showWord) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         showWordThumb: (st.gameMode === 'words' || st.showWord) ? 'translateX(22px)' : 'translateX(2px)',
         showWordToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
         showWordTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
@@ -551,13 +634,13 @@
           this.setState({ showWord: !st.showWord });
         },
         jestersKnow: st.jestersKnow,
-        jestersKnowBg: st.jestersKnow ? '#b3202f' : 'var(--m-lift-toggle)',
+        jestersKnowBg: st.jestersKnow ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         jestersKnowThumb: st.jestersKnow ? 'translateX(22px)' : 'translateX(2px)',
         toggleJestersKnow: () => this.setState({ jestersKnow: !st.jestersKnow }),
         jesterGetsRole: st.jesterGetsRole,
         jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
         jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a similar but fake word instead of being told they’re the Jester' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
-        jesterGetsRoleBg: st.jesterGetsRole ? '#b3202f' : 'var(--m-lift-toggle)',
+        jesterGetsRoleBg: st.jesterGetsRole ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         jesterGetsRoleThumb: st.jesterGetsRole ? 'translateX(22px)' : 'translateX(2px)',
         jesterGetsRoleToggleOpacity: '1',
         jesterGetsRoleTogglePointerEvents: 'auto',
@@ -578,11 +661,15 @@
         timerColor: st.secondsLeft !== null && st.secondsLeft <= 30 ? '#e8a0a8' : 'var(--m-timer)',
         darkMode: st.darkMode,
         lightMode: !st.darkMode,
-        lightModeBg: !st.darkMode ? '#b3202f' : 'var(--m-lift-toggle)',
+        lightModeBg: !st.darkMode ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         lightModeThumb: !st.darkMode ? 'translateX(22px)' : 'translateX(2px)',
         toggleLightMode: () => this.setState({ darkMode: !st.darkMode }),
+        jesterMode: st.jesterMode,
+        jesterModeBg: st.jesterMode ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        jesterModeThumb: st.jesterMode ? 'translateX(22px)' : 'translateX(2px)',
+        toggleJesterMode: () => this.setState({ jesterMode: !st.jesterMode }),
         soundEffects: st.soundEffects,
-        soundEffectsBg: st.soundEffects ? '#b3202f' : 'var(--m-lift-toggle)',
+        soundEffectsBg: st.soundEffects ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         soundEffectsThumb: st.soundEffects ? 'translateX(22px)' : 'translateX(2px)',
         toggleSoundEffects: () => this.setState({ soundEffects: !st.soundEffects }),
         playerNames: st.playerList.join(', '),
@@ -599,14 +686,14 @@
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
         setWordMode: () => this.setState({ gameMode: 'words', showWord: true }),
-        roleTileBg: st.gameMode === 'roles' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift-soft)',
+        roleTileBg: st.gameMode === 'roles' ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
         roleTileBorder: st.gameMode === 'roles' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
-        roleTileColor: st.gameMode === 'roles' ? '#f0e6c9' : 'var(--m-muted)',
-        roleTileSubColor: st.gameMode === 'roles' ? '#c6a96e' : 'var(--m-dim)',
-        wordTileBg: st.gameMode === 'words' ? 'linear-gradient(135deg,#7a1620,#4d0e14)' : 'var(--m-lift-soft)',
+        roleTileColor: st.gameMode === 'roles' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
+        roleTileSubColor: st.gameMode === 'roles' ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
+        wordTileBg: st.gameMode === 'words' ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
         wordTileBorder: st.gameMode === 'words' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
-        wordTileColor: st.gameMode === 'words' ? '#f0e6c9' : 'var(--m-muted)',
-        wordTileSubColor: st.gameMode === 'words' ? '#c6a96e' : 'var(--m-dim)',
+        wordTileColor: st.gameMode === 'words' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
+        wordTileSubColor: st.gameMode === 'words' ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
         wine, crimson, navy, goldFace, ivoryFace,
         lobby, votable,
         hasJester: !!jesterPlayer,
@@ -926,12 +1013,21 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
             )
           ),
+          h('div', { onClick: v.toggleJesterMode, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', {},
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, '🃏 Jester Mode'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); margin-top:1px;") }, 'Let the fool redecorate the theatre')
+            ),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterModeBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterModeThumb}; transition:transform .25s;`) })
+            )
+          ),
           h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
           h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);") }, 'MASQ'),
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);"), className: 'j-title' }, 'MASQ'),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.0')
           )
         )
@@ -962,7 +1058,7 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
           h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;") }, 'MASQ'),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;"), className: 'j-title' }, 'MASQ'),
           h('div', { onClick: v.openSettings, className: 'imp-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
@@ -989,7 +1085,7 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
-          h('div', { onClick: v.goReveal, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer;") }, 'RAISE THE CURTAIN')
+          h('div', { onClick: v.goReveal, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:imp-backdrop .2s ease both;') },
           h('div', { onClick: v.closeModal, style: css('flex:1;') }),
@@ -1036,7 +1132,7 @@
           v.addingPlayer
             ? h('div', { style: css('display:flex; gap:8px; align-items:center; animation:imp-rise .2s ease both;') },
                 h('input', { onKeyDown: v.onNameKeyDown, onChange: v.onNameChange, value: v.newName, placeholder: 'Enter player name…', style: css("flex:1; padding:14px 16px; background:var(--m-lift-input); border:1px solid var(--m-accent); border-radius:12px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:16px; outline:none;") }),
-                h('div', { onClick: v.confirmAdd, className: 'imp-btn', style: css("padding:14px 16px; background:linear-gradient(180deg,#b3202f,#7a1620); border-radius:12px; color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
+                h('div', { onClick: v.confirmAdd, className: 'imp-btn', style: css("padding:14px 16px; background:var(--m-cta); border-radius:12px; color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
                 h('div', { onClick: v.cancelAdd, className: 'imp-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
               )
             : h('div', { onClick: v.onAddTap, className: 'imp-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
@@ -1073,14 +1169,14 @@
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
           v.allSeen
-            ? h('div', { onClick: v.goVoting, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer; animation:imp-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
+            ? h('div', { onClick: v.goVoting, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:imp-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
             : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
         v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
           h('div', { onClick: v.openCurtain, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
-            h('div', { style: css('position:absolute; inset:0; background:radial-gradient(120% 80% at 50% 0%, #f6ecd2, #e6d6b0); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
+            h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
                 h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60 })
               ),
@@ -1156,13 +1252,13 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
-          h('div', { onClick: v.goResults, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:0 8px 28px rgba(178,32,47,.4); cursor:pointer;") }, 'REVEAL THE JESTER')
+          h('div', { onClick: v.goResults, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
         ),
         v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
           h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:imp-rise .3s ease both;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out. Cast your votes and unmask the jester.'),
-            h('div', { onClick: v.dismissTimeUp, className: 'imp-btn', style: css("margin-top:22px; padding:14px; background:linear-gradient(180deg,#b3202f,#7a1620); color:#f6ecd2; font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
+            h('div', { onClick: v.dismissTimeUp, className: 'imp-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
       );
@@ -1180,7 +1276,7 @@
           h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite;') },
             h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120 })
           ),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;") }, v.revealedName),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, v.revealedName),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
             h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
@@ -1209,19 +1305,34 @@
           )
         ),
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
-          h('div', { onClick: v.playAgain, className: 'imp-btn', style: css("padding:17px; text-align:center; background:linear-gradient(180deg,#ecdfc0,#d3bf93); color:#3c0a10; font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
+          h('div', { onClick: v.playAgain, className: 'imp-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
         )
       );
     }
 
     render() {
       const v = this.renderVals();
+      const jester = this.state.jesterMode;
+      const glyphs = ['◆', '✦', '♦', '✧'];
       return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), var(--m-page); display:flex; align-items:center; justify-content:center;') },
+        jester && h('div', { className: 'jester-page-fx' }),
         h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
           v.isReveal && this.renderReveal(v),
           v.isVoting && this.renderVoting(v),
-          v.isResults && this.renderResults(v)
+          v.isResults && this.renderResults(v),
+          jester && h('div', { className: 'jester-fx' },
+            Array.from({ length: 16 }, (_, i) => h('span', {
+              key: i,
+              className: 'jfx c' + (i % 4),
+              style: {
+                left: ((i * 61) % 97) + '%',
+                animationDelay: (-i * 1.7) + 's',
+                animationDuration: (9 + (i % 5) * 2.5) + 's',
+                fontSize: (11 + ((i * 7) % 12)) + 'px',
+              },
+            }, glyphs[i % 4]))
+          )
         )
       );
     }

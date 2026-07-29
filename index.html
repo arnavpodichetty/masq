@@ -28,6 +28,42 @@
   @keyframes imp-backdrop { from { opacity:0 } to { opacity:1 } }
   .imp-btn { transition: transform .12s ease, opacity .12s ease; }
   .imp-btn:active { transform: scale(.95); opacity:.82; }
+
+  /* ---- Jester Mode ---- */
+  .jester-page-fx {
+    position: fixed; inset: -40%; pointer-events: none; opacity: .45;
+    background: repeating-conic-gradient(from 45deg, rgba(123,47,247,.2) 0deg 90deg, rgba(0,0,0,0) 90deg 180deg);
+    background-size: 76px 76px;
+    animation: jpage-drift 26s linear infinite, jpage-hue 18s linear infinite;
+  }
+  @keyframes jpage-drift { to { transform: translate(76px, 76px) } }
+  @keyframes jpage-hue { to { filter: hue-rotate(360deg) } }
+  .jester-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .jfx { position: absolute; bottom: -4%; opacity: 0; animation: jfx-rise linear infinite; }
+  .jfx.c0 { color: #ffd23f; text-shadow: 0 0 9px rgba(255,210,63,.85); }
+  .jfx.c1 { color: #ff3d8b; text-shadow: 0 0 9px rgba(255,61,139,.85); }
+  .jfx.c2 { color: #a78bfa; text-shadow: 0 0 9px rgba(139,92,246,.95); }
+  .jfx.c3 { color: #4ade80; text-shadow: 0 0 9px rgba(74,222,128,.85); }
+  @keyframes jfx-rise {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0 }
+    8%   { opacity: .8 }
+    50%  { transform: translateY(-480px) translateX(16px) rotate(210deg); opacity: .55 }
+    92%  { opacity: .35 }
+    100% { transform: translateY(-980px) translateX(-12px) rotate(420deg); opacity: 0 }
+  }
+  body.jester .j-title {
+    background: linear-gradient(90deg, #ffd23f, #ff3d8b, #a78bfa, #4ade80, #ffd23f);
+    background-size: 250% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: j-shimmer 3.2s linear infinite;
+  }
+  @keyframes j-shimmer { to { background-position: 250% 0 } }
+  body.jester .j-glow { animation: j-cta 2.4s ease-in-out infinite; }
+  @keyframes j-cta {
+    0%, 100% { box-shadow: 0 8px 26px rgba(255,61,139,.5), 0 0 0 0 rgba(255,210,63,.35) }
+    50%      { box-shadow: 0 10px 34px rgba(139,92,246,.6), 0 0 24px 4px rgba(255,210,63,.22) }
+  }
 </style>
 </head>
 <body>
