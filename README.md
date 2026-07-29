@@ -2,7 +2,9 @@
 
 A pass-and-play social deduction party game for one phone and a group of friends. Everyone but the Jester gets the secret word (and a role to match); the Jester has to bluff their way through questioning without getting caught.
 
-**Play it live:** [arnavpodichetty.github.io/masq](https://arnavpodichetty.github.io/masq/)
+**Play it live:**
+- [arnavpodichetty.github.io/masq](https://arnavpodichetty.github.io/masq/)
+- [masq-self.vercel.app](https://masq-self.vercel.app/)
 
 ## Playing
 
