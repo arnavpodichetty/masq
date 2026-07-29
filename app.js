@@ -711,8 +711,6 @@
         lightModeThumb: !st.darkMode ? 'translateX(22px)' : 'translateX(2px)',
         toggleLightMode: () => this.setState({ darkMode: !st.darkMode }),
         jesterMode: st.jesterMode,
-        jesterModeBg: st.jesterMode ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
-        jesterModeThumb: st.jesterMode ? 'translateX(22px)' : 'translateX(2px)',
         toggleJesterMode: () => this.setState({ jesterMode: !st.jesterMode }),
         soundEffects: st.soundEffects,
         soundEffectsBg: st.soundEffects ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
@@ -1059,15 +1057,6 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleJesterMode, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
-            h('div', {},
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, '🃏 Jester Mode'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); margin-top:1px;") }, 'Let the fool redecorate the theatre')
-            ),
-            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterModeBg}; transition:background .25s; flex:none;`) },
-              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterModeThumb}; transition:transform .25s;`) })
-            )
-          ),
           h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
@@ -1104,7 +1093,7 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
           h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em;"), className: 'j-title' },
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em; cursor:pointer;"), className: 'j-title', onClick: v.toggleJesterMode },
             v.jesterMode
               ? 'MASQ'.split('').map((ch, i) => h('span', { key: i, className: 'j-title j-dance', style: { animationDelay: (i * 0.13) + 's, ' + (i * 0.13) + 's' } }, ch))
               : 'MASQ'
