@@ -331,6 +331,7 @@
         isModalSettings: st.modal === 'settings',
         isModalGameSettings: st.modal === 'gameSettings',
         isModalWordList: st.modal === 'wordList',
+        isModalCredits: st.modal === 'credits',
         isModalPlayers: st.modal === 'players',
         closeModal: () => this.setState({ modal: null }),
         openPlayers: () => this.setState({ modal: 'players' }),
@@ -341,6 +342,7 @@
         openSettings: () => this.setState({ modal: 'settings' }),
         openGameSettings: () => this.setState({ modal: 'gameSettings' }),
         openWordList: () => this.setState({ modal: 'wordList' }),
+        openCredits: () => this.setState({ modal: 'credits' }),
         wordListGroups: [
           { cat: 'Locations', words: locationNames },
           { cat: 'Biomes', words: biomeNames },
@@ -798,10 +800,34 @@
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'Dark Theme'),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:13px; color:#5a6a84;") }, 'Coming Soon')
           ),
+          h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:#ddd0b0;") }, 'Credits'),
+            h('div', { style: css('color:#5a6a84; font-size:18px;') }, '›')
+          ),
           h('div', { style: css('padding:14px 16px; background:rgba(255,255,255,.05); border-radius:12px; text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:#e6cb7e;") }, 'MASQ'),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:#5f6c86; margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.0')
           )
+        )
+      );
+    }
+
+    creditsModal(v) {
+      const company = [
+        { border: '#caa64f', name: 'Arnav Podichetty', role: 'Creator & Code' },
+        { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
+        { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
+      ];
+      return h('div', { style: css('background:#16101a; border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid rgba(200,162,76,.25); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+        h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:#f0e6c9;") }, 'Credits'),
+          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:#9b8a63; cursor:pointer;") }, '×')
+        ),
+        h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
+          company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:rgba(255,255,255,.04); border-radius:12px; border-left:3px solid ${c.border};`) },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:#e6cb7e;") }, c.name),
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b8a63; margin-top:4px;") }, c.role)
+          ))
         )
       );
     }
@@ -848,6 +874,7 @@
           v.isModalGameSettings && this.gameSettingsModal(v),
           v.isModalSettings && this.settingsModal(v),
           v.isModalWordList && this.wordListModal(v),
+          v.isModalCredits && this.creditsModal(v),
           v.isModalPlayers && this.playersModal(v)
         )
       );
