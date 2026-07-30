@@ -1,6 +1,6 @@
 # Masq
 
-![Masq](masq.png)
+<img src="masq.png" alt="Masq" width="267" height="500">
 
 A pass-and-play social deduction party game for one phone and a group of friends. Everyone but the Jester gets the secret word (and a role to match); the Jester has to bluff their way through questioning without getting caught.
 
