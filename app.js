@@ -267,9 +267,9 @@
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
       jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
       timeLimit: 5,
-      categories: ['Locations', 'Biomes', 'Historical Eras', 'Movie Genres', 'Music Genres'],
+      categories: ['Locations', 'Biomes', 'Historical Eras', 'Movie/TV Show Genres', 'Music Genres'],
       wordCategories: ['Food', 'Animals', 'Objects', 'Movies'],
-      selCategories: ['Locations', 'Biomes', 'Historical Eras', 'Movie Genres', 'Music Genres'],
+      selCategories: ['Locations', 'Biomes', 'Historical Eras', 'Movie/TV Show Genres', 'Music Genres'],
       roundJesterIndices: null,
       roundStarterIdx: null,
       roundCategory: 'Locations',
@@ -431,11 +431,11 @@
       const lineColors = st.jesterMode
         ? ['#7b2ff7', '#db2777', '#16a34a', '#d97706', '#7c3aed', '#be185d']
         : ['#7a1620', '#14254a', '#2e5bb0', '#6e141c', '#4a3010', '#7a1620'];
-      const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieCatalog, fakeMovieRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, wordOnlyCatalog } = window.MASQ_LOCATIONS_DATA;
+      const { biomeCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, historicalErasCatalog, fakeHistoricalErasRoleCatalog, movieTvCatalog, fakeMovieTvRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, wordOnlyCatalog } = window.MASQ_LOCATIONS_DATA;
       const biomeNames = Object.keys(biomeCatalog);
       const locationNames = Object.keys(locationCatalog);
       const historicalEraNames = Object.keys(historicalErasCatalog);
-      const movieGenreNames = Object.keys(movieCatalog);
+      const movieTvGenreNames = Object.keys(movieTvCatalog);
       const musicGenreNames = Object.keys(musicGenreCatalog);
       const shuffle = (items) => {
         const next = [...items];
@@ -494,7 +494,7 @@
       const isBiomeRound = roundCategory === 'Biomes';
       const isLocationRound = roundCategory === 'Locations';
       const isHistoricalRound = roundCategory === 'Historical Eras';
-      const isMovieRound = roundCategory === 'Movie Genres';
+      const isMovieTvRound = roundCategory === 'Movie/TV Show Genres';
       const isMusicRound = roundCategory === 'Music Genres';
       const isFoodRound = roundCategory === 'Food';
       const isAnimalsRound = roundCategory === 'Animals';
@@ -535,10 +535,10 @@
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
-        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieRound ? '#2f8f7a' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))),
-        apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : (isMusicRound ? '19px' : '23px')),
+        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieTvRound ? '#2f8f7a' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))),
+        apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px')),
         apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
-        apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location'))))))),
+        apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location'))))))),
         apWordSize: isBiomeRound ? '20px' : '22px',
         apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
         apIsUndisguisedJester,
@@ -552,8 +552,8 @@
               ? 'The location is your secret. Give clues that fit your role without making the answer obvious.'
             : isHistoricalRound
               ? 'The era is your secret. Give clues that fit your role without making the answer obvious.'
-            : isMovieRound
-              ? 'The genre is your secret. Give clues that fit your movie without making the answer obvious.'
+            : isMovieTvRound
+              ? 'The genre is your secret. Give clues that fit your movie or show without making the answer obvious.'
             : isMusicRound
               ? 'The genre is your secret. Give clues that fit your artist without making the answer obvious.'
             : 'Give clues that prove you know the word without giving it away to the Jester.',
@@ -595,7 +595,7 @@
           { cat: 'Locations', words: locationNames },
           { cat: 'Biomes', words: biomeNames },
           { cat: 'Historical Eras', words: historicalEraNames },
-          { cat: 'Movie Genres', words: movieGenreNames },
+          { cat: 'Movie/TV Show Genres', words: movieTvGenreNames },
           { cat: 'Music Genres', words: musicGenreNames },
           { cat: 'Food', words: wordOnlyCatalog.Food },
           { cat: 'Animals', words: wordOnlyCatalog.Animals },
@@ -804,7 +804,7 @@
           const rawWordPool = (category) => {
             if (category === 'Biomes') return biomeNames;
             if (category === 'Historical Eras') return historicalEraNames;
-            if (category === 'Movie Genres') return movieGenreNames;
+            if (category === 'Movie/TV Show Genres') return movieTvGenreNames;
             if (category === 'Music Genres') return musicGenreNames;
             if (category === 'Food') return wordOnlyCatalog.Food;
             if (category === 'Animals') return wordOnlyCatalog.Animals;
@@ -855,8 +855,8 @@
             nextRound = buildRound('Biomes', pickFrom('Biomes'), biomeCatalog, fakeBiomeRoleCatalog);
           } else if (chosenCategory === 'Historical Eras') {
             nextRound = buildRound('Historical Eras', pickFrom('Historical Eras'), historicalErasCatalog, fakeHistoricalErasRoleCatalog);
-          } else if (chosenCategory === 'Movie Genres') {
-            nextRound = buildRound('Movie Genres', pickFrom('Movie Genres'), movieCatalog, fakeMovieRoleCatalog);
+          } else if (chosenCategory === 'Movie/TV Show Genres') {
+            nextRound = buildRound('Movie/TV Show Genres', pickFrom('Movie/TV Show Genres'), movieTvCatalog, fakeMovieTvRoleCatalog);
           } else if (chosenCategory === 'Music Genres') {
             nextRound = buildRound('Music Genres', pickFrom('Music Genres'), musicGenreCatalog, fakeMusicGenreRoleCatalog);
           } else if (chosenCategory === 'Food') {
