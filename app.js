@@ -283,6 +283,7 @@
       soundEffects: true,
       jesterMode: false,
       wordListExpanded: [],
+      disabledWords: {},
     };
 
     __nextPlayerId = 4;
@@ -597,13 +598,38 @@
           { cat: 'Movies', words: wordOnlyCatalog.Movies },
         ].map(g => {
           const open = (st.wordListExpanded || []).includes(g.cat);
+          const off = (st.disabledWords || {})[g.cat] || [];
+          const kept = g.words.filter(w => !off.includes(w)).length;
           return {
             ...g, open,
             chevron: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            countLabel: kept === g.words.length ? `${g.cat} (${g.words.length})` : `${g.cat} (${kept}/${g.words.length})`,
+            lastOne: kept === 1,
             toggle: () => {
               const cur = this.state.wordListExpanded || [];
               this.setState({ wordListExpanded: cur.includes(g.cat) ? cur.filter(c => c !== g.cat) : [...cur, g.cat] });
             },
+            items: g.words.map(w => {
+              const crossed = off.includes(w);
+              // The last surviving word in a category is locked — an empty category
+              // would leave a round with no word to deal.
+              const locked = !crossed && kept === 1;
+              return {
+                word: w, crossed, locked,
+                style: crossed
+                  ? "font-family:'EB Garamond',serif; font-size:13px; color:var(--m-dim); background:transparent; border:1px solid var(--m-border); border-radius:8px; padding:5px 10px; cursor:pointer; text-decoration:line-through; opacity:.55;"
+                  : locked
+                    ? "font-family:'EB Garamond',serif; font-size:13px; color:var(--m-body); background:var(--m-lift); border:1px dashed var(--m-border-strong); border-radius:8px; padding:5px 10px; cursor:default;"
+                    : "font-family:'EB Garamond',serif; font-size:13px; color:var(--m-body); background:var(--m-lift); border:1px solid var(--m-border); border-radius:8px; padding:5px 10px; cursor:pointer;",
+                toggleWord: () => {
+                  if (locked) return;
+                  const map = { ...(this.state.disabledWords || {}) };
+                  const cur = map[g.cat] || [];
+                  map[g.cat] = cur.includes(w) ? cur.filter(x => x !== w) : [...cur, w];
+                  this.setState({ disabledWords: map });
+                },
+              };
+            }),
           };
         }),
         gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
@@ -763,6 +789,26 @@
           }
           const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
           const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
+          const rawWordPool = (category) => {
+            if (category === 'Biomes') return biomeNames;
+            if (category === 'Historical Eras') return historicalEraNames;
+            if (category === 'Movie Genres') return movieGenreNames;
+            if (category === 'Food') return wordOnlyCatalog.Food;
+            if (category === 'Animals') return wordOnlyCatalog.Animals;
+            if (category === 'Objects') return wordOnlyCatalog.Objects;
+            if (category === 'Movies') return wordOnlyCatalog.Movies;
+            return locationNames;
+          };
+          // Words crossed out in the word list are skipped. The word list keeps at
+          // least one word per category, so a pool is never empty.
+          const getWordPool = (category) => {
+            const raw = rawWordPool(category);
+            const off = (st.disabledWords || {})[category] || [];
+            if (!off.length) return raw;
+            const kept = raw.filter(w => !off.includes(w));
+            return kept.length ? kept : raw;
+          };
+          const pickFrom = (category) => { const pool = getWordPool(category); return pool[Math.floor(Math.random() * pool.length)]; };
           let pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
           if (st.gameMode === 'roles') {
             pickableCategories = pickableCategories.filter(c => !st.wordCategories.includes(c));
@@ -775,16 +821,6 @@
           const jesterPlayerNames = st.playerList.filter((_, i) => jesterIndexSet.has(i));
           const useJesterRole = st.gameMode === 'roles' && st.jesterGetsRole;
           const useJesterWord = st.gameMode === 'words' && st.jesterGetsRole;
-          const getWordPool = (category) => {
-            if (category === 'Biomes') return biomeNames;
-            if (category === 'Historical Eras') return historicalEraNames;
-            if (category === 'Movie Genres') return movieGenreNames;
-            if (category === 'Food') return wordOnlyCatalog.Food;
-            if (category === 'Animals') return wordOnlyCatalog.Animals;
-            if (category === 'Objects') return wordOnlyCatalog.Objects;
-            if (category === 'Movies') return wordOnlyCatalog.Movies;
-            return locationNames;
-          };
           const buildRound = (roundCategory, wordName, roleCatalog, fakeRoleCatalog) => {
             const roles = shuffle(roleCatalog[wordName]);
             const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
@@ -801,30 +837,23 @@
             }
             return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
           };
-          const buildWordOnlyRound = (category, words) => {
-            const word = words[Math.floor(Math.random() * words.length)];
-            return { roundCategory: category, roundWord: word, roundRoleMap: {}, roundJesterRoleMap: {} };
-          };
+          const buildWordOnlyRound = (category) => ({ roundCategory: category, roundWord: pickFrom(category), roundRoleMap: {}, roundJesterRoleMap: {} });
           if (chosenCategory === 'Biomes') {
-            const biomeName = biomeNames[Math.floor(Math.random() * biomeNames.length)];
-            nextRound = buildRound('Biomes', biomeName, biomeCatalog, fakeBiomeRoleCatalog);
+            nextRound = buildRound('Biomes', pickFrom('Biomes'), biomeCatalog, fakeBiomeRoleCatalog);
           } else if (chosenCategory === 'Historical Eras') {
-            const eraName = historicalEraNames[Math.floor(Math.random() * historicalEraNames.length)];
-            nextRound = buildRound('Historical Eras', eraName, historicalErasCatalog, fakeHistoricalErasRoleCatalog);
+            nextRound = buildRound('Historical Eras', pickFrom('Historical Eras'), historicalErasCatalog, fakeHistoricalErasRoleCatalog);
           } else if (chosenCategory === 'Movie Genres') {
-            const genreName = movieGenreNames[Math.floor(Math.random() * movieGenreNames.length)];
-            nextRound = buildRound('Movie Genres', genreName, movieCatalog, fakeMovieRoleCatalog);
+            nextRound = buildRound('Movie Genres', pickFrom('Movie Genres'), movieCatalog, fakeMovieRoleCatalog);
           } else if (chosenCategory === 'Food') {
-            nextRound = buildWordOnlyRound('Food', wordOnlyCatalog.Food);
+            nextRound = buildWordOnlyRound('Food');
           } else if (chosenCategory === 'Animals') {
-            nextRound = buildWordOnlyRound('Animals', wordOnlyCatalog.Animals);
+            nextRound = buildWordOnlyRound('Animals');
           } else if (chosenCategory === 'Objects') {
-            nextRound = buildWordOnlyRound('Objects', wordOnlyCatalog.Objects);
+            nextRound = buildWordOnlyRound('Objects');
           } else if (chosenCategory === 'Movies') {
-            nextRound = buildWordOnlyRound('Movies', wordOnlyCatalog.Movies);
+            nextRound = buildWordOnlyRound('Movies');
           } else {
-            const locationName = locationNames[Math.floor(Math.random() * locationNames.length)];
-            nextRound = buildRound('Locations', locationName, locationCatalog, fakeLocationRoleCatalog);
+            nextRound = buildRound('Locations', pickFrom('Locations'), locationCatalog, fakeLocationRoleCatalog);
           }
           let roundJesterWordMap = {};
           if (useJesterWord) {
@@ -1037,12 +1066,13 @@
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
           v.wordListGroups.map((g, i) => h('div', { key: i },
             h('div', { onClick: g.toggle, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
-              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, `${g.cat} (${g.words.length})`),
+              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, g.countLabel),
               h('div', { style: css(`color:var(--m-dim2); font-size:18px; transform:${g.chevron}; transition:transform .2s;`) }, '›')
             ),
             g.open ? h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; padding:10px 4px 4px;') },
-              g.words.map((w, j) => h('div', { key: j, style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-body); background:var(--m-lift); border:1px solid var(--m-border); border-radius:8px; padding:5px 10px;") }, w))
-            ) : null
+              g.items.map((it, j) => h('div', { key: j, onClick: it.toggleWord, className: it.locked ? '' : 'imp-btn', style: css(it.style) }, it.word))
+            ) : null,
+            g.open && g.lastOne ? h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); padding:6px 4px 0;") }, 'Every category has to keep at least one word.') : null
           ))
         )
       );
