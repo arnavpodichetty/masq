@@ -605,6 +605,13 @@
             chevron: open ? 'rotate(90deg)' : 'rotate(0deg)',
             countLabel: kept === g.words.length ? `${g.cat} (${g.words.length})` : `${g.cat} (${kept}/${g.words.length})`,
             lastOne: kept === 1,
+            hasCrossed: kept < g.words.length,
+            resetCat: (e) => {
+              e.stopPropagation();
+              const map = { ...(this.state.disabledWords || {}) };
+              delete map[g.cat];
+              this.setState({ disabledWords: map });
+            },
             toggle: () => {
               const cur = this.state.wordListExpanded || [];
               this.setState({ wordListExpanded: cur.includes(g.cat) ? cur.filter(c => c !== g.cat) : [...cur, g.cat] });
@@ -1067,7 +1074,10 @@
           v.wordListGroups.map((g, i) => h('div', { key: i },
             h('div', { onClick: g.toggle, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, g.countLabel),
-              h('div', { style: css(`color:var(--m-dim2); font-size:18px; transform:${g.chevron}; transition:transform .2s;`) }, '›')
+              h('div', { style: css('display:flex; align-items:center; gap:10px;') },
+                g.hasCrossed ? h('div', { onClick: g.resetCat, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--m-brand); border:1px solid var(--m-border); border-radius:8px; padding:4px 8px; cursor:pointer;") }, 'Reset') : null,
+                h('div', { style: css(`color:var(--m-dim2); font-size:18px; transform:${g.chevron}; transition:transform .2s;`) }, '›')
+              )
             ),
             g.open ? h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; padding:10px 4px 4px;') },
               g.items.map((it, j) => h('div', { key: j, onClick: it.toggleWord, className: it.locked ? '' : 'imp-btn', style: css(it.style) }, it.word))
