@@ -263,6 +263,7 @@
 
   var musicGenreCatalog = {
     'Alternative Rock': ['Coldplay (Yellow)', 'Gorillaz (Feel Good Inc)', 'Linkin Park (In the End)', 'Muse (Uprising)', 'Oasis (Wonderwall)', 'Radiohead (Creep)', 'Red Hot Chili Peppers (Californication)', 'Smashing Pumpkins (1979)', 'Third Eye Blind (Semi-Charmed Life)', "Weezer (Say It Ain't So)"],
+    'Bedroom Pop': ['beabadoobee (the perfect pair)', 'Cigarettes After Sex (Apocalypse)', 'Clairo (Sofia)', 'Faye Webster (Kingston)', 'girl in red (we fell in love in october)', 'Mac DeMarco (Chamber of Reflection)', 'Malcolm Todd (Earrings)', 'Rex Orange County (Best Friend)', 'Steve Lacy (Dark Red)', 'The Marias (No One Noticed)'],
     'Blues': ['Albert King (Born Under a Bad Sign)', 'B.B. King (The Thrill Is Gone)', "Buddy Guy (Damn Right, I've Got the Blues)", 'Eric Clapton (Layla)', 'Etta James (At Last)', "Howlin' Wolf (Smokestack Lightning)", 'John Lee Hooker (Boom Boom)', 'Muddy Waters (Hoochie Coochie Man)', 'Robert Johnson (Cross Road Blues)', 'Stevie Ray Vaughan (Pride and Joy)'],
     'Classical': ['Bach (Air on the G String)', 'Beethoven (Fur Elise)', 'Brahms (Lullaby)', 'Chopin (Nocturne in E-flat Major)', 'Debussy (Clair de Lune)', 'Erik Satie (Gymnopedie No. 1)', 'Grieg (In the Hall of the Mountain King)', 'Mozart (Eine kleine Nachtmusik)', 'Tchaikovsky (Swan Lake)', 'Vivaldi (The Four Seasons)'],
     'Country': ["Blake Shelton (God's Country)", 'Carrie Underwood (Before He Cheats)', 'Chris Stapleton (Tennessee Whiskey)', 'Dolly Parton (Jolene)', 'Johnny Cash (Hurt)', 'Kenny Chesney (No Shoes, No Shirt, No Problems)', 'Luke Combs (When It Rains It Pours)', 'Miranda Lambert (The House That Built Me)', 'Morgan Wallen (Last Night)', 'Zach Bryan (Something in the Orange)'],
@@ -275,10 +276,11 @@
     'Heavy Metal': ['Black Sabbath (Paranoid)', 'Iron Maiden (The Trooper)', 'Judas Priest (Breaking the Law)', 'Megadeth (Symphony of Destruction)', 'Metallica (Enter Sandman)', 'Pantera (Walk)', 'Rammstein (Du Hast)', 'Slayer (Raining Blood)', 'Slipknot (Duality)', 'System Of A Down (Chop Suey!)'],
     'Hip Hop': ['Cardi B (I Like It)', 'Drake (One Dance)', 'Eminem (Without Me)', 'J. Cole (No Role Modelz)', 'Jay-Z (Empire State of Mind)', 'Kanye West (Heartless)', 'Kendrick Lamar (All The Stars)', 'Lil Wayne (Love Me)', 'Nicki Minaj (Starships)', 'Travis Scott (goosebumps)'],
     'Indie / Alternative': ['Arctic Monkeys (I Wanna Be Yours)', 'Cage The Elephant (Cigarette Daydreams)', 'Cigarettes After Sex (Apocalypse)', 'Florence + The Machine (Dog Days Are Over)', 'Glass Animals (Heat Waves)', 'Lana Del Rey (Summertime Sadness)', 'Mac DeMarco (Chamber of Reflection)', 'Tame Impala (The Less I Know The Better)', 'The 1975 (Somebody Else)', 'Vampire Weekend (A-Punk)'],
+    'J-Pop / J-Rock': ['Ado (New Genesis)', 'Creepy Nuts (Bling-Bang-Bang-Born)', 'Hikaru Utada (First Love)', 'Kenshi Yonezu (KICK BACK)', 'King Gnu (Hakujitsu)', 'LiSA (Gurenge)', 'Official HIGE DANdism (Pretender)', 'One OK Rock (Wherever You Are)', 'RADWIMPS (Zenzenzense)', 'YOASOBI (Idol)'],
     'Jazz': ['Billie Holiday (Strange Fruit)', 'Charlie Parker (Ornithology)', 'Chet Baker (My Funny Valentine)', 'Dave Brubeck (Take Five)', 'Duke Ellington (Take the A Train)', 'Ella Fitzgerald (Dream a Little Dream of Me)', 'John Coltrane (My Favorite Things)', 'Louis Armstrong (What a Wonderful World)', 'Miles Davis (So What)', 'Nina Simone (Feeling Good)'],
     'K-Pop': ['aespa (Next Level)', 'BLACKPINK (How You Like That)', 'BTS (Dynamite)', 'EXO (Growl)', 'IVE (LOVE DIVE)', 'NewJeans (Super Shy)', 'SEVENTEEN (Very Nice)', "Stray Kids (God's Menu)", 'TWICE (TT)', 'TXT (Sugar Rush Ride)'],
     'Latin': ['Enrique Iglesias (Bailando)', 'Juanes (La Camisa Negra)', 'Luis Fonsi (Despacito)', 'Maluma (Hawai)', 'Marc Anthony (Vivir Mi Vida)', 'Peso Pluma (Ella Baila Sola)', "Ricky Martin (Livin' la Vida Loca)", 'Rosalia (DESPECHA)', 'Selena (Como La Flor)', "Shakira (Hips Don't Lie)"],
-    'Pop': ['Ariana Grande (7 rings)', 'Billie Eilish (BIRDS OF A FEATHER)', 'Bruno Mars (Locked out of Heaven)', "Dua Lipa (Don't Start Now)", 'Ed Sheeran (Shape of You)', 'Harry Styles (As It Was)', 'Justin Bieber (Love Yourself)', 'Katy Perry (Dark Horse)', 'Olivia Rodrigo (drivers license)', 'Taylor Swift (Cruel Summer)'],
+    'Pop': ['Ariana Grande (7 rings)', 'Billie Eilish (BIRDS OF A FEATHER)', 'Bruno Mars (Locked out of Heaven)', 'Ed Sheeran (Shape of You)', 'Harry Styles (As It Was)', 'Justin Bieber (Love Yourself)', 'Katy Perry (Dark Horse)', 'Olivia Rodrigo (drivers license)', 'Sabrina Carpenter (Espresso)', 'Taylor Swift (Cruel Summer)'],
     'Post-Punk Revival': ['Bloc Party (Banquet)', 'Editors (Munich)', 'Franz Ferdinand (Take Me Out)', 'Interpol (Evil)', 'Kaiser Chiefs (Ruby)', 'The Killers (Mr. Brightside)', "The Libertines (Can't Stand Me Now)", 'The Strokes (The Adults Are Talking)', 'The White Stripes (Seven Nation Army)', 'Yeah Yeah Yeahs (Maps)'],
     'Punk Rock': ['Bad Religion (21st Century Digital Boy)', 'blink-182 (All The Small Things)', 'Dead Kennedys (Holiday in Cambodia)', 'Green Day (Basket Case)', 'NOFX (Linoleum)', 'Rancid (Time Bomb)', 'Sex Pistols (Anarchy in the U.K.)', 'The Clash (Should I Stay or Should I Go)', "The Offspring (You're Gonna Go Far, Kid)", 'The Ramones (Blitzkrieg Bop)'],
     'R&B': ["Alicia Keys (If I Ain't Got You)", 'Beyonce (Halo)', 'Boyz II Men (End of the Road)', 'Chris Brown (Under The Influence)', 'Daniel Caesar (Best Part)', 'Frank Ocean (Pink + White)', 'Rihanna (Umbrella)', 'SZA (Kill Bill)', 'The Weeknd (Blinding Lights)', 'Usher (Yeah!)'],
@@ -289,11 +291,12 @@
 
   var fakeMusicGenreRoleCatalog = {
     'Alternative Rock': ['Bush (Glycerine)', 'Interpol (Evil)', 'Tame Impala (The Less I Know The Better)'],
+    'Bedroom Pop': ['Johnny Cash (Hurt)', 'Metallica (Enter Sandman)', 'Mozart (Eine kleine Nachtmusik)'],
     'Blues': ["Al Green (Let's Stay Together)", 'Chet Baker (My Funny Valentine)', 'Johnny Cash (Hurt)'],
     'Classical': ['Duke Ellington (Take the A Train)', 'Mahalia Jackson (Take My Hand, Precious Lord)', 'Nina Simone (Feeling Good)'],
     'Country': ["Bob Dylan (Blowin' in the Wind)", 'Etta James (At Last)', 'Stevie Ray Vaughan (Pride and Joy)'],
     'Disco': ['Calvin Harris (One Kiss)', "Diana Ross (I'm Coming Out)", 'Usher (Yeah!)'],
-    'EDM': ["Bee Gees (Stayin' Alive)", "Dua Lipa (Don't Start Now)", 'The Weeknd (Blinding Lights)'],
+    'EDM': ["Bee Gees (Stayin' Alive)", 'Sabrina Carpenter (Espresso)', 'The Weeknd (Blinding Lights)'],
     'Emo / Pop Punk': ['Green Day (Basket Case)', 'Linkin Park (In the End)', "The Offspring (You're Gonna Go Far, Kid)"],
     'Folk': ['Chris Stapleton (Tennessee Whiskey)', 'Dolly Parton (Jolene)', 'Robert Johnson (Cross Road Blues)'],
     'Gospel': ['Aretha Franklin (Respect)', 'B.B. King (The Thrill Is Gone)', 'Sam Cooke (A Change Is Gonna Come)'],
@@ -301,6 +304,7 @@
     'Heavy Metal': ['AC/DC (Highway to Hell)', 'Alice in Chains (Man in the Box)', "Guns N' Roses (Sweet Child O' Mine)"],
     'Hip Hop': ['Bad Bunny (DAKITI)', 'Frank Ocean (Pink + White)', 'SZA (Kill Bill)'],
     'Indie / Alternative': ['Billie Eilish (BIRDS OF A FEATHER)', 'Coldplay (Yellow)', 'The Killers (Mr. Brightside)'],
+    'J-Pop / J-Rock': ['Aretha Franklin (Respect)', 'Dolly Parton (Jolene)', 'Sex Pistols (Anarchy in the U.K.)'],
     'Jazz': ['Bach (Air on the G String)', 'Muddy Waters (Hoochie Coochie Man)', 'Stevie Wonder (Superstition)'],
     'K-Pop': ['Ariana Grande (7 rings)', 'Marshmello (Happier)', 'Rihanna (Umbrella)'],
     'Latin': ['Bruno Mars (Locked out of Heaven)', 'J Balvin (LA CANCION)', 'Nicky Jam (X)'],

@@ -1006,6 +1006,7 @@
         { border: '#7a1620', title: 'Role Mode', body: 'The default. Everyone but the Jester gets a secret role. The word stays hidden (you can turn it on in Options). Use your role to ask and answer questions without giving yourself away. The Jester has no role and has to bluff.' },
         { border: '#14254a', title: 'Word Mode', body: 'Everyone but the Jester sees the same secret word, with no roles. Ask questions that prove you know it without saying it outright. The Jester sees nothing and has to fake it.' },
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so each player privately sees their card. Then take turns asking one question to someone else. When you’re ready (or the timer ends), discuss and vote. Catch the Jester and the Cast wins; miss them and the Jester wins.' },
+        { border: '#b5893c', title: 'Trim the Word List', body: 'Head to Settings → View All Words to browse every category. Tap any word to cross it out and it won’t come up in future rounds; tap it again to bring it back. Use Reset to restore a whole category. Each category always keeps at least one word.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
