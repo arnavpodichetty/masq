@@ -19,7 +19,7 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 
 ### Categories
 
-- Role categories: Locations, Biomes, Historical Eras, Movie Genres
+- Role categories: Locations, Biomes, Historical Eras, Movie Genres, Music Genres
 - Word categories (Word Mode only): Food, Animals, Objects, Movies
 
 ### How a Round Plays Out
