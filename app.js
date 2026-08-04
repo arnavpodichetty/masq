@@ -900,7 +900,7 @@
     }
 
     settingsRow({ onClick, iconBg, icon, label, value }) {
-      return h('div', { onClick, className: 'imp-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
+      return h('div', { onClick, className: 'masq-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
         h('div', { style: css(`width:34px; height:34px; border-radius:9px; background:${iconBg}; display:flex; align-items:center; justify-content:center; flex:none;`), dangerouslySetInnerHTML: { __html: icon } }),
         h('div', { style: css('flex:1;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--m-label);") }, label),
@@ -911,7 +911,7 @@
     }
 
     categoriesModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Categories'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
@@ -934,7 +934,7 @@
     }
 
     jestersModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Number of Jesters'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
@@ -952,7 +952,7 @@
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-soft2);") }, 'or randomize'),
           h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') })
         ),
-        h('div', { onClick: v.toggleRandJesters, className: 'imp-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:14px;') },
+        h('div', { onClick: v.toggleRandJesters, className: 'masq-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:14px;') },
           h('div', { style: css('flex:1;') },
             h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Random Count'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Pick a random number of jesters each round')
@@ -961,22 +961,22 @@
             h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.randJestersThumb}; transition:transform .25s;`) })
           )
         ),
-        v.randJesters && h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:18px; animation:imp-rise .2s ease both;') },
+        v.randJesters && h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:18px; animation:masq-rise .2s ease both;') },
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Min'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { onClick: v.decRandMin, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMin),
-              h('div', { onClick: v.incRandMin, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
+              h('div', { onClick: v.incRandMin, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           ),
           h('div', { style: css("font-family:'Cinzel',serif; font-size:16px; color:var(--m-arrow); padding-top:20px;") }, '→'),
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Max'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { onClick: v.decRandMax, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMax),
-              h('div', { onClick: v.incRandMax, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
+              h('div', { onClick: v.incRandMax, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           )
         )
@@ -984,7 +984,7 @@
     }
 
     timeModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Time Limit'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
@@ -1008,7 +1008,7 @@
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so each player privately sees their card. Then take turns asking one question to someone else. When you’re ready (or the timer ends), discuss and vote. Catch the Jester and the Cast wins; miss them and the Jester wins.' },
         { border: '#b5893c', title: 'Trim the Word List', body: 'Head to Settings → View All Words to browse every category. Tap any word to cross it out and it won’t come up in future rounds; tap it again to bring it back. Use Reset to restore a whole category. Each category always keeps at least one word.' },
       ];
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'How to Play'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
@@ -1023,10 +1023,10 @@
     }
 
     gameSettingsModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Game Options'),
-          h('div', { onClick: v.closeModal, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { onClick: v.closeModal, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid var(--m-border);') },
           h('div', { onClick: v.toggleShowCat, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
@@ -1074,22 +1074,22 @@
     }
 
     wordListModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'All Words'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
           v.wordListGroups.map((g, i) => h('div', { key: i },
-            h('div', { onClick: g.toggle, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { onClick: g.toggle, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, g.countLabel),
               h('div', { style: css('display:flex; align-items:center; gap:10px;') },
-                g.hasCrossed ? h('div', { onClick: g.resetCat, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--m-brand); border:1px solid var(--m-border); border-radius:8px; padding:4px 8px; cursor:pointer;") }, 'Reset') : null,
+                g.hasCrossed ? h('div', { onClick: g.resetCat, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--m-brand); border:1px solid var(--m-border); border-radius:8px; padding:4px 8px; cursor:pointer;") }, 'Reset') : null,
                 h('div', { style: css(`color:var(--m-dim2); font-size:18px; transform:${g.chevron}; transition:transform .2s;`) }, '›')
               )
             ),
             g.open ? h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; padding:10px 4px 4px;') },
-              g.items.map((it, j) => h('div', { key: j, onClick: it.toggleWord, className: it.locked ? '' : 'imp-btn', style: css(it.style) }, it.word))
+              g.items.map((it, j) => h('div', { key: j, onClick: it.toggleWord, className: it.locked ? '' : 'masq-btn', style: css(it.style) }, it.word))
             ) : null,
             g.open && g.lastOne ? h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); padding:6px 4px 0;") }, 'Every category has to keep at least one word.') : null
           ))
@@ -1098,29 +1098,29 @@
     }
 
     settingsModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Settings'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
-          h('div', { onClick: v.openWordList, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { onClick: v.openWordList, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'View All Words'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
-          h('div', { onClick: v.toggleSoundEffects, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { onClick: v.toggleSoundEffects, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleLightMode, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { onClick: v.toggleLightMode, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Light Mode'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.lightModeBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.openCredits, className: 'imp-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { onClick: v.openCredits, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
@@ -1138,10 +1138,10 @@
         { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
         { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
       ];
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Credits'),
-          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { onClick: v.openSettings, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
           company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
@@ -1153,25 +1153,25 @@
     }
 
     renderLobby(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-fade-in .25s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
-          h('div', { onClick: v.openHelp, className: 'imp-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
+          h('div', { onClick: v.openHelp, className: 'masq-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em; cursor:pointer;"), className: 'j-title', onClick: v.toggleJesterMode },
             v.jesterMode
               ? 'MASQ'.split('').map((ch, i) => h('span', { key: i, className: 'j-title j-dance', style: { animationDelay: (i * 0.13) + 's, ' + (i * 0.13) + 's' } }, ch))
               : 'MASQ'
           ),
-          h('div', { onClick: v.openSettings, className: 'imp-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
+          h('div', { onClick: v.openSettings, className: 'masq-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Mode'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px;') },
-            h('div', { onClick: v.setRoleMode, className: 'imp-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
+            h('div', { onClick: v.setRoleMode, className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_20 } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.roleTileColor};`) }, 'Role Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.roleTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Roles and words assigned, Jester flies blind')
             ),
-            h('div', { onClick: v.setWordMode, className: 'imp-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
+            h('div', { onClick: v.setWordMode, className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_WORD } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.wordTileColor};`) }, 'Word Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.wordTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Everyone gets the word but the Jester')
@@ -1187,9 +1187,9 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
-          h('div', { onClick: v.goReveal, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
+          h('div', { onClick: v.goReveal, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
-        v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:imp-backdrop .2s ease both;') },
+        v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
           h('div', { onClick: v.closeModal, style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
@@ -1205,7 +1205,7 @@
     }
 
     playersModal(v) {
-      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:imp-slide-up .3s ease both;') },
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'The Cast'),
           h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
@@ -1217,14 +1217,14 @@
               style: css(`display:grid; grid-template-rows:${p.removing ? '0fr' : '1fr'}; opacity:${p.removing ? 0 : 1}; margin-bottom:${p.removing ? '0px' : '8px'}; overflow:hidden; transition:grid-template-rows .28s ease, opacity .22s ease, margin-bottom .28s ease; pointer-events:${p.removing ? 'none' : 'auto'};`)
             },
               h('div', { style: css('overflow:hidden; min-height:0;') },
-                h('div', { style: css('display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); animation:imp-rise .25s ease both;') },
+                h('div', { style: css('display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); animation:masq-rise .25s ease both;') },
                   h('div', { style: css('flex:none; width:40px; height:40px; border-radius:50%; background:var(--m-avatar-bg); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center;') },
                     h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 26, hat: v.jesterMode })
                   ),
                   p.editing
                     ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:var(--m-lift-strong); border:1px solid var(--m-accent); border-radius:8px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
                     : h('div', { onClick: p.onEditTap, style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:var(--m-text); cursor:text; padding:6px 2px;") }, p.name),
-                  h('div', { onClick: p.onRemove, className: 'imp-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
+                  h('div', { onClick: p.onRemove, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
                 )
               )
             ))
@@ -1232,12 +1232,12 @@
         ),
         h('div', { style: css('padding-top:14px;') },
           v.addingPlayer
-            ? h('div', { style: css('display:flex; gap:8px; align-items:center; animation:imp-rise .2s ease both;') },
+            ? h('div', { style: css('display:flex; gap:8px; align-items:center; animation:masq-rise .2s ease both;') },
                 h('input', { onKeyDown: v.onNameKeyDown, onChange: v.onNameChange, value: v.newName, placeholder: 'Enter player name…', style: css("flex:1; padding:14px 16px; background:var(--m-lift-input); border:1px solid var(--m-accent); border-radius:12px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:16px; outline:none;") }),
-                h('div', { onClick: v.confirmAdd, className: 'imp-btn', style: css("padding:14px 16px; background:var(--m-cta); border-radius:12px; color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
-                h('div', { onClick: v.cancelAdd, className: 'imp-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
+                h('div', { onClick: v.confirmAdd, className: 'masq-btn', style: css("padding:14px 16px; background:var(--m-cta); border-radius:12px; color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
+                h('div', { onClick: v.cancelAdd, className: 'masq-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
               )
-            : h('div', { onClick: v.onAddTap, className: 'imp-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
+            : h('div', { onClick: v.onAddTap, className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
                 h('div', { style: css("font-size:22px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
                 h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-soft);") }, 'Add a player…')
               )
@@ -1246,10 +1246,10 @@
     }
 
     renderReveal(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-slide-in .3s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToLobby, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { onClick: v.backToLobby, className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'Tap your name in secret'),
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Each player privately sees their role, then passes the phone.'),
           v.showCategory && h('div', { style: css('display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; border:1px solid var(--m-border-hard);') },
@@ -1259,7 +1259,7 @@
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px;') },
           h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
-            v.actOnePlayers.map((p, i) => h('div', { key: i, onClick: p.onTap, className: 'imp-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
+            v.actOnePlayers.map((p, i) => h('div', { key: i, onClick: p.onTap, className: 'masq-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
               h('div', { style: css('flex:none; width:44px; height:44px; border-radius:50%; background:var(--m-avatar-bg); display:flex; align-items:center; justify-content:center; border:1px solid var(--m-border-strong);') },
                 h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 30, hat: v.jesterMode })
               ),
@@ -1271,10 +1271,10 @@
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
           v.allSeen
-            ? h('div', { onClick: v.goVoting, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:imp-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
+            ? h('div', { onClick: v.goVoting, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
             : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
-        v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
+        v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
           h('div', { onClick: v.openCurtain, className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
@@ -1315,7 +1315,7 @@
             h('div', { style: css("position:absolute; top:12px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:12px; letter-spacing:.2em; color:#e6cb7e; pointer-events:none;") }, v.curtainHint)
           ),
           v.cardOpen
-            ? h('div', { onClick: v.closeOverlay, style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:imp-rise .35s ease both;") }, 'GOT IT')
+            ? h('div', { onClick: v.closeOverlay, style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:masq-rise .35s ease both;") }, 'GOT IT')
             : h('div', { style: css("margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-accent);") }, 'Tap the curtain to reveal')
         )
       );
@@ -1328,10 +1328,10 @@
         { badge: 'var(--m-accent)', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'var(--m-border-strong)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
         { badge: '#b3202f', bg: 'linear-gradient(135deg,#5c1117,#3c0a10)', border: 'rgba(178,32,47,.4)', num: '4', numColor: '#fff', icon: ICON_STEP4, title: 'Unmask the Jester', body: 'When ready, tap below to reveal who the jester really was.', panelBg: 'rgba(178,32,47,.08)' },
       ];
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:imp-slide-in .3s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToReveal, className: 'imp-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { onClick: v.backToReveal, className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'The Trial'),
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Debate, accuse, unmask the jester.')
         ),
@@ -1355,20 +1355,20 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
-          h('div', { onClick: v.goResults, className: 'imp-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
+          h('div', { onClick: v.goResults, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
         ),
-        v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:imp-fade-in .2s ease both;') },
-          h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:imp-rise .3s ease both;') },
+        v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
+          h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:masq-rise .3s ease both;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out. Cast your votes and unmask the jester.'),
-            h('div', { onClick: v.dismissTimeUp, className: 'imp-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
+            h('div', { onClick: v.dismissTimeUp, className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
       );
     }
 
     renderResults(v) {
-      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:imp-scale-in .35s ease both;') },
+      return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:masq-scale-in .35s ease both;') },
         v.jesterMode && h('div', { className: 'j-burst' },
           Array.from({ length: 14 }, (_, i) => h('span', {
             key: i,
@@ -1383,7 +1383,7 @@
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:var(--m-text-bright);") }, v.jesterRevealHeading),
-          h('div', { style: css('margin-top:18px; animation:imp-float 5s ease-in-out infinite; position:relative;') },
+          h('div', { style: css('margin-top:18px; animation:masq-float 5s ease-in-out infinite; position:relative;') },
             v.jesterMode && h('div', { className: 'j-rays' }),
             h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120, hat: v.jesterMode })
           ),
@@ -1416,7 +1416,7 @@
           )
         ),
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
-          h('div', { onClick: v.playAgain, className: 'imp-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
+          h('div', { onClick: v.playAgain, className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
         )
       );
     }
