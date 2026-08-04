@@ -2,7 +2,7 @@
 
 <img src="masq.png" alt="Masq" width="267" height="500">
 
-A pass-and-play social deduction party game for one phone and a group of friends. Everyone but the Jester gets the secret word (and a role to match); the Jester has to bluff their way through questioning without getting caught.
+Masq is a pass-and-play social deduction party game for one phone and a group of friends. Everyone but the Jester gets the secret word (and a role to match); the Jester has to bluff their way through questioning without getting caught.
 
 **Play it live:**
 - [arnavpodichetty.github.io/masq](https://arnavpodichetty.github.io/masq/)
@@ -37,15 +37,13 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 - Jester gets a fake role/word instead of knowing nothing
 - Optional round timer with an audio cue when time's up
 
-## Files
-
-- `index.html` — page shell, fonts, and global styles/animations
-- `app.js` — the game itself: a single-file React app (no JSX/build step, uses `React.createElement` directly) rendering all screens (Lobby, Players, Reveal, Voting, Results) and modals
-- `data.js` — the word/role catalogs (locations, biomes, historical eras, movie genres, and word-only pools) exposed on `window.MASQ_LOCATIONS_DATA`
-
 ## Tech
 
 Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, package manager, or build step required.
+
+## Credits
+
+Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya. Inspired by Spyfall and Imposter.
 
 ## License
 
