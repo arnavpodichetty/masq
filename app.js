@@ -126,7 +126,7 @@
     '--m-cta': 'linear-gradient(180deg,#b3202f,#7a1620)',
     '--m-cta-text': '#f6ecd2',
     '--m-cta-glow': '0 8px 28px rgba(178,32,47,.4)',
-    '--m-tile-sel': 'var(--m-tile-sel)',
+    '--m-tile-sel': 'linear-gradient(135deg,#7a1620,#4d0e14)',
     '--m-tile-sel-text': '#f0e6c9',
     '--m-tile-sel-sub': '#c6a96e',
     '--m-toggle-on': '#b3202f',
@@ -184,7 +184,7 @@
     '--m-cta': 'linear-gradient(180deg,#b3202f,#7a1620)',
     '--m-cta-text': '#f6ecd2',
     '--m-cta-glow': '0 8px 28px rgba(178,32,47,.4)',
-    '--m-tile-sel': 'var(--m-tile-sel)',
+    '--m-tile-sel': 'linear-gradient(135deg,#7a1620,#4d0e14)',
     '--m-tile-sel-text': '#f0e6c9',
     '--m-tile-sel-sub': '#c6a96e',
     '--m-toggle-on': '#b3202f',
@@ -322,7 +322,7 @@
   // ---- App: game state + logic (ported ~verbatim from the DC script) ----
   class App extends React.Component {
     state = {
-      screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, gameMode: 'roles',
+      screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, gameMode: 'roles',
       modal: null,
       playerList: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
       playerKeys: [0, 1, 2, 3],
@@ -546,6 +546,8 @@
       });
       const maxJesters = Math.max(0, st.playerList.length - 1);
       const jesterCount = Math.min(st.jesterCount, maxJesters);
+      const randMax = Math.min(st.jesterRandMax, maxJesters);
+      const randMin = Math.min(st.jesterRandMin, randMax);
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
       const players = st.playerList.map((name, i) => ({
@@ -555,23 +557,8 @@
         face: faceColors[i % faceColors.length],
         line: lineColors[i % lineColors.length],
         jester: jesterIndices.has(i),
-        you: i === 0,
       }));
       const jesterNames = players.filter(p => p.jester).map(p => p.name);
-
-      const lobby = players.map((p, i) => ({ ...p, host: i === 0, notHost: i !== 0 }));
-
-      const votable = players.filter(p => !p.you).map(p => {
-        const selected = st.vote === p.name;
-        const votes = selected ? 1 : 0;
-        return {
-          ...p, selected,
-          voteLabel: votes === 1 ? '1 vote' : votes + ' votes',
-          tileBg: selected ? 'rgba(230,203,126,.16)' : 'var(--m-lift-soft)',
-          tileBorder: selected ? '2px solid var(--m-brand)' : '1px solid var(--m-border-btn)',
-          onVote: () => this.setState({ vote: p.name }),
-        };
-      });
 
       const roundCategory = st.roundCategory || 'Locations';
       const roundRoleMap = st.roundRoleMap || {};
@@ -618,8 +605,19 @@
       };
       const openCurtain = () => this.setState({ cardOpen: true });
 
-      const voteName = st.vote || '';
-      const jesterPlayer = players.find(p => p.jester);
+      // Every jester is named at the final curtain, each with the disguise they
+      // actually held — gated the same way the reveal card is, so results can
+      // never claim a fake role the player was never shown.
+      const jesterReveals = players.filter(p => p.jester).map((p) => {
+        const fakeRole = st.gameMode === 'roles' && st.jesterGetsRole ? (roundJesterRoleMap[p.name] || null) : null;
+        const fakeWord = st.gameMode === 'words' && st.jesterGetsRole ? (roundJesterWordMap[p.name] || null) : null;
+        return {
+          name: p.name,
+          disguise: fakeRole
+            ? 'Posed as ' + fakeRole
+            : (fakeWord ? 'Held the fake word ' + fakeWord : null),
+        };
+      });
       return {
         actOnePlayers, allSeen, notAllSeen: !allSeen,
         showOverlay: !!ap,
@@ -904,16 +902,19 @@
         customCategoryItems: (st.gameMode === 'words' ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
         hasCustomInPicker: (st.gameMode === 'words' ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
-        jesterCount: st.jesterCount,
-        incJester: () => this.setState({ jesterCount: Math.min(st.jesterCount + 1, maxJesters) }),
-        decJester: () => this.setState({ jesterCount: Math.max(st.jesterCount - 1, 0) }),
-        jesterLabel: st.jesterCount === 0 ? 'No Jesters' : st.jesterCount === 1 ? '1 Jester' : st.jesterCount + ' Jesters',
-        jesterRandMin: st.jesterRandMin,
-        jesterRandMax: st.jesterRandMax,
-        incRandMin: () => this.setState({ jesterRandMin: Math.min(st.jesterRandMin + 1, st.jesterRandMax) }),
-        decRandMin: () => this.setState({ jesterRandMin: Math.max(st.jesterRandMin - 1, 0) }),
-        incRandMax: () => this.setState({ jesterRandMax: Math.min(st.jesterRandMax + 1, maxJesters) }),
-        decRandMax: () => this.setState({ jesterRandMax: Math.max(st.jesterRandMax - 1, st.jesterRandMin) }),
+        // Counts are shown clamped to the current cast — removing players can
+        // strand a saved count above what the table can seat, and the lobby
+        // should never promise more jesters than the round will deal.
+        jesterCount,
+        incJester: () => this.setState({ jesterCount: Math.min(jesterCount + 1, maxJesters) }),
+        decJester: () => this.setState({ jesterCount: Math.max(jesterCount - 1, 0) }),
+        jesterLabel: jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters',
+        jesterRandMin: randMin,
+        jesterRandMax: randMax,
+        incRandMin: () => this.setState({ jesterRandMin: Math.min(randMin + 1, randMax) }),
+        decRandMin: () => this.setState({ jesterRandMin: Math.max(randMin - 1, 0) }),
+        incRandMax: () => this.setState({ jesterRandMax: Math.min(randMax + 1, maxJesters) }),
+        decRandMax: () => this.setState({ jesterRandMax: Math.max(randMax - 1, randMin) }),
         randJesters: st.randJesters,
         randJestersBg: st.randJesters ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         randJestersThumb: st.randJesters ? 'translateX(22px)' : 'translateX(2px)',
@@ -1007,18 +1008,20 @@
         wordTileColor: st.gameMode === 'words' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
         wordTileSubColor: st.gameMode === 'words' ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
         wine, crimson, navy, goldFace, ivoryFace,
-        lobby, votable,
-        hasJester: !!jesterPlayer,
-        revealedName: jesterPlayer ? jesterPlayer.name : 'No One',
-        jesterRevealHeading: jesterPlayer ? 'The Jester was…' : 'There Was No Jester',
+        hasJester: jesterReveals.length > 0,
+        jesterReveals,
+        revealNameSize: jesterReveals.length > 1 ? '26px' : '34px',
+        jesterRevealHeading: jesterReveals.length === 0
+          ? 'There Was No Jester'
+          : jesterReveals.length === 1 ? 'The Jester was…' : 'The Jesters were…',
         goReveal: () => {
-          let newJesterCount = st.jesterCount;
+          let newJesterCount = jesterCount;
           if (st.randJesters) {
-            const min = st.jesterRandMin;
-            const max = Math.min(st.jesterRandMax, maxJesters);
-            newJesterCount = Math.floor(Math.random() * (max - min + 1)) + min;
+            newJesterCount = randMin + Math.floor(Math.random() * (randMax - randMin + 1));
           }
-          const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
+          // Fisher-Yates, not sort(() => Math.random() - .5) — that comparator
+          // is not a uniform shuffle and quietly favours certain seats.
+          const shuffledIndices = shuffle(st.playerList.map((_, index) => index));
           const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
           const rawWordPool = (category) => {
             if (customByName[category]) return customByName[category].entries.map(e => e.word);
@@ -1125,19 +1128,18 @@
           }
           nextRound = { ...nextRound, roundJesterWordMap };
           const roundStarterIdx = Math.floor(Math.random() * st.playerList.length);
-          this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, jesterCount: newJesterCount, roundJesterIndices: selectedJesterIndices, roundStarterIdx, ...nextRound });
+          // The dealt count lives in roundJesterIndices — writing it back to
+          // jesterCount would let a randomized round overwrite the number the
+          // host actually chose in the Jesters modal.
+          this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
         goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false }); },
-        backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
-        backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false, timerPaused: false }); },
-        playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
+        backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
+        backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false, timerPaused: false }); },
+        playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
         dismissTimeUp: () => this.setState({ timeUp: false }),
         showTimeUpPopup: st.timeUp,
-        hasVote: st.vote !== null, notHasVote: st.vote === null,
-        voteUpper: voteName.toUpperCase(),
-        caughtJester: !!jesterPlayer && st.vote !== null && players.find(p => p.name === st.vote)?.jester,
-        missedJester: !!jesterPlayer && st.vote !== null && !players.find(p => p.name === st.vote)?.jester,
       };
     }
 
@@ -1861,7 +1863,14 @@
             v.jesterMode && h('div', { className: 'j-rays' }),
             h(Mask, { comedy: !v.hasJester, tragedy: v.hasJester, cracked: v.hasJester, faceColor: v.ivoryFace, lineColor: v.hasJester ? v.crimson : v.wine, size: 120, hat: v.jesterMode })
           ),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, v.revealedName),
+          v.hasJester
+            ? h('div', { style: css('margin-top:14px; display:flex; flex-direction:column; align-items:center; gap:9px; padding:0 26px;') },
+                v.jesterReveals.map((j, i) => h('div', { key: i, style: css('text-align:center; animation:masq-rise .35s ease both;') },
+                  h('div', { className: 'j-title', style: css(`font-family:'Cinzel Decorative',serif; font-weight:700; font-size:${v.revealNameSize}; color:var(--m-brand); line-height:1.15;`) }, j.name),
+                  j.disguise && h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-results-sub); margin-top:3px;") }, j.disguise)
+                ))
+              )
+            : h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, 'No One'),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
             h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
@@ -1875,14 +1884,6 @@
             )
           ),
           h('div', { style: css('margin-top:26px; padding:0 30px; text-align:center;') },
-            v.caughtJester && h(React.Fragment, null,
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'The Cast wins! 🎉'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'You unmasked the jester before the curtain fell.')
-            ),
-            v.missedJester && h(React.Fragment, null,
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#e8a0a8;") }, 'The Jester escapes!'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'You accused the wrong performer. The jester takes a bow.')
-            ),
             !v.hasJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'Every performer was genuine.'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-results-sub); margin-top:6px;") }, 'No one was pretending. This round had no jester.')
