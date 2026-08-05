@@ -39,6 +39,83 @@
     };
   }
 
+  // ---- progressive jester ----
+  // Who gets picked can run one of two ways. 'random' is memoryless: an even
+  // draw every round, so the same player can land it three times running.
+  // 'progressive' nudges the role around — weights are "shares", everyone
+  // starts on 1, and a player's chance is their share of the table's total.
+  // Taking the role costs PROGRESSIVE_STEP_PCT of the whole table's chance,
+  // and what they give up is split evenly among everyone who didn't. The total
+  // never drifts, so the cost is exactly that many percentage points every
+  // time, whatever the player count: at a table of six, 1 share is 16.7% and a
+  // 5-point step takes a fresh jester to 11.7% while the other five each gain
+  // 1. It's a nudge, not a lockout — one turn as the Jester barely dents your
+  // odds, and only about four picks in quick succession can bottom anyone out.
+  const PROGRESSIVE_STEP_PCT = 0.05;
+
+  function freshWeights(ids) {
+    const weights = {};
+    ids.forEach((id) => { weights[id] = 1; });
+    return weights;
+  }
+
+  // Any change to the roster starts the cycle over — the stored weights only
+  // mean anything for the exact set of players that earned them.
+  function normalizeWeights(stored, ids) {
+    if (!stored || typeof stored !== 'object') return freshWeights(ids);
+    const sameRoster = Object.keys(stored).length === ids.length
+      && ids.every(id => typeof stored[id] === 'number' && isFinite(stored[id]) && stored[id] >= 0);
+    return sameRoster ? { ...stored } : freshWeights(ids);
+  }
+
+  // Draws `count` distinct items, each item's odds being its share of the pool.
+  function weightedDraw(items, weightOf, count) {
+    const pool = items.slice();
+    const picked = [];
+    while (picked.length < count && pool.length) {
+      const weights = pool.map(item => Math.max(0, weightOf(item) || 0));
+      const total = weights.reduce((sum, w) => sum + w, 0);
+      let idx = -1;
+      if (total > 0) {
+        let target = Math.random() * total;
+        for (let i = 0; i < pool.length; i += 1) {
+          if (target < weights[i]) { idx = i; break; }
+          target -= weights[i];
+        }
+        // Only reachable if rounding eats the remainder; take the last real
+        // candidate rather than letting a zero-weight item slip through.
+        if (idx < 0) idx = weights.reduce((best, w, i) => (w > 0 ? i : best), 0);
+      } else {
+        // Everyone left is spent — fall back to an even draw.
+        idx = Math.floor(Math.random() * pool.length);
+      }
+      picked.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    return picked;
+  }
+
+  function applyProgressive(weights, ids, pickedIds) {
+    const next = { ...weights };
+    const wasPicked = new Set(pickedIds.map(String));
+    const others = ids.filter(id => !wasPicked.has(String(id)));
+    // The pool always totals one share per player, so a percentage of the
+    // whole table is that percentage times the head count, in shares.
+    const step = PROGRESSIVE_STEP_PCT * ids.length;
+    let released = 0;
+    pickedIds.forEach((id) => {
+      const held = Math.max(0, next[id] || 0);
+      const spend = Math.min(step, held);
+      next[id] = held - spend;
+      released += spend;
+    });
+    if (others.length && released > 0) {
+      const share = released / others.length;
+      others.forEach((id) => { next[id] = Math.max(0, (next[id] || 0) + share); });
+    }
+    return next;
+  }
+
   // ---- custom categories (the only thing that survives a reload) ----
   // Shape: [{ id, name, kind, entries: [{ word, roles: [] }] }].
   // kind 'roles' — every word carries its own role list, like Locations.
@@ -349,6 +426,9 @@
       playerKeys: [0, 1, 2, 3],
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
       jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
+      // 'random' | 'progressive'. Weights live in memory only — a refresh or a
+      // roster change resets the cycle.
+      jesterSelection: 'random', jesterWeights: {}, showJesterOdds: false,
       timeLimit: 5,
       categories: ['Locations', 'Biomes', 'Historical Eras', 'Movie/TV Show Genres', 'Music Genres'],
       wordCategories: ['Food', 'Animals', 'Objects', 'Movies'],
@@ -567,6 +647,7 @@
       });
       const maxJesters = Math.max(0, st.playerList.length - 1);
       const jesterCount = Math.min(st.jesterCount, maxJesters);
+      const isProgressive = st.jesterSelection === 'progressive';
       const randMax = Math.min(st.jesterRandMax, maxJesters);
       const randMin = Math.min(st.jesterRandMin, randMax);
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
@@ -584,6 +665,9 @@
         line: lineColors[i % lineColors.length],
         jester: jesterIndices.has(i),
       }));
+      const playerIds = players.map(p => p.id);
+      const jesterWeights = normalizeWeights(st.jesterWeights, playerIds);
+      const weightTotal = playerIds.reduce((sum, id) => sum + (jesterWeights[id] || 0), 0);
 
       const roundCategory = st.roundCategory || 'Locations';
       const roundRoleMap = st.roundRoleMap || {};
@@ -937,12 +1021,37 @@
         incJester: () => this.setState({ jesterCount: Math.min(jesterCount + 1, maxJesters) }),
         decJester: () => this.setState({ jesterCount: Math.max(jesterCount - 1, 0) }),
         jesterLabel: jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters',
+        // The lobby row names the selection mode too, so Progressive isn't a
+        // setting you have to open the modal to remember turning on.
+        jesterRowValue: (jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters')
+          + (st.randJesters ? ' · Random Count' : '')
+          + (isProgressive ? ' · Progressive' : ''),
         jesterRandMin: randMin,
         jesterRandMax: randMax,
         incRandMin: () => this.setState({ jesterRandMin: Math.min(randMin + 1, randMax) }),
         decRandMin: () => this.setState({ jesterRandMin: Math.max(randMin - 1, 0) }),
         incRandMax: () => this.setState({ jesterRandMax: Math.min(randMax + 1, maxJesters) }),
         decRandMax: () => this.setState({ jesterRandMax: Math.max(randMax - 1, randMin) }),
+        // Who gets picked, as opposed to how many.
+        isProgressiveJester: isProgressive,
+        setJesterSelection: (mode) => this.setState({ jesterSelection: mode }),
+        randomPickBg: !isProgressive ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
+        randomPickBorder: !isProgressive ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
+        randomPickColor: !isProgressive ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
+        randomPickSubColor: !isProgressive ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
+        progressivePickBg: isProgressive ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
+        progressivePickBorder: isProgressive ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
+        progressivePickColor: isProgressive ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
+        progressivePickSubColor: isProgressive ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
+        // The share each player holds of the next draw. Invisible odds are
+        // impossible to trust, so the modal shows them.
+        jesterOdds: players.map(p => ({
+          name: p.name,
+          pct: weightTotal > 0
+            ? Math.round(((jesterWeights[p.id] || 0) / weightTotal) * 100)
+            : Math.round(100 / Math.max(1, players.length)),
+          spent: (jesterWeights[p.id] || 0) === 0,
+        })),
         randJesters: st.randJesters,
         randJestersBg: st.randJesters ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         randJestersThumb: st.randJesters ? 'translateX(22px)' : 'translateX(2px)',
@@ -1020,6 +1129,10 @@
         toggleLightMode: () => this.setState({ darkMode: !st.darkMode }),
         jesterMode: st.jesterMode,
         toggleJesterMode: () => this.setState({ jesterMode: !st.jesterMode }),
+        showJesterOdds: st.showJesterOdds,
+        showJesterOddsBg: st.showJesterOdds ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        showJesterOddsThumb: st.showJesterOdds ? 'translateX(22px)' : 'translateX(2px)',
+        toggleShowJesterOdds: () => this.setState({ showJesterOdds: !st.showJesterOdds }),
         soundEffects: st.soundEffects,
         soundEffectsBg: st.soundEffects ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         soundEffectsThumb: st.soundEffects ? 'translateX(22px)' : 'translateX(2px)',
@@ -1058,10 +1171,17 @@
           if (st.randJesters) {
             newJesterCount = randMin + Math.floor(Math.random() * (randMax - randMin + 1));
           }
-          // Fisher-Yates, not sort(() => Math.random() - .5) — that comparator
-          // is not a uniform shuffle and quietly favours certain seats.
-          const shuffledIndices = shuffle(st.playerList.map((_, index) => index));
-          const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
+          const drawCount = Math.min(newJesterCount, maxJesters);
+          const allIndices = st.playerList.map((_, index) => index);
+          // Progressive draws by weight and then rebalances; truly random is a
+          // flat Fisher-Yates shuffle — not sort(() => Math.random() - .5),
+          // which is not uniform and quietly favours certain seats.
+          const selectedJesterIndices = isProgressive
+            ? weightedDraw(allIndices, (i) => jesterWeights[playerId(i)], drawCount)
+            : shuffle(allIndices).slice(0, drawCount);
+          const nextWeights = isProgressive
+            ? applyProgressive(jesterWeights, playerIds, selectedJesterIndices.map(i => playerId(i)))
+            : jesterWeights;
           const rawWordPool = (category) => {
             if (customByName[category]) return customByName[category].entries.map(e => e.word);
             if (category === 'Biomes') return biomeNames;
@@ -1172,7 +1292,7 @@
           // The dealt count lives in roundJesterIndices — writing it back to
           // jesterCount would let a randomized round overwrite the number the
           // host actually chose in the Jesters modal.
-          this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, ...nextRound });
+          this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, jesterWeights: nextWeights, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
         goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false }); },
@@ -1296,7 +1416,7 @@
     jestersModal(v) {
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Number of Jesters'),
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Jesters'),
           h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:32px;') },
@@ -1339,6 +1459,47 @@
               h('div', { ...press(v.incRandMax, 'Raise the maximum jesters'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           )
+        ),
+        h('div', { style: css('display:flex; align-items:center; gap:12px; margin:20px 0 12px;') },
+          h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') }),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-soft2);") }, 'who gets picked'),
+          h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') })
+        ),
+        h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
+          h('div', {
+            ...press(() => v.setJesterSelection('random'), null, { 'aria-pressed': String(!v.isProgressiveJester) }),
+            className: 'masq-btn',
+            style: css(`padding:13px 14px; border-radius:12px; background:${v.randomPickBg}; border:${v.randomPickBorder}; cursor:pointer;`),
+          },
+            h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.randomPickColor};`) }, 'Truly Random'),
+            h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.randomPickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Even odds every round, streaks and all')
+          ),
+          h('div', {
+            ...press(() => v.setJesterSelection('progressive'), null, { 'aria-pressed': String(v.isProgressiveJester) }),
+            className: 'masq-btn',
+            style: css(`padding:13px 14px; border-radius:12px; background:${v.progressivePickBg}; border:${v.progressivePickBorder}; cursor:pointer;`),
+          },
+            h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.progressivePickColor};`) }, 'Progressive'),
+            h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.progressivePickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Recent jesters get picked less often')
+          )
+        ),
+        // The per-player numbers are off by default — most tables don't want to
+        // see who the game thinks is "due". Settings → Show Progressive Jester Odds.
+        v.isProgressiveJester && h('div', { style: css('margin-top:12px; animation:masq-rise .2s ease both;') },
+          v.showJesterOdds && h(React.Fragment, null,
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:7px;") }, 'Odds next round'),
+            h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;') },
+              v.jesterOdds.map((o, i) => h('div', {
+                key: i,
+                style: css(`display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:8px; background:var(--m-lift); border:1px solid var(--m-border); opacity:${o.spent ? '.5' : '1'};`),
+              },
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-body);") }, o.name),
+                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-accent);") }, o.pct + '%')
+              ))
+            )
+          ),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); line-height:1.4;") },
+            'Evens out over a game. Resets if you add or remove a player, or reload.')
         )
       );
     }
@@ -1613,6 +1774,12 @@
               h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
             )
           ),
+          h('div', { ...press(v.toggleShowJesterOdds, 'Show progressive jester odds', { role: 'switch', 'aria-checked': String(v.showJesterOdds) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Show Progressive Jester Odds'),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showJesterOddsBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showJesterOddsThumb}; transition:transform .25s;`) })
+            )
+          ),
           h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
@@ -1686,7 +1853,7 @@
           h('div', { style: css('display:flex; flex-direction:column; gap:8px; margin-bottom:8px;') },
             this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-border-med)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
             this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-border-med)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
-            this.settingsRow({ onClick: v.openJesters, iconBg: 'rgba(178,32,47,.2)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterLabel }),
+            this.settingsRow({ onClick: v.openJesters, iconBg: 'rgba(178,32,47,.2)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
             this.settingsRow({ onClick: v.openTime, iconBg: 'rgba(46,91,176,.2)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
             this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-border-med)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
           )
