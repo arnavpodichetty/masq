@@ -1362,22 +1362,22 @@
 
     helpModal(v) {
       const cards = [
-        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add your players, pick Role Mode or Word Mode, and choose categories. Each round picks one category at random from what you selected.' },
-        { border: '#7a1620', title: 'Role Mode', body: 'The default. Everyone but the Jester gets a secret role. The word stays hidden (you can turn it on in Options). Use your role to ask and answer questions without giving yourself away. The Jester has no role and has to bluff.' },
-        { border: '#14254a', title: 'Word Mode', body: 'Everyone but the Jester sees the same secret word, with no roles. Ask questions that prove you know it without saying it outright. The Jester sees nothing and has to fake it.' },
-        { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so each player privately sees their card. Then take turns asking one question to someone else. When you’re ready (or the timer ends), discuss and vote. Catch the Jester and the Cast wins; miss them and the Jester wins.' },
-        { border: '#b5893c', title: 'Trim the Word List', body: 'Head to Settings → View All Words to browse every category. Tap any word to cross it out and it won’t come up in future rounds; tap it again to bring it back. Use Reset to restore a whole category. Each category always keeps at least one word.' },
-        { border: '#2f8f7a', title: 'Make Your Own', body: 'Settings → Custom Categories lets you build your own. A role category gives every word its own list of roles, like Locations. A word category is just a list of words separated by commas, like Food, and plays in Word Mode. Either way it’s saved on this device and shows up in the Categories picker next to the built-in ones.' },
+        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add players, pick a mode, choose categories. Each round draws one at random.' },
+        { border: '#7a1620', title: 'Role Mode', body: 'Everyone gets a secret role tied to the word. The Jester gets nothing.' },
+        { border: '#14254a', title: 'Word Mode', body: 'Everyone gets the same secret word, no roles. The Jester gets nothing.' },
+        { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so everyone reads their card in private, then take turns asking each other questions. Prove you know the secret without giving it away.' },
+        { border: '#b5893c', title: 'The Unmasking', body: 'When you’re ready or the timer runs out argue it out, name your Jester, then tap to reveal.' },
+        { border: '#2f8f7a', title: 'Make It Yours', body: 'Cross out words you don’t want from your favorite categories you’d rather not see, or your own build categories.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'How to Play'),
           h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
-        h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
-          cards.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--m-brand); margin-bottom:4px;") }, c.title),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); line-height:1.5;") }, c.body)
+        h('div', { style: css('display:flex; flex-direction:column; gap:9px;') },
+          cards.map((c, i) => h('div', { key: i, style: css(`padding:11px 13px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--m-brand); margin-bottom:2px;") }, c.title),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); line-height:1.45;") }, c.body)
           ))
         )
       );
