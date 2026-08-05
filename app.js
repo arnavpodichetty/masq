@@ -600,8 +600,8 @@
 
     renderVals() {
       const st = this.state;
-      const wine = '#6e141c', crimson = '#b3202f', navy = '#14254a';
-      const goldFace = '#e6cb7e', ivoryFace = '#efe4c8';
+      const wine = '#6e141c', crimson = '#b3202f';
+      const ivoryFace = '#efe4c8';
 
       const faceColors = st.jesterMode
         ? ['#fdf4ff', '#f3e8ff', '#fef9c3', '#fce7f3', '#ecfccb', '#e0f2fe']
@@ -650,6 +650,15 @@
       const isProgressive = st.jesterSelection === 'progressive';
       const randMax = Math.min(st.jesterRandMax, maxJesters);
       const randMin = Math.min(st.jesterRandMin, randMax);
+      // Two modes force Show Word's hand, so the toggle is derived rather than
+      // read straight off state. Word Mode always shows the word — that is the
+      // mode. Role Mode with a disguised jester always hides it: the jester's
+      // fake role is borrowed from some *other* word, so there is no word that
+      // fits their card. Printing one for everyone else and not for them would
+      // out the jester at a glance. `st.showWord` therefore only ever means
+      // "what the host picked for an ordinary Role Mode round".
+      const wordLocked = st.gameMode === 'words' || st.jesterGetsRole;
+      const showWord = st.gameMode === 'words' ? true : (st.jesterGetsRole ? false : st.showWord);
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
       // Everything about a round — who's seen their card, who holds which role,
@@ -674,7 +683,6 @@
       const roundJesterRoleMap = st.roundJesterRoleMap || {};
       const roundJesterWordMap = st.roundJesterWordMap || {};
       const isBiomeRound = roundCategory === 'Biomes';
-      const isLocationRound = roundCategory === 'Locations';
       const isHistoricalRound = roundCategory === 'Historical Eras';
       const isMovieTvRound = roundCategory === 'Movie/TV Show Genres';
       const isMusicRound = roundCategory === 'Music Genres';
@@ -713,6 +721,16 @@
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
       const openCurtain = () => this.setState({ cardOpen: true });
+      // Tapping the wrong name is the one mistake this screen can't undo by
+      // itself — without a way out you'd have to open a card that isn't yours
+      // to get rid of it. Backing out before the curtain rises leaves the
+      // player unviewed, so they can still take their turn.
+      const cancelOverlay = () => this.setState({ activePlayer: null, cardOpen: false });
+      // Tapping the dark space around the card does whatever the visible button
+      // does: back out while the curtain is still down, dismiss-as-read once
+      // it's up. The card swallows its own clicks, so reading your role never
+      // closes the screen out from under you.
+      const dismissOverlay = () => { if (st.cardOpen) closeOverlay(); else cancelOverlay(); };
 
       // Every jester is named at the final curtain, each with the disguise they
       // actually held — gated the same way the reveal card is, so results can
@@ -728,9 +746,8 @@
         };
       });
       return {
-        actOnePlayers, allSeen, notAllSeen: !allSeen,
+        actOnePlayers, allSeen,
         showOverlay: !!ap,
-        hideOverlay: !ap,
         apName: ap ? ap.name : '',
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
@@ -740,23 +757,10 @@
         apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
         apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))))),
         apWordSize: isBiomeRound ? '20px' : '22px',
-        apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
+        apWordBlockStyle: showWord ? '' : 'display:none;',
         apIsUndisguisedJester,
         apIsDisguisedJester: apRoleDisguised,
         apIsPerformer: !apIsJester || apWordDisguised,
-        apHint: apIsUndisguisedJester
-          ? 'You have no word. Blend in, bluff your clues, and avoid being unmasked before the curtain falls.'
-          : isBiomeRound
-            ? 'The biome is your secret. Give clues that fit your animal role without making the answer obvious.'
-            : isLocationRound
-              ? 'The location is your secret. Give clues that fit your role without making the answer obvious.'
-            : isHistoricalRound
-              ? 'The era is your secret. Give clues that fit your role without making the answer obvious.'
-            : isMovieTvRound
-              ? 'The genre is your secret. Give clues that fit your movie or show without making the answer obvious.'
-            : isMusicRound
-              ? 'The genre is your secret. Give clues that fit your artist without making the answer obvious.'
-            : 'Give clues that prove you know the word without giving it away to the Jester.',
         // Allies are excluded by id, so a jester sharing a name with someone
         // else is not accidentally struck from their own ally list.
         apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1
@@ -766,12 +770,11 @@
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
-        cardOpen: st.cardOpen, cardNotOpen: !st.cardOpen,
-        openCurtain, closeOverlay,
+        cardOpen: st.cardOpen,
+        openCurtain, closeOverlay, cancelOverlay, dismissOverlay,
         leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt1) 0 12px,var(--m-curt2) 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
         rightCurtain: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt2) 0 12px,var(--m-curt1) 12px 22px)', boxShadow: 'inset 16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', transform: st.cardOpen ? 'translateX(104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
         curtainHint: st.cardOpen ? '' : 'TAP TO REVEAL',
-        modal: st.modal,
         hasModal: !!st.modal,
         isModalCategories: st.modal === 'categories',
         isModalJesters: st.modal === 'jesters',
@@ -953,14 +956,19 @@
         }),
         // A disguised jester doesn't know they're a jester, so there's no one to
         // introduce them to — the summary only claims what the round will do.
-        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
+        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
           const p = players[i];
           const pid = p.id;
           const removing = (st.removingIds || []).includes(pid);
+          // An empty cast is not a game: the round would deal nothing and the
+          // trial would open with "undefined asks the first question". The last
+          // player's × goes inert rather than disappearing, so the row doesn't
+          // reflow the moment the cast gets short.
+          const onlyOne = st.playerList.length <= 1;
           return {
-            name, i, pid, editing, notEditing: !editing, removing,
+            name, pid, editing, removing, onlyOne,
             comedy: p.comedy, tragedy: p.tragedy, face: p.face, line: p.line,
             editVal: editing ? st.editingVal : name,
             onEditTap: () => this.setState({ editingIdx: i, editingVal: name }),
@@ -978,7 +986,7 @@
               this.setState({ playerList: pl, editingIdx: null, editingVal: '' });
             },
             onRemove: () => {
-              if (removing) return;
+              if (removing || onlyOne) return;
               this.setState(prev => ({ removingIds: [...(prev.removingIds || []), pid], editingIdx: null }));
               setTimeout(() => {
                 this.setState(prev => {
@@ -994,7 +1002,7 @@
             },
           };
         }),
-        addingPlayer: st.addingPlayer, notAddingPlayer: !st.addingPlayer,
+        addingPlayer: st.addingPlayer,
         newName: st.newName,
         onAddTap: () => this.setState({ addingPlayer: true }),
         onNameChange: (e) => this.setState({ newName: e.target.value }),
@@ -1060,13 +1068,18 @@
         showCatBg: st.showCategory ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         showCatThumb: st.showCategory ? 'translateX(22px)' : 'translateX(2px)',
         toggleShowCat: () => this.setState({ showCategory: !st.showCategory }),
-        showWord: st.gameMode === 'words' ? true : st.showWord,
-        showWordBg: (st.gameMode === 'words' || st.showWord) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
-        showWordThumb: (st.gameMode === 'words' || st.showWord) ? 'translateX(22px)' : 'translateX(2px)',
-        showWordToggleOpacity: st.gameMode === 'words' ? '.55' : '1',
-        showWordTogglePointerEvents: st.gameMode === 'words' ? 'none' : 'auto',
+        showWord,
+        showWordDesc: st.gameMode === 'words'
+          ? 'Always on in Word Mode — the word is the game'
+          : st.jesterGetsRole
+            ? 'Unavailable while the Jester gets a fake role — a jester with no word to show would stand out'
+            : 'Players can see the word and their role',
+        showWordBg: showWord ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        showWordThumb: showWord ? 'translateX(22px)' : 'translateX(2px)',
+        showWordToggleOpacity: wordLocked ? '.55' : '1',
+        showWordTogglePointerEvents: wordLocked ? 'none' : 'auto',
         toggleShowWord: () => {
-          if (st.gameMode === 'words') return;
+          if (wordLocked) return;
           this.setState({ showWord: !st.showWord });
         },
         // Dimmed and inert while the jester is disguised, the same treatment
@@ -1091,7 +1104,6 @@
         jesterGetsRoleToggleOpacity: '1',
         jesterGetsRoleTogglePointerEvents: 'auto',
         toggleJesterGetsRole: () => this.setState({ jesterGetsRole: !st.jesterGetsRole }),
-        timeLimit: st.timeLimit,
         timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
         timeLimitUnit: st.timeLimit === 0 ? 'No limit' : st.timeLimit === 1 ? 'minute' : 'minutes',
         timeLimitRow: st.timeLimit === 0 ? 'No limit' : st.timeLimit + ' min',
@@ -1122,7 +1134,6 @@
             this.setState({ timerPaused: true });
           }
         },
-        darkMode: st.darkMode,
         lightMode: !st.darkMode,
         lightModeBg: !st.darkMode ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         lightModeThumb: !st.darkMode ? 'translateX(22px)' : 'translateX(2px)',
@@ -1137,20 +1148,21 @@
         soundEffectsBg: st.soundEffects ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         soundEffectsThumb: st.soundEffects ? 'translateX(22px)' : 'translateX(2px)',
         toggleSoundEffects: () => this.setState({ soundEffects: !st.soundEffects }),
-        playerNames: st.playerList.join(', '),
         playerCount: st.playerList.length,
         isLobby: st.screen === 'lobby',
         isReveal: st.screen === 'reveal',
         isVoting: st.screen === 'voting',
         isResults: st.screen === 'results',
-        gameMode: st.gameMode,
         isWordsMode: st.gameMode === 'words',
         showRoleHeading: st.gameMode !== 'words',
         setRoleMode: () => {
           const nextSel = st.selCategories.filter(c => !wordOnlyNames.includes(c));
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
-        setWordMode: () => this.setState({ gameMode: 'words', showWord: true }),
+        // Word Mode shows the word whatever `showWord` says, so it's left alone
+        // — otherwise a trip through Word Mode would silently switch Show Word
+        // on for every Role Mode round afterwards.
+        setWordMode: () => this.setState({ gameMode: 'words' }),
         roleTileBg: st.gameMode === 'roles' ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
         roleTileBorder: st.gameMode === 'roles' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
         roleTileColor: st.gameMode === 'roles' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
@@ -1159,7 +1171,7 @@
         wordTileBorder: st.gameMode === 'words' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
         wordTileColor: st.gameMode === 'words' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
         wordTileSubColor: st.gameMode === 'words' ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
-        wine, crimson, navy, goldFace, ivoryFace,
+        wine, crimson, ivoryFace,
         hasJester: jesterReveals.length > 0,
         jesterReveals,
         revealNameSize: jesterReveals.length > 1 ? '26px' : '34px',
@@ -1210,7 +1222,8 @@
             if (!pickableCategories.length) pickableCategories = st.categories;
           }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
-          let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundJesterRoleMap: {} };
+          // Every branch of the chain below assigns, including the final else.
+          let nextRound;
           // Built from this round's draw rather than the players array, which
           // still carries the previous round's jester flags.
           const jesterPlayerIds = selectedJesterIndices.map(i => playerId(i));
@@ -1528,7 +1541,7 @@
         { border: '#14254a', title: 'Word Mode', body: 'Everyone gets the same secret word, no roles. The Jester gets nothing.' },
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so everyone reads their card in private, then take turns asking each other questions. Prove you know the secret without giving it away.' },
         { border: '#b5893c', title: 'The Unmasking', body: 'When you’re ready or the timer runs out argue it out, name your Jester, then tap to reveal.' },
-        { border: '#2f8f7a', title: 'Make It Yours', body: 'Cross out words you don’t want from your favorite categories you’d rather not see, or your own build categories.' },
+        { border: '#2f8f7a', title: 'Make It Yours', body: 'Cross out any words you’d rather not see, or build categories of your own, from Settings.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
@@ -1575,7 +1588,7 @@
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(46,91,176,.18); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_SHOW_WORD } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Word'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Players can see the word and their role')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.showWordDesc)
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showWordBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showWordThumb}; transition:transform .25s;`) })
@@ -1665,7 +1678,7 @@
     // Step one for a new category: role category or word category. Skipped when
     // editing, since an existing category already knows what it is.
     customKindModal(v) {
-      const tile = (onClick, icon, title, body) => h('div', { onClick, className: 'masq-btn', style: css('display:flex; align-items:flex-start; gap:13px; padding:16px; background:var(--m-lift); border:1px solid var(--m-border-med); border-radius:14px; cursor:pointer;') },
+      const tile = (onClick, icon, title, body) => h('div', { ...press(onClick), className: 'masq-btn', style: css('display:flex; align-items:flex-start; gap:13px; padding:16px; background:var(--m-lift); border:1px solid var(--m-border-med); border-radius:14px; cursor:pointer;') },
         h('div', { style: css('flex:none; margin-top:1px;'), dangerouslySetInnerHTML: { __html: icon } }),
         h('div', { style: css('flex:1;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-text);") }, title),
@@ -1900,7 +1913,11 @@
                   p.editing
                     ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:var(--m-lift-strong); border:1px solid var(--m-accent); border-radius:8px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
                     : h('div', { ...press(p.onEditTap), style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:var(--m-text); cursor:text; padding:6px 2px;") }, p.name),
-                  h('div', { ...press(p.onRemove, 'Remove player'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
+                  h('div', {
+                    ...press(p.onlyOne ? undefined : p.onRemove, 'Remove ' + p.name),
+                    className: p.onlyOne ? '' : 'masq-btn',
+                    style: css(`width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; line-height:1; flex:none; cursor:${p.onlyOne ? 'default' : 'pointer'}; opacity:${p.onlyOne ? '.35' : '1'};`),
+                  }, '×')
                 )
               )
             ))
@@ -1950,10 +1967,12 @@
             ? h('div', { ...press(v.goVoting), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
             : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
-        v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
+        v.showOverlay && h('div', { onClick: v.dismissOverlay, style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
-          h('div', { ...press(v.openCurtain), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
+          // The card stops its own click so tapping it raises the curtain (and
+          // afterwards does nothing) instead of reaching the backdrop handler.
+          h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
                 h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
@@ -1991,8 +2010,8 @@
             h('div', { style: css("position:absolute; top:12px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:12px; letter-spacing:.2em; color:#e6cb7e; pointer-events:none;") }, v.curtainHint)
           ),
           v.cardOpen
-            ? h('div', { ...press(v.closeOverlay), style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:masq-rise .35s ease both;") }, 'GOT IT')
-            : h('div', { style: css("margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-accent);") }, 'Tap the curtain to reveal')
+            ? h('div', { ...press(v.closeOverlay), className: 'masq-btn', style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:masq-rise .35s ease both;") }, 'GOT IT')
+            : h('div', { ...press(v.cancelOverlay), className: 'masq-btn', style: css("margin-top:22px; padding:9px 18px; font-family:'EB Garamond',serif; font-size:13px; color:var(--m-soft2); border:1px solid var(--m-border-med); border-radius:9px; cursor:pointer;") }, 'Not your turn? Go back')
         )
       );
     }

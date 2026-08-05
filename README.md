@@ -46,10 +46,13 @@ Custom categories are saved in the browser's `localStorage`, so they persist acr
 ### Options
 
 - Number of Jesters (fixed or randomized within a min/max range)
+- Who gets picked: **Truly Random** (an even draw every round) or **Progressive**, which nudges the role away from whoever just had it. Progressive weights live in memory only — adding or removing a player, or reloading, starts the cycle over. Settings → Show Progressive Jester Odds puts each player's chance on screen.
 - Show/hide the category and word
 - Jesters know each other
 - Jester gets a fake role/word instead of knowing nothing
 - Optional round timer with an audio cue when time's up
+
+Some options rule each other out and are dimmed rather than hidden: *Jesters Know Each Other* is unavailable while the Jester wears a disguise (a disguised jester doesn't know they're one), and *Show Word* is forced on in Word Mode and forced off in Role Mode while the Jester gets a fake role — the disguised jester has no word to display, so showing one to everybody else would give them away.
 
 ## Tech
 
