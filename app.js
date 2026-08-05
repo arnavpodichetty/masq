@@ -1472,7 +1472,7 @@
             style: css(`padding:13px 14px; border-radius:12px; background:${v.randomPickBg}; border:${v.randomPickBorder}; cursor:pointer;`),
           },
             h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.randomPickColor};`) }, 'Truly Random'),
-            h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.randomPickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Even odds every round, streaks and all')
+            h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.randomPickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Random jester each round')
           ),
           h('div', {
             ...press(() => v.setJesterSelection('progressive'), null, { 'aria-pressed': String(v.isProgressiveJester) }),
