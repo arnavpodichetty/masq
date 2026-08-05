@@ -272,6 +272,8 @@
   const ICON_TIME = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M7 4 L17 4 L17 8 Q17 11 12 12 Q7 13 7 16 L7 20 L17 20 L17 16 Q17 13 12 12 Q7 11 7 8 Z" stroke="#9fb0cf" stroke-width="1.8" stroke-linejoin="round"></path><path d="M9 18 Q12 16 15 18" stroke="#9fb0cf" stroke-width="1.5" stroke-linecap="round"></path><path d="M9 6 Q12 7.5 15 6" stroke="#9fb0cf" stroke-width="1.5" stroke-linecap="round"></path></svg>';
   const ICON_OPTIONS = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="3" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M12 2 L12 5 M12 19 L12 22 M2 12 L5 12 M19 12 L22 12 M4.93 4.93 L7.05 7.05 M16.95 16.95 L19.07 19.07 M19.07 4.93 L16.95 7.05 M7.05 16.95 L4.93 19.07" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   const ICON_SHOW_WORD = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 12 C5.5 7.5 9 5 12 5 C15 5 18.5 7.5 21 12 C18.5 16.5 15 19 12 19 C9 19 5.5 16.5 3 12 Z" stroke="#9fb0cf" stroke-width="1.8"></path><circle cx="12" cy="12" r="2.5" stroke="#9fb0cf" stroke-width="1.4"></circle><path d="M5 19 L19 5" stroke="#9fb0cf" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><rect x="7" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect><rect x="13.4" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect></svg>';
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M8.5 5.4 L18 12 L8.5 18.6 Z" fill="var(--m-accent)" stroke="var(--m-accent)" stroke-width="1.8" stroke-linejoin="round"></path></svg>';
   const ICON_STEP1 = '<svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="10" r="5" fill="none" stroke="#9fb0cf" stroke-width="2"></circle><path d="M11 14 L6 28 M21 14 L26 28 M8 28 L24 28" stroke="#9fb0cf" stroke-width="2" stroke-linecap="round"></path><path d="M13 18 L19 18" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 22 L20 22" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><circle cx="16" cy="10" r="2.5" fill="var(--m-brand)"></circle></svg>';
   const ICON_STEP2 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#e6a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 10 16 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 10 22 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 21 Q16 27 21 21" fill="none" stroke="#e6a0a8" stroke-width="2" stroke-linecap="round"></path></svg>';
   const ICON_STEP3 = '<svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 6 L16 20" stroke="var(--m-brand)" stroke-width="2.5" stroke-linecap="round"></path><path d="M10 14 L16 20 L22 14" fill="none" stroke="var(--m-brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><rect x="8" y="24" width="16" height="3" rx="1.5" fill="var(--m-brand)" opacity="0.5"></rect></svg>';
@@ -339,6 +341,7 @@
       roundJesterWordMap: {},
       secondsLeft: null,
       timeUp: false,
+      timerPaused: false,
       darkMode: true,
       soundEffects: true,
       jesterMode: false,
@@ -465,24 +468,33 @@
       beep(0.64, 1108);
     }
 
+    __tick = () => {
+      const left = (this.state.secondsLeft || 0) - 1;
+      if (left <= 0) {
+        this.__clearTimer();
+        this.setState({ secondsLeft: 0, timeUp: true, timerPaused: false });
+        this.__playTimerSound();
+      } else {
+        this.setState({ secondsLeft: left });
+      }
+    };
+
+    // Pausing clears the interval and resuming starts a fresh one, so the
+    // countdown always restarts on a whole second rather than a fraction.
+    __runTimer() {
+      if (this.__timerId) return;
+      this.__timerId = setInterval(this.__tick, 1000);
+    }
+
     __startTimer(minutes) {
       this.__clearTimer();
       if (!minutes) {
-        this.setState({ secondsLeft: null, timeUp: false });
+        this.setState({ secondsLeft: null, timeUp: false, timerPaused: false });
         return;
       }
       if (this.state.soundEffects) this.__ensureAudioCtx();
-      this.setState({ secondsLeft: minutes * 60, timeUp: false });
-      this.__timerId = setInterval(() => {
-        const left = (this.state.secondsLeft || 0) - 1;
-        if (left <= 0) {
-          this.__clearTimer();
-          this.setState({ secondsLeft: 0, timeUp: true });
-          this.__playTimerSound();
-        } else {
-          this.setState({ secondsLeft: left });
-        }
-      }, 1000);
+      this.setState({ secondsLeft: minutes * 60, timeUp: false, timerPaused: false });
+      this.__runTimer();
     }
 
     renderVals() {
@@ -945,6 +957,22 @@
           return m + ':' + String(s).padStart(2, '0');
         })(),
         timerColor: st.secondsLeft !== null && st.secondsLeft <= 30 ? '#e8a0a8' : 'var(--m-timer)',
+        timerLabel: st.timerPaused ? 'Paused' : 'Time Remaining',
+        timerOpacity: st.timerPaused ? '.5' : '1',
+        timerIcon: st.timerPaused ? ICON_PLAY : ICON_PAUSE,
+        // No pausing once the clock has run out — resuming from zero would just
+        // fire the time-up alarm again.
+        canPauseTimer: st.secondsLeft !== null && st.secondsLeft > 0,
+        toggleTimerPause: () => {
+          if (st.secondsLeft === null || st.secondsLeft <= 0) return;
+          if (st.timerPaused) {
+            this.setState({ timerPaused: false });
+            this.__runTimer();
+          } else {
+            this.__clearTimer();
+            this.setState({ timerPaused: true });
+          }
+        },
         darkMode: st.darkMode,
         lightMode: !st.darkMode,
         lightModeBg: !st.darkMode ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
@@ -1100,10 +1128,10 @@
           this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, jesterCount: newJesterCount, roundJesterIndices: selectedJesterIndices, roundStarterIdx, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
-        goResults: () => { this.__clearTimer(); this.setState({ screen: 'results' }); },
-        backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false }); },
-        backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false }); },
-        playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false }); },
+        goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false }); },
+        backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
+        backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', vote: null, activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false, timerPaused: false }); },
+        playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', vote: null, viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
         dismissTimeUp: () => this.setState({ timeUp: false }),
         showTimeUpPopup: st.timeUp,
         hasVote: st.vote !== null, notHasVote: st.vote === null,
@@ -1788,8 +1816,16 @@
             ))
           ),
           v.hasTimeLimit && h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;') },
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--m-label);") }, 'Time Remaining'),
-            h('div', { style: css(`font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:${v.timerColor}; line-height:1.2;`) }, v.timerDisplay)
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--m-label); transition:color .2s;") }, v.timerLabel),
+            h('div', { style: css(`font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:${v.timerColor}; line-height:1.2; opacity:${v.timerOpacity}; transition:opacity .2s;`) }, v.timerDisplay),
+            v.canPauseTimer
+              ? h('div', {
+                  onClick: v.toggleTimerPause,
+                  className: 'masq-btn',
+                  style: css('margin-top:14px; width:42px; height:42px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none;'),
+                  dangerouslySetInnerHTML: { __html: v.timerIcon },
+                })
+              : null
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
