@@ -21,6 +21,20 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 
 - Role categories: Locations, Biomes, Historical Eras, Movie/TV Show Genres, Music Genres
 - Word categories (Word Mode only): Food, Animals, Objects, Movies
+- Custom categories: your own, made in Settings → Custom Categories
+
+### Custom Categories
+
+Settings → Custom Categories. Making one starts by picking its type:
+
+- **Role category** — each word gets its own list of roles, like Locations. Add a word, list its roles separated by commas, repeat. A round deals one of that word's roles to every performer. Plays in both Role Mode and Word Mode.
+- **Word category** — just the category name and a list of words separated by commas (newlines work too, so a pasted list is fine), like Food. Plays in Word Mode.
+
+You can switch a category between the two types while editing; the words carry over either way.
+
+When the Jester is set to receive a fake role, role categories borrow one from a different word in the same category. A category with only one word (or with no spare roles to borrow) simply tells the Jester they're the Jester instead.
+
+Custom categories are saved in the browser's `localStorage`, so they persist across reloads on that device but don't travel between devices or browsers.
 
 ### How a Round Plays Out
 

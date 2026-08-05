@@ -18,6 +18,66 @@
   }
 
 
+  // ---- custom categories (the only thing that survives a reload) ----
+  // Shape: [{ id, name, kind, entries: [{ word, roles: [] }] }].
+  // kind 'roles' — every word carries its own role list, like Locations.
+  // kind 'words' — just a list of words, like Food. Word categories are hidden
+  // from Role Mode, since there would be no roles to deal.
+  const CUSTOM_KEY = 'masq.customCategories';
+
+  // Words for a word category are typed as one blob — commas or newlines both
+  // separate, so a pasted list works as-is.
+  function parseWordList(text) {
+    const out = [];
+    const seen = new Set();
+    String(text || '').split(/[\n,]/).forEach((raw) => {
+      const word = raw.trim();
+      if (!word || seen.has(word.toLowerCase())) return;
+      seen.add(word.toLowerCase());
+      out.push(word);
+    });
+    return out;
+  }
+
+  function loadCustomCategories() {
+    try {
+      const raw = window.localStorage.getItem(CUSTOM_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter(c => c && typeof c.name === 'string' && Array.isArray(c.entries))
+        .map((c, i) => {
+          const entries = c.entries
+            .filter(e => e && typeof e.word === 'string' && e.word.trim())
+            .map(e => ({ word: e.word, roles: Array.isArray(e.roles) ? e.roles.filter(r => typeof r === 'string' && r.trim()) : [] }));
+          return {
+            id: typeof c.id === 'string' ? c.id : 'c' + i,
+            name: c.name,
+            // Categories saved before the kind existed are classified by whether
+            // anyone ever gave them a role.
+            kind: c.kind === 'words' || c.kind === 'roles' ? c.kind : (entries.some(e => e.roles.length) ? 'roles' : 'words'),
+            entries,
+          };
+        })
+        .filter(c => c.name.trim() && c.entries.length);
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function saveCustomCategories(list) {
+    try {
+      window.localStorage.setItem(CUSTOM_KEY, JSON.stringify(list));
+    } catch (err) {
+      // Private mode / quota — the categories still work for this session.
+    }
+  }
+
+  function newCustomId() {
+    return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
   const THEME_DARK = {
     '--m-page': '#05020a',
     '--m-page-glow': 'rgba(46,91,176,.12)',
@@ -284,6 +344,11 @@
       jesterMode: false,
       wordListExpanded: [],
       disabledWords: {},
+      customCategories: loadCustomCategories(),
+      customDraft: null,
+      customError: '',
+      customDeleteId: null,
+      customFrom: 'settings',
     };
 
     __nextPlayerId = 4;
@@ -445,7 +510,16 @@
         }
         return next;
       };
-      const allCategoryNames = [...st.categories, ...st.wordCategories];
+      const custom = Array.isArray(st.customCategories) ? st.customCategories : [];
+      const customByName = custom.reduce((acc, c) => { acc[c.name] = c; return acc; }, {});
+      // Word categories follow the same Role Mode / Word Mode rules as the
+      // built-in ones. A role category that somehow lost all its roles is
+      // treated the same way, so Role Mode can never deal a roleless round.
+      const customIsWordOnly = (c) => c.kind === 'words' || !c.entries.some(e => e.roles && e.roles.length);
+      const customWordOnlyNames = custom.filter(customIsWordOnly).map(c => c.name);
+      const customNames = custom.map(c => c.name);
+      const wordOnlyNames = [...st.wordCategories, ...customWordOnlyNames];
+      const allCategoryNames = [...st.categories, ...st.wordCategories, ...customNames];
       const mapCategoryItem = (cat) => ({
         cat,
         sel: st.selCategories.includes(cat),
@@ -500,6 +574,7 @@
       const isAnimalsRound = roundCategory === 'Animals';
       const isObjectsRound = roundCategory === 'Objects';
       const isMoviesWordRound = roundCategory === 'Movies';
+      const isCustomRound = !!customByName[roundCategory];
       const actOnePlayers = players.map(p => {
         const seen = !!st.viewed[p.name];
         return {
@@ -515,10 +590,16 @@
       const ap = st.activePlayer;
       const apIsJester = ap && !!ap.jester;
       const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.name] || 'PERFORMER') : null;
-      const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole;
-      const apWordDisguised = apIsJester && st.gameMode === 'words' && st.jesterGetsRole;
-      const apFakeRole = apRoleDisguised ? (roundJesterRoleMap[ap.name] || null) : null;
-      const apFakeWord = apWordDisguised ? (roundJesterWordMap[ap.name] || null) : null;
+      // A disguise only holds if the round actually produced one. A category
+      // with a single word (or a custom one with no spare roles) has nothing to
+      // fake with — those jesters are told they're the Jester instead of being
+      // handed a blank card.
+      const apFakeRoleRaw = ap ? (roundJesterRoleMap[ap.name] || null) : null;
+      const apFakeWordRaw = ap ? (roundJesterWordMap[ap.name] || null) : null;
+      const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole && !!apFakeRoleRaw;
+      const apWordDisguised = apIsJester && st.gameMode === 'words' && st.jesterGetsRole && !!apFakeWordRaw;
+      const apFakeRole = apRoleDisguised ? apFakeRoleRaw : null;
+      const apFakeWord = apWordDisguised ? apFakeWordRaw : null;
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
       const closeOverlay = () => {
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.name]: true } }));
@@ -538,7 +619,7 @@
         apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieTvRound ? '#2f8f7a' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))),
         apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px')),
         apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
-        apWordLabel: isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location'))))))),
+        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))))),
         apWordSize: isBiomeRound ? '20px' : '22px',
         apWordBlockStyle: (st.gameMode === 'words' || st.showWord) ? '' : 'display:none;',
         apIsUndisguisedJester,
@@ -581,6 +662,8 @@
         isModalWordList: st.modal === 'wordList',
         isModalCredits: st.modal === 'credits',
         isModalPlayers: st.modal === 'players',
+        isModalCustom: st.modal === 'custom',
+        isModalCustomEdit: st.modal === 'customEdit',
         closeModal: () => this.setState({ modal: null }),
         openPlayers: () => this.setState({ modal: 'players' }),
         openCategories: () => this.setState({ modal: 'categories' }),
@@ -591,6 +674,110 @@
         openGameSettings: () => this.setState({ modal: 'gameSettings' }),
         openWordList: () => this.setState({ modal: 'wordList', wordListExpanded: [] }),
         openCredits: () => this.setState({ modal: 'credits' }),
+        // Reachable from Settings and from the Categories picker — the close
+        // button returns to whichever one you came in through.
+        openCustom: () => this.setState(prev => ({ modal: 'custom', customFrom: prev.modal === 'categories' ? 'categories' : 'settings', customDeleteId: null })),
+        closeCustom: () => this.setState(prev => ({ modal: prev.customFrom || 'settings', customDeleteId: null })),
+        customCount: custom.length,
+        customCountLabel: custom.length === 0 ? 'None yet' : custom.length === 1 ? '1 category' : custom.length + ' categories',
+        customCats: custom.map((c) => {
+          const roleCount = c.entries.reduce((n, e) => n + ((e.roles && e.roles.length) || 0), 0);
+          const wordLabel = c.entries.length === 1 ? '1 word' : c.entries.length + ' words';
+          const pendingDelete = st.customDeleteId === c.id;
+          return {
+            id: c.id,
+            name: c.name,
+            summary: c.kind === 'words'
+              ? `Word category · ${wordLabel}`
+              : `Role category · ${wordLabel} · ${roleCount === 1 ? '1 role' : roleCount + ' roles'}`,
+            pendingDelete,
+            inUse: st.selCategories.includes(c.name),
+            onEdit: () => this.setState({
+              modal: 'customEdit',
+              customDraft: {
+                id: c.id,
+                kind: c.kind,
+                name: c.name,
+                entries: c.entries.map(e => ({ word: e.word, rolesText: (e.roles || []).join(', ') })),
+                wordsText: c.entries.map(e => e.word).join(', '),
+              },
+              customError: '',
+              customDeleteId: null,
+            }),
+            onDelete: (e) => {
+              e.stopPropagation();
+              if (!pendingDelete) {
+                this.setState({ customDeleteId: c.id });
+                return;
+              }
+              const list = custom.filter(x => x.id !== c.id);
+              saveCustomCategories(list);
+              const sel = st.selCategories.filter(n => n !== c.name);
+              this.setState({
+                customCategories: list,
+                selCategories: sel.length ? sel : [...st.categories],
+                customDeleteId: null,
+              });
+            },
+          };
+        }),
+        // A new category starts with no kind, which is what makes the editor
+        // show the "role or words?" step first.
+        newCustom: () => this.setState({
+          modal: 'customEdit',
+          customDraft: { id: null, kind: null, name: '', entries: [{ word: '', rolesText: '' }], wordsText: '' },
+          customError: '',
+          customDeleteId: null,
+        }),
+        draftIsNew: !(st.customDraft && st.customDraft.id),
+        draftKind: st.customDraft ? st.customDraft.kind : null,
+        draftIsWords: !!st.customDraft && st.customDraft.kind === 'words',
+        // Switching kind carries the words across so nothing typed is lost.
+        setDraftKind: (kind) => this.setState((prev) => {
+          const d = prev.customDraft;
+          if (!d || d.kind === kind) return null;
+          if (kind === 'words') {
+            const carried = d.entries.map(e => (e.word || '').trim()).filter(Boolean);
+            return { customDraft: { ...d, kind, wordsText: carried.length ? carried.join(', ') : d.wordsText }, customError: '' };
+          }
+          const carried = parseWordList(d.wordsText);
+          const entries = carried.length
+            ? carried.map((word) => {
+                const kept = d.entries.find(e => (e.word || '').trim().toLowerCase() === word.toLowerCase());
+                return { word, rolesText: kept ? kept.rolesText : '' };
+              })
+            : d.entries;
+          return { customDraft: { ...d, kind, entries: entries.length ? entries : [{ word: '', rolesText: '' }] }, customError: '' };
+        }),
+        draftWordsText: st.customDraft ? (st.customDraft.wordsText || '') : '',
+        draftWordCount: (() => {
+          if (!st.customDraft || st.customDraft.kind !== 'words') return 0;
+          return parseWordList(st.customDraft.wordsText).length;
+        })(),
+        onDraftWordsChange: (ev) => {
+          const value = ev.target.value;
+          this.setState(prev => ({ customDraft: { ...prev.customDraft, wordsText: value }, customError: '' }));
+        },
+        draftName: st.customDraft ? st.customDraft.name : '',
+        draftEntries: (st.customDraft ? st.customDraft.entries : []).map((e, i) => ({
+          word: e.word,
+          rolesText: e.rolesText,
+          onlyOne: st.customDraft.entries.length === 1,
+          onWordChange: (ev) => this.__setDraftEntry(i, { word: ev.target.value }),
+          onRolesChange: (ev) => this.__setDraftEntry(i, { rolesText: ev.target.value }),
+          onRemove: () => this.setState(prev => ({
+            customDraft: { ...prev.customDraft, entries: prev.customDraft.entries.filter((_, j) => j !== i) },
+            customError: '',
+          })),
+        })),
+        customError: st.customError,
+        onDraftNameChange: (ev) => this.setState(prev => ({ customDraft: { ...prev.customDraft, name: ev.target.value }, customError: '' })),
+        addDraftEntry: () => this.setState(prev => ({
+          customDraft: { ...prev.customDraft, entries: [...prev.customDraft.entries, { word: '', rolesText: '' }] },
+          customError: '',
+        })),
+        cancelDraft: () => this.setState({ modal: 'custom', customDraft: null, customError: '' }),
+        saveDraft: () => this.__saveCustomDraft(custom, [...st.categories, ...st.wordCategories]),
         wordListGroups: [
           { cat: 'Locations', words: locationNames },
           { cat: 'Biomes', words: biomeNames },
@@ -700,6 +887,10 @@
         cancelAdd: () => this.setState({ addingPlayer: false, newName: '' }),
         categoryItems: st.categories.map(mapCategoryItem),
         wordCategoryItems: st.wordCategories.map(mapCategoryItem),
+        // Word-only customs are hidden from the picker in Role Mode, exactly
+        // like the built-in word categories.
+        customCategoryItems: (st.gameMode === 'words' ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
+        hasCustomInPicker: (st.gameMode === 'words' ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
         jesterCount: st.jesterCount,
         incJester: () => this.setState({ jesterCount: Math.min(st.jesterCount + 1, maxJesters) }),
@@ -775,7 +966,7 @@
         isWordsMode: st.gameMode === 'words',
         showRoleHeading: st.gameMode !== 'words',
         setRoleMode: () => {
-          const nextSel = st.selCategories.filter(c => !st.wordCategories.includes(c));
+          const nextSel = st.selCategories.filter(c => !wordOnlyNames.includes(c));
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
         setWordMode: () => this.setState({ gameMode: 'words', showWord: true }),
@@ -802,6 +993,7 @@
           const shuffledIndices = st.playerList.map((_, index) => index).sort(() => Math.random() - 0.5);
           const selectedJesterIndices = shuffledIndices.slice(0, Math.min(newJesterCount, maxJesters));
           const rawWordPool = (category) => {
+            if (customByName[category]) return customByName[category].entries.map(e => e.word);
             if (category === 'Biomes') return biomeNames;
             if (category === 'Historical Eras') return historicalEraNames;
             if (category === 'Movie/TV Show Genres') return movieTvGenreNames;
@@ -824,7 +1016,7 @@
           const pickFrom = (category) => { const pool = getWordPool(category); return pool[Math.floor(Math.random() * pool.length)]; };
           let pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
           if (st.gameMode === 'roles') {
-            pickableCategories = pickableCategories.filter(c => !st.wordCategories.includes(c));
+            pickableCategories = pickableCategories.filter(c => !wordOnlyNames.includes(c));
             if (!pickableCategories.length) pickableCategories = st.categories;
           }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
@@ -851,7 +1043,29 @@
             return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
           };
           const buildWordOnlyRound = (category) => ({ roundCategory: category, roundWord: pickFrom(category), roundRoleMap: {}, roundJesterRoleMap: {} });
-          if (chosenCategory === 'Biomes') {
+          // Custom categories bring their own roles. Their fake-role pool is
+          // borrowed from the other words in the same category — the same trick
+          // the built-in fake catalogs use, just derived instead of authored.
+          const buildCustomRound = (c) => {
+            const roleCatalog = {};
+            const fakeRoleCatalog = {};
+            c.entries.forEach((e) => {
+              const own = (e.roles && e.roles.length) ? e.roles : ['PERFORMER'];
+              roleCatalog[e.word] = own;
+              const borrowed = [];
+              c.entries.forEach((other) => {
+                if (other.word === e.word) return;
+                (other.roles || []).forEach((r) => {
+                  if (!own.includes(r) && !borrowed.includes(r)) borrowed.push(r);
+                });
+              });
+              fakeRoleCatalog[e.word] = borrowed;
+            });
+            return buildRound(c.name, pickFrom(c.name), roleCatalog, fakeRoleCatalog);
+          };
+          if (customByName[chosenCategory]) {
+            nextRound = buildCustomRound(customByName[chosenCategory]);
+          } else if (chosenCategory === 'Biomes') {
             nextRound = buildRound('Biomes', pickFrom('Biomes'), biomeCatalog, fakeBiomeRoleCatalog);
           } else if (chosenCategory === 'Historical Eras') {
             nextRound = buildRound('Historical Eras', pickFrom('Historical Eras'), historicalErasCatalog, fakeHistoricalErasRoleCatalog);
@@ -899,6 +1113,71 @@
       };
     }
 
+    __setDraftEntry(i, patch) {
+      this.setState(prev => ({
+        customDraft: {
+          ...prev.customDraft,
+          entries: prev.customDraft.entries.map((e, j) => (j === i ? { ...e, ...patch } : e)),
+        },
+        customError: '',
+      }));
+    }
+
+    // Normalises the draft, rejects the three states a category can't be saved
+    // in (no name, a name already in use, no words), then persists.
+    __saveCustomDraft(custom, builtInNames) {
+      const draft = this.state.customDraft;
+      if (!draft) return;
+      const name = (draft.name || '').trim();
+      if (!name) {
+        this.setState({ customError: 'Give your category a name.' });
+        return;
+      }
+      const taken = [...builtInNames, ...custom.filter(c => c.id !== draft.id).map(c => c.name)];
+      if (taken.some(n => n.toLowerCase() === name.toLowerCase())) {
+        this.setState({ customError: '“' + name + '” is already the name of another category.' });
+        return;
+      }
+      const kind = draft.kind === 'words' ? 'words' : 'roles';
+      let entries;
+      if (kind === 'words') {
+        entries = parseWordList(draft.wordsText).map(word => ({ word, roles: [] }));
+      } else {
+        const seen = new Set();
+        entries = [];
+        draft.entries.forEach((e) => {
+          const word = (e.word || '').trim();
+          if (!word || seen.has(word.toLowerCase())) return;
+          seen.add(word.toLowerCase());
+          const roles = [];
+          (e.rolesText || '').split(',').forEach((r) => {
+            const role = r.trim();
+            if (role && !roles.includes(role)) roles.push(role);
+          });
+          entries.push({ word, roles });
+        });
+      }
+      if (!entries.length) {
+        this.setState({ customError: 'Add at least one word.' });
+        return;
+      }
+      // A role category with no roles would never come up in Role Mode, which
+      // is a confusing thing to discover mid-game rather than here.
+      if (kind === 'roles' && !entries.some(e => e.roles.length)) {
+        this.setState({ customError: 'Give at least one word some roles, or switch this to a word category.' });
+        return;
+      }
+      const previous = draft.id ? custom.find(c => c.id === draft.id) : null;
+      const list = draft.id
+        ? custom.map(c => (c.id === draft.id ? { id: c.id, name, kind, entries } : c))
+        : [...custom, { id: newCustomId(), name, kind, entries }];
+      saveCustomCategories(list);
+      const sel = previous && previous.name !== name
+        ? this.state.selCategories.map(c => (c === previous.name ? name : c))
+        : this.state.selCategories;
+      this.setState({ customCategories: list, selCategories: sel, modal: 'custom', customDraft: null, customError: '' });
+    }
+
     settingsRow({ onClick, iconBg, icon, label, value }) {
       return h('div', { onClick, className: 'masq-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
         h('div', { style: css(`width:34px; height:34px; border-radius:9px; background:${iconBg}; display:flex; align-items:center; justify-content:center; flex:none;`), dangerouslySetInnerHTML: { __html: icon } }),
@@ -929,7 +1208,17 @@
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
             ))
           )
-        )
+        ),
+        v.hasCustomInPicker && h(React.Fragment, null,
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 8px;") }, 'Your Categories'),
+          h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
+            v.customCategoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
+              h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
+            ))
+          )
+        ),
+        h('div', { onClick: v.openCustom, className: 'masq-btn', style: css("margin-top:16px; padding:12px; text-align:center; border:1px dashed var(--m-border-hard); border-radius:12px; cursor:pointer; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-soft);") },
+          v.customCount ? 'Edit custom categories' : 'Make your own category…')
       );
     }
 
@@ -1007,6 +1296,7 @@
         { border: '#14254a', title: 'Word Mode', body: 'Everyone but the Jester sees the same secret word, with no roles. Ask questions that prove you know it without saying it outright. The Jester sees nothing and has to fake it.' },
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so each player privately sees their card. Then take turns asking one question to someone else. When you’re ready (or the timer ends), discuss and vote. Catch the Jester and the Cast wins; miss them and the Jester wins.' },
         { border: '#b5893c', title: 'Trim the Word List', body: 'Head to Settings → View All Words to browse every category. Tap any word to cross it out and it won’t come up in future rounds; tap it again to bring it back. Use Reset to restore a whole category. Each category always keeps at least one word.' },
+        { border: '#2f8f7a', title: 'Make Your Own', body: 'Settings → Custom Categories lets you build your own. A role category gives every word its own list of roles, like Locations. A word category is just a list of words separated by commas, like Food, and plays in Word Mode. Either way it’s saved on this device and shows up in the Categories picker next to the built-in ones.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
@@ -1097,6 +1387,143 @@
       );
     }
 
+    customModal(v) {
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
+        h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Custom Categories'),
+          h('div', { onClick: v.closeCustom, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+        ),
+        h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:16px;") },
+          'Build a role category, where every word carries its own roles, or a word category that’s just a list of words. Both show up in the Categories picker and are saved on this device.'),
+        h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
+          v.customCats.length
+            ? h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
+                v.customCats.map(c => h('div', {
+                  key: c.id,
+                  onClick: c.onEdit,
+                  className: 'masq-btn',
+                  style: css('display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); cursor:pointer; animation:masq-rise .25s ease both;'),
+                },
+                  h('div', { style: css('flex:1; min-width:0;') },
+                    h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:16px; color:var(--m-text);") }, c.name),
+                    h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") },
+                      c.inUse ? c.summary + ' · in play' : c.summary)
+                  ),
+                  h('div', {
+                    onClick: c.onDelete,
+                    className: 'masq-btn',
+                    style: c.pendingDelete
+                      ? css("padding:6px 10px; border-radius:9px; background:rgba(178,32,47,.28); border:1px solid rgba(178,32,47,.5); font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#f4c9cd; cursor:pointer; flex:none;")
+                      : css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;'),
+                  }, c.pendingDelete ? 'Delete?' : '×')
+                ))
+              )
+            : h('div', { style: css("padding:22px 16px; text-align:center; border:1px dashed var(--m-border-hard); border-radius:14px; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-soft2);") },
+                'No custom categories yet.')
+        ),
+        h('div', { style: css('padding-top:14px;') },
+          h('div', { onClick: v.newCustom, className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
+            h('div', { style: css("font-size:22px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-soft);") }, 'New category…')
+          )
+        )
+      );
+    }
+
+    // Step one for a new category: role category or word category. Skipped when
+    // editing, since an existing category already knows what it is.
+    customKindModal(v) {
+      const tile = (onClick, icon, title, body) => h('div', { onClick, className: 'masq-btn', style: css('display:flex; align-items:flex-start; gap:13px; padding:16px; background:var(--m-lift); border:1px solid var(--m-border-med); border-radius:14px; cursor:pointer;') },
+        h('div', { style: css('flex:none; margin-top:1px;'), dangerouslySetInnerHTML: { __html: icon } }),
+        h('div', { style: css('flex:1;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-text);") }, title),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:3px; line-height:1.45;") }, body)
+        )
+      );
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
+        h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'New Category'),
+          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+        ),
+        h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:16px;") }, 'What kind of category is this?'),
+        h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
+          tile(() => v.setDraftKind('roles'), ICON_ROLE_20, 'Role Category',
+            'Each word comes with its own list of roles, like Locations. Plays in both Role Mode and Word Mode.'),
+          tile(() => v.setDraftKind('words'), ICON_WORD, 'Word Category',
+            'Just a list of words, no roles, like Food. Plays in Word Mode.')
+        )
+      );
+    }
+
+    customEditModal(v) {
+      if (!v.draftKind) return this.customKindModal(v);
+      const inputStyle = "width:100%; padding:11px 13px; background:var(--m-lift-input); border:1px solid var(--m-border-strong); border-radius:10px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:15px; outline:none;";
+      const kindTab = (kind, label) => {
+        const on = (kind === 'words') === v.draftIsWords;
+        return h('div', {
+          onClick: () => v.setDraftKind(kind),
+          className: 'masq-btn',
+          style: css(`flex:1; padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:${on ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)'}; border:${on ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)'}; font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:${on ? 'var(--m-tile-sel-text)' : 'var(--m-muted)'};`),
+        }, label);
+      };
+      return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
+        h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, v.draftIsNew ? 'New Category' : 'Edit Category'),
+          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+        ),
+        h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:7px;") }, 'Category Type'),
+          h('div', { style: css('display:flex; gap:8px;') }, kindTab('roles', 'Words & Roles'), kindTab('words', 'Words Only')),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 7px;") }, 'Category Name'),
+          h('input', { onChange: v.onDraftNameChange, value: v.draftName, placeholder: 'e.g. Our Friend Group', style: css(inputStyle) }),
+          v.draftIsWords
+            ? h(React.Fragment, null,
+                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 4px;") }, 'Words'),
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:10px;") },
+                  'Separate them with commas. Each round picks one at random.'),
+                h('textarea', {
+                  onChange: v.onDraftWordsChange,
+                  value: v.draftWordsText,
+                  rows: 7,
+                  placeholder: 'Pizza, Sushi, Tacos, Ramen…',
+                  style: css(inputStyle + " resize:vertical; line-height:1.6; min-height:130px;"),
+                }),
+                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:7px;") },
+                  v.draftWordCount === 1 ? '1 word' : v.draftWordCount + ' words')
+              )
+            : h(React.Fragment, null,
+                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 4px;") }, 'Words & Roles'),
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:10px;") },
+                  'One word per card. Separate its roles with commas — a round hands each player one of them.'),
+                h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
+                  v.draftEntries.map((e, i) => h('div', { key: i, style: css('padding:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); border-radius:14px; animation:masq-rise .2s ease both;') },
+                    h('div', { style: css('display:flex; align-items:center; gap:8px;') },
+                      h('input', { onChange: e.onWordChange, value: e.word, placeholder: 'Word', style: css(inputStyle + ' flex:1;') }),
+                      h('div', {
+                        onClick: e.onlyOne ? undefined : e.onRemove,
+                        className: e.onlyOne ? '' : 'masq-btn',
+                        style: css(`width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; line-height:1; flex:none; cursor:${e.onlyOne ? 'default' : 'pointer'}; opacity:${e.onlyOne ? '.35' : '1'};`),
+                      }, '×')
+                    ),
+                    h('input', { onChange: e.onRolesChange, value: e.rolesText, placeholder: 'Roles, comma separated', style: css(inputStyle + ' margin-top:8px; font-size:14px;') })
+                  ))
+                ),
+                h('div', { onClick: v.addDraftEntry, className: 'masq-btn', style: css('margin-top:10px; padding:13px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;') },
+                  h('div', { style: css("font-size:19px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
+                  h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-soft);") }, 'Add a word…')
+                )
+              )
+        ),
+        v.customError
+          ? h('div', { style: css("margin-top:12px; padding:11px 13px; background:rgba(178,32,47,.15); border:1px solid rgba(178,32,47,.4); border-radius:10px; font-family:'EB Garamond',serif; font-size:14px; color:#e8a0a8; animation:masq-rise .2s ease both;") }, v.customError)
+          : null,
+        h('div', { style: css('display:flex; gap:9px; padding-top:14px;') },
+          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("flex:none; padding:16px 20px; text-align:center; border:1px solid var(--m-border-btn); border-radius:12px; font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-soft); cursor:pointer;") }, 'Cancel'),
+          h('div', { onClick: v.saveDraft, className: 'masq-btn', style: css("flex:1; padding:16px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.06em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'SAVE CATEGORY')
+        )
+      );
+    }
+
     settingsModal(v) {
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
@@ -1107,6 +1534,13 @@
           h('div', { onClick: v.openWordList, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'View All Words'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
+          ),
+          h('div', { onClick: v.openCustom, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Custom Categories'),
+            h('div', { style: css('display:flex; align-items:center; gap:9px;') },
+              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim);") }, v.customCountLabel),
+              h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
+            )
           ),
           h('div', { onClick: v.toggleSoundEffects, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
@@ -1190,7 +1624,9 @@
           h('div', { onClick: v.goReveal, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
-          h('div', { onClick: v.closeModal, style: css('flex:1;') }),
+          // Tapping away closes any modal except the category editor, where it
+          // would throw away everything you just typed.
+          h('div', { onClick: v.isModalCustomEdit ? undefined : v.closeModal, style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
           v.isModalTime && this.timeModal(v),
@@ -1199,7 +1635,9 @@
           v.isModalSettings && this.settingsModal(v),
           v.isModalWordList && this.wordListModal(v),
           v.isModalCredits && this.creditsModal(v),
-          v.isModalPlayers && this.playersModal(v)
+          v.isModalPlayers && this.playersModal(v),
+          v.isModalCustom && this.customModal(v),
+          v.isModalCustomEdit && this.customEditModal(v)
         )
       );
     }
