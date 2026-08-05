@@ -1,5 +1,4 @@
-// Masq — plain React (no build step). Loaded after React/ReactDOM UMD
-// and data.js.
+// Masq — plain React (no build step). Loaded after React/ReactDOM UMD and data.js.
 (function () {
   const h = React.createElement;
 
@@ -17,12 +16,9 @@
     return o;
   }
 
-
-  // Every control in this app is a styled <div>. This gives one real button
-  // semantics: reachable by Tab, activated with Enter or Space, and announced
-  // with a name. `label` is only needed when the visible content is a bare
-  // glyph like '×' — otherwise the div's own text is the accessible name.
-  // `extra` carries a different role where one fits, e.g. a switch.
+  // Controls here are styled <div>s; this gives one real button semantics: Tab
+  // to reach, Enter/Space to activate, a name to announce. Pass `label` only
+  // when the content is a bare glyph like '×'. `extra` overrides the role.
   function press(onClick, label, extra) {
     if (!onClick) return {};
     return {
@@ -40,17 +36,10 @@
   }
 
   // ---- progressive jester ----
-  // Who gets picked can run one of two ways. 'random' is memoryless: an even
-  // draw every round, so the same player can land it three times running.
-  // 'progressive' nudges the role around — weights are "shares", everyone
-  // starts on 1, and a player's chance is their share of the table's total.
-  // Taking the role costs PROGRESSIVE_STEP_PCT of the whole table's chance,
-  // and what they give up is split evenly among everyone who didn't. The total
-  // never drifts, so the cost is exactly that many percentage points every
-  // time, whatever the player count: at a table of six, 1 share is 16.7% and a
-  // 5-point step takes a fresh jester to 11.7% while the other five each gain
-  // 1. It's a nudge, not a lockout — one turn as the Jester barely dents your
-  // odds, and only about four picks in quick succession can bottom anyone out.
+  // Everyone holds "shares" and starts on 1; your odds are your share of the
+  // table's total. Being picked costs this much of the table's whole chance,
+  // split evenly among everyone who wasn't, so the total never drifts and the
+  // cost is the same percentage at any head count. A nudge, not a lockout.
   const PROGRESSIVE_STEP_PCT = 0.05;
 
   function freshWeights(ids) {
@@ -59,8 +48,7 @@
     return weights;
   }
 
-  // Any change to the roster starts the cycle over — the stored weights only
-  // mean anything for the exact set of players that earned them.
+  // Stored weights only fit the roster that earned them; any change resets.
   function normalizeWeights(stored, ids) {
     if (!stored || typeof stored !== 'object') return freshWeights(ids);
     const sameRoster = Object.keys(stored).length === ids.length
@@ -82,8 +70,7 @@
           if (target < weights[i]) { idx = i; break; }
           target -= weights[i];
         }
-        // Only reachable if rounding eats the remainder; take the last real
-        // candidate rather than letting a zero-weight item slip through.
+        // Rounding ate the remainder — take the last non-zero candidate.
         if (idx < 0) idx = weights.reduce((best, w, i) => (w > 0 ? i : best), 0);
       } else {
         // Everyone left is spent — fall back to an even draw.
@@ -99,8 +86,8 @@
     const next = { ...weights };
     const wasPicked = new Set(pickedIds.map(String));
     const others = ids.filter(id => !wasPicked.has(String(id)));
-    // The pool always totals one share per player, so a percentage of the
-    // whole table is that percentage times the head count, in shares.
+    // The pool totals one share per player, so a percentage of the table is
+    // that percentage times the head count, in shares.
     const step = PROGRESSIVE_STEP_PCT * ids.length;
     let released = 0;
     pickedIds.forEach((id) => {
@@ -116,15 +103,13 @@
     return next;
   }
 
-  // ---- custom categories (the only thing that survives a reload) ----
-  // Shape: [{ id, name, kind, entries: [{ word, roles: [] }] }].
-  // kind 'roles' — every word carries its own role list, like Locations.
-  // kind 'words' — just a list of words, like Food. Word categories are hidden
-  // from Role Mode, since there would be no roles to deal.
+  // ---- custom categories (the only state that survives a reload) ----
+  // [{ id, name, kind, entries: [{ word, roles: [] }] }]
+  // 'roles' — every word carries its own role list, like Locations.
+  // 'words' — just words, like Food. Hidden from Role Mode: no roles to deal.
   const CUSTOM_KEY = 'masq.customCategories';
 
-  // Words for a word category are typed as one blob — commas or newlines both
-  // separate, so a pasted list works as-is.
+  // Typed as one blob; commas and newlines both split, so pasted lists work.
   function parseWordList(text) {
     const out = [];
     const seen = new Set();
@@ -152,8 +137,7 @@
           return {
             id: typeof c.id === 'string' ? c.id : 'c' + i,
             name: c.name,
-            // Categories saved before the kind existed are classified by whether
-            // anyone ever gave them a role.
+            // Saved before `kind` existed — infer it from the roles.
             kind: c.kind === 'words' || c.kind === 'roles' ? c.kind : (entries.some(e => e.roles.length) ? 'roles' : 'words'),
             entries,
           };
@@ -377,7 +361,7 @@
   const ICON_STEP3 = '<svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 6 L16 20" stroke="var(--m-brand)" stroke-width="2.5" stroke-linecap="round"></path><path d="M10 14 L16 20 L22 14" fill="none" stroke="var(--m-brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><rect x="8" y="24" width="16" height="3" rx="1.5" fill="var(--m-brand)" opacity="0.5"></rect></svg>';
   const ICON_STEP4 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#f4a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 16 16 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 16 22 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 23 Q16 17 21 23" fill="none" stroke="#f4a0a8" stroke-width="2" stroke-linecap="round"></path><path d="M23 6 L26 3 M26 3 L29 6 M26 3 L26 8" stroke="#f4a0a8" stroke-width="1.5" stroke-linecap="round"></path></svg>';
 
-  // ---- Mask (was Mask.dc.html, imported via dc-import) ----
+  // ---- Mask ----
   function Mask({ comedy, tragedy, cracked, faceColor, lineColor, size, hat }) {
     const FACE_D = 'M50 6 C26 6 13 26 13 52 C13 82 30 108 50 108 C70 108 87 82 87 52 C87 26 74 6 50 6 Z';
     return h('svg', { viewBox: '0 0 100 110', width: size, height: size, style: { display: 'block', overflow: 'visible' } },
@@ -417,7 +401,7 @@
     );
   }
 
-  // ---- App: game state + logic (ported ~verbatim from the DC script) ----
+  // ---- App: game state + logic ----
   class App extends React.Component {
     state = {
       screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, gameMode: 'roles',
@@ -426,7 +410,7 @@
       playerKeys: [0, 1, 2, 3],
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
       jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
-      // 'random' | 'progressive'. Weights live in memory only — a refresh or a
+      // 'random' | 'progressive'. Weights are in-memory only: a reload or a
       // roster change resets the cycle.
       jesterSelection: 'random', jesterWeights: {}, showJesterOdds: false,
       timeLimit: 5,
@@ -462,8 +446,8 @@
       this.__fitPhoneShell = this.__fitPhoneShell.bind(this);
       this.__fitPhoneShell();
       window.addEventListener('resize', this.__fitPhoneShell);
-      // Jester mode: neon spark trail that follows the pointer (decorative,
-      // rendered outside React so it never triggers re-renders).
+      // Jester mode: decorative pointer spark trail, built outside React so it
+      // never triggers a re-render.
       this.__spark = (e) => {
         if (!this.state.jesterMode) return;
         const now = performance.now();
@@ -494,8 +478,8 @@
       if (this.__audioCtx) this.__audioCtx.close();
     }
 
-    // Jester mode: holographic-foil card. Tilts in 3D toward the pointer and
-    // slides the rainbow sheen (--hx/--hy feed the .j-holo gradient).
+    // Jester mode: tilt the card toward the pointer and slide its foil sheen.
+    // --hx/--hy feed the .j-holo gradient.
     __holoMove = (e) => {
       if (!this.state.jesterMode) return;
       const el = e.currentTarget;
@@ -580,8 +564,8 @@
       }
     };
 
-    // Pausing clears the interval and resuming starts a fresh one, so the
-    // countdown always restarts on a whole second rather than a fraction.
+    // Pause clears the interval and resume starts a fresh one, so the countdown
+    // always restarts on a whole second.
     __runTimer() {
       if (this.__timerId) return;
       this.__timerId = setInterval(this.__tick, 1000);
@@ -625,9 +609,8 @@
       };
       const custom = Array.isArray(st.customCategories) ? st.customCategories : [];
       const customByName = custom.reduce((acc, c) => { acc[c.name] = c; return acc; }, {});
-      // Word categories follow the same Role Mode / Word Mode rules as the
-      // built-in ones. A role category that somehow lost all its roles is
-      // treated the same way, so Role Mode can never deal a roleless round.
+      // A role category that lost all its roles counts as word-only, so Role
+      // Mode can never deal a roleless round.
       const customIsWordOnly = (c) => c.kind === 'words' || !c.entries.some(e => e.roles && e.roles.length);
       const customWordOnlyNames = custom.filter(customIsWordOnly).map(c => c.name);
       const customNames = custom.map(c => c.name);
@@ -650,19 +633,14 @@
       const isProgressive = st.jesterSelection === 'progressive';
       const randMax = Math.min(st.jesterRandMax, maxJesters);
       const randMin = Math.min(st.jesterRandMin, randMax);
-      // Two modes force Show Word's hand, so the toggle is derived rather than
-      // read straight off state. Word Mode always shows the word — that is the
-      // mode. Role Mode with a disguised jester always hides it: the jester's
-      // fake role is borrowed from some *other* word, so there is no word that
-      // fits their card. Printing one for everyone else and not for them would
-      // out the jester at a glance. `st.showWord` therefore only ever means
-      // "what the host picked for an ordinary Role Mode round".
+      // Derived, not read off state. Word Mode always shows the word; Role Mode
+      // hides it while the jester is disguised, since their fake role comes from
+      // another word and a block everyone but them has would give them away.
       const wordLocked = st.gameMode === 'words' || st.jesterGetsRole;
       const showWord = st.gameMode === 'words' ? true : (st.jesterGetsRole ? false : st.showWord);
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
-      // Everything about a round — who's seen their card, who holds which role,
-      // who's a jester — is keyed by this id, never by name. Two players called
+      // Round state is keyed by this id, never by name: two players called
       // "Alex" are two players.
       const playerId = (i) => ((st.playerKeys && st.playerKeys[i] != null) ? st.playerKeys[i] : i);
       const players = st.playerList.map((name, i) => ({
@@ -706,10 +684,8 @@
       const ap = st.activePlayer;
       const apIsJester = ap && !!ap.jester;
       const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.id] || 'PERFORMER') : null;
-      // A disguise only holds if the round actually produced one. A category
-      // with a single word (or a custom one with no spare roles) has nothing to
-      // fake with — those jesters are told they're the Jester instead of being
-      // handed a blank card.
+      // A disguise only holds if the round produced one. A single-word category
+      // has nothing to fake with, so that jester is told they're the Jester.
       const apFakeRoleRaw = ap ? (roundJesterRoleMap[ap.id] || null) : null;
       const apFakeWordRaw = ap ? (roundJesterWordMap[ap.id] || null) : null;
       const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole && !!apFakeRoleRaw;
@@ -721,20 +697,15 @@
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
       const openCurtain = () => this.setState({ cardOpen: true });
-      // Tapping the wrong name is the one mistake this screen can't undo by
-      // itself — without a way out you'd have to open a card that isn't yours
-      // to get rid of it. Backing out before the curtain rises leaves the
-      // player unviewed, so they can still take their turn.
+      // Backing out of a mis-tapped name leaves that player unviewed, so they
+      // can still take their turn.
       const cancelOverlay = () => this.setState({ activePlayer: null, cardOpen: false });
-      // Tapping the dark space around the card does whatever the visible button
-      // does: back out while the curtain is still down, dismiss-as-read once
-      // it's up. The card swallows its own clicks, so reading your role never
-      // closes the screen out from under you.
+      // The backdrop does whatever the visible button does: back out with the
+      // curtain down, dismiss-as-read once it's up.
       const dismissOverlay = () => { if (st.cardOpen) closeOverlay(); else cancelOverlay(); };
 
-      // Every jester is named at the final curtain, each with the disguise they
-      // actually held — gated the same way the reveal card is, so results can
-      // never claim a fake role the player was never shown.
+      // Gated the same way the reveal card is, so results can never claim a
+      // disguise the player was never shown.
       const jesterReveals = players.filter(p => p.jester).map((p) => {
         const fakeRole = st.gameMode === 'roles' && st.jesterGetsRole ? (roundJesterRoleMap[p.id] || null) : null;
         const fakeWord = st.gameMode === 'words' && st.jesterGetsRole ? (roundJesterWordMap[p.id] || null) : null;
@@ -761,8 +732,8 @@
         apIsUndisguisedJester,
         apIsDisguisedJester: apRoleDisguised,
         apIsPerformer: !apIsJester || apWordDisguised,
-        // Allies are excluded by id, so a jester sharing a name with someone
-        // else is not accidentally struck from their own ally list.
+        // Excluded by id, so a jester who shares a name isn't struck from their
+        // own ally list.
         apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1
           ? players.filter(p => p.jester && p.id !== (ap ? ap.id : null)).map(p => p.name).join(', ')
           : null,
@@ -797,8 +768,8 @@
         openGameSettings: () => this.setState({ modal: 'gameSettings' }),
         openWordList: () => this.setState({ modal: 'wordList', wordListExpanded: [] }),
         openCredits: () => this.setState({ modal: 'credits' }),
-        // Reachable from Settings and from the Categories picker — the close
-        // button returns to whichever one you came in through.
+        // Reachable from Settings and from the Categories picker; close returns
+        // to whichever you came in through.
         openCustom: () => this.setState(prev => ({ modal: 'custom', customFrom: prev.modal === 'categories' ? 'categories' : 'settings', customDeleteId: null })),
         closeCustom: () => this.setState(prev => ({ modal: prev.customFrom || 'settings', customDeleteId: null })),
         customCount: custom.length,
@@ -844,8 +815,7 @@
             },
           };
         }),
-        // A new category starts with no kind, which is what makes the editor
-        // show the "role or words?" step first.
+        // No kind yet — that's what shows the "role or words?" step first.
         newCustom: () => this.setState({
           modal: 'customEdit',
           customDraft: { id: null, kind: null, name: '', entries: [{ word: '', rolesText: '' }], wordsText: '' },
@@ -933,8 +903,8 @@
             },
             items: g.words.map(w => {
               const crossed = off.includes(w);
-              // The last surviving word in a category is locked — an empty category
-              // would leave a round with no word to deal.
+              // The last surviving word is locked; an empty category has
+              // nothing to deal.
               const locked = !crossed && kept === 1;
               return {
                 word: w, crossed, locked,
@@ -954,18 +924,16 @@
             }),
           };
         }),
-        // A disguised jester doesn't know they're a jester, so there's no one to
-        // introduce them to — the summary only claims what the round will do.
+        // A disguised jester doesn't know they're one, so the summary drops the
+        // "jesters know each other" claim.
         gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
           const p = players[i];
           const pid = p.id;
           const removing = (st.removingIds || []).includes(pid);
-          // An empty cast is not a game: the round would deal nothing and the
-          // trial would open with "undefined asks the first question". The last
-          // player's × goes inert rather than disappearing, so the row doesn't
-          // reflow the moment the cast gets short.
+          // An empty cast would deal nothing and open the trial with "undefined
+          // asks the first question", so the last player's × goes inert.
           const onlyOne = st.playerList.length <= 1;
           return {
             name, pid, editing, removing, onlyOne,
@@ -1017,20 +985,18 @@
         cancelAdd: () => this.setState({ addingPlayer: false, newName: '' }),
         categoryItems: st.categories.map(mapCategoryItem),
         wordCategoryItems: st.wordCategories.map(mapCategoryItem),
-        // Word-only customs are hidden from the picker in Role Mode, exactly
-        // like the built-in word categories.
+        // Word-only customs are hidden in Role Mode, like the built-in ones.
         customCategoryItems: (st.gameMode === 'words' ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
         hasCustomInPicker: (st.gameMode === 'words' ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
-        // Counts are shown clamped to the current cast — removing players can
-        // strand a saved count above what the table can seat, and the lobby
-        // should never promise more jesters than the round will deal.
+        // Clamped to the cast: removing players can strand a saved count above
+        // what the table seats, and the lobby shouldn't promise more than it deals.
         jesterCount,
         incJester: () => this.setState({ jesterCount: Math.min(jesterCount + 1, maxJesters) }),
         decJester: () => this.setState({ jesterCount: Math.max(jesterCount - 1, 0) }),
         jesterLabel: jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters',
-        // The lobby row names the selection mode too, so Progressive isn't a
-        // setting you have to open the modal to remember turning on.
+        // Names the selection mode too, so Progressive shows without opening the
+        // modal.
         jesterRowValue: (jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters')
           + (st.randJesters ? ' · Random Count' : '')
           + (isProgressive ? ' · Progressive' : ''),
@@ -1051,8 +1017,7 @@
         progressivePickBorder: isProgressive ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
         progressivePickColor: isProgressive ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
         progressivePickSubColor: isProgressive ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
-        // The share each player holds of the next draw. Invisible odds are
-        // impossible to trust, so the modal shows them.
+        // Each player's share of the next draw — invisible odds are hard to trust.
         jesterOdds: players.map(p => ({
           name: p.name,
           pct: weightTotal > 0
@@ -1082,8 +1047,7 @@
           if (wordLocked) return;
           this.setState({ showWord: !st.showWord });
         },
-        // Dimmed and inert while the jester is disguised, the same treatment
-        // Show Word gets in Word Mode.
+        // Dimmed and inert while the jester is disguised.
         jestersKnow: st.jestersKnow && !st.jesterGetsRole,
         jestersKnowDesc: st.jesterGetsRole
           ? 'Unavailable while the Jester gets a fake role — a disguised jester doesn’t know they are one'
@@ -1121,8 +1085,7 @@
         timerOpacity: st.timerPaused ? '.5' : '1',
         timerIcon: st.timerPaused ? ICON_PLAY : ICON_PAUSE,
         timerPauseLabel: st.timerPaused ? 'Resume the timer' : 'Pause the timer',
-        // No pausing once the clock has run out — resuming from zero would just
-        // fire the time-up alarm again.
+        // No pausing at zero: resuming would just re-fire the time-up alarm.
         canPauseTimer: st.secondsLeft !== null && st.secondsLeft > 0,
         toggleTimerPause: () => {
           if (st.secondsLeft === null || st.secondsLeft <= 0) return;
@@ -1159,9 +1122,8 @@
           const nextSel = st.selCategories.filter(c => !wordOnlyNames.includes(c));
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
-        // Word Mode shows the word whatever `showWord` says, so it's left alone
-        // — otherwise a trip through Word Mode would silently switch Show Word
-        // on for every Role Mode round afterwards.
+        // Left alone: Word Mode shows the word regardless, and writing it here
+        // would leave Show Word on for every Role Mode round afterwards.
         setWordMode: () => this.setState({ gameMode: 'words' }),
         roleTileBg: st.gameMode === 'roles' ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
         roleTileBorder: st.gameMode === 'roles' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
@@ -1185,9 +1147,8 @@
           }
           const drawCount = Math.min(newJesterCount, maxJesters);
           const allIndices = st.playerList.map((_, index) => index);
-          // Progressive draws by weight and then rebalances; truly random is a
-          // flat Fisher-Yates shuffle — not sort(() => Math.random() - .5),
-          // which is not uniform and quietly favours certain seats.
+          // Progressive draws by weight then rebalances. Random is Fisher-Yates,
+          // not sort(() => Math.random() - .5), which isn't uniform.
           const selectedJesterIndices = isProgressive
             ? weightedDraw(allIndices, (i) => jesterWeights[playerId(i)], drawCount)
             : shuffle(allIndices).slice(0, drawCount);
@@ -1206,8 +1167,8 @@
             if (category === 'Movies') return wordOnlyCatalog.Movies;
             return locationNames;
           };
-          // Words crossed out in the word list are skipped. The word list keeps at
-          // least one word per category, so a pool is never empty.
+          // Crossed-out words are skipped; the word list keeps at least one per
+          // category, so a pool is never empty.
           const getWordPool = (category) => {
             const raw = rawWordPool(category);
             const off = (st.disabledWords || {})[category] || [];
@@ -1222,10 +1183,9 @@
             if (!pickableCategories.length) pickableCategories = st.categories;
           }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
-          // Every branch of the chain below assigns, including the final else.
           let nextRound;
-          // Built from this round's draw rather than the players array, which
-          // still carries the previous round's jester flags.
+          // From this round's draw, not `players`, which still carries last
+          // round's jester flags.
           const jesterPlayerIds = selectedJesterIndices.map(i => playerId(i));
           const jesterIdSet = new Set(jesterPlayerIds);
           const rolePlayerIds = players.map(p => p.id).filter(id => !jesterIdSet.has(id));
@@ -1248,9 +1208,8 @@
             return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
           };
           const buildWordOnlyRound = (category) => ({ roundCategory: category, roundWord: pickFrom(category), roundRoleMap: {}, roundJesterRoleMap: {} });
-          // Custom categories bring their own roles. Their fake-role pool is
-          // borrowed from the other words in the same category — the same trick
-          // the built-in fake catalogs use, just derived instead of authored.
+          // Fake roles are borrowed from the category's other words — what the
+          // built-in fake catalogs do by hand, derived instead.
           const buildCustomRound = (c) => {
             const roleCatalog = {};
             const fakeRoleCatalog = {};
@@ -1302,9 +1261,8 @@
           }
           nextRound = { ...nextRound, roundJesterWordMap };
           const roundStarterIdx = Math.floor(Math.random() * st.playerList.length);
-          // The dealt count lives in roundJesterIndices — writing it back to
-          // jesterCount would let a randomized round overwrite the number the
-          // host actually chose in the Jesters modal.
+          // The dealt count stays in roundJesterIndices; writing it to
+          // jesterCount would let a random round overwrite the host's choice.
           this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, jesterWeights: nextWeights, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
@@ -1327,8 +1285,7 @@
       }));
     }
 
-    // Normalises the draft, rejects the three states a category can't be saved
-    // in (no name, a name already in use, no words), then persists.
+    // Normalises the draft, rejects the unsaveable states, then persists.
     __saveCustomDraft(custom, builtInNames) {
       const draft = this.state.customDraft;
       if (!draft) return;
@@ -1365,8 +1322,8 @@
         this.setState({ customError: 'Add at least one word.' });
         return;
       }
-      // A role category with no roles would never come up in Role Mode, which
-      // is a confusing thing to discover mid-game rather than here.
+      // A roleless role category would never come up in Role Mode — better to
+      // say so here than let them find out mid-game.
       if (kind === 'roles' && !entries.some(e => e.roles.length)) {
         this.setState({ customError: 'Give at least one word some roles, or switch this to a word category.' });
         return;
@@ -1496,8 +1453,7 @@
             h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.progressivePickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Recent jesters get picked less often')
           )
         ),
-        // The per-player numbers are off by default — most tables don't want to
-        // see who the game thinks is "due". Settings → Show Progressive Jester Odds.
+        // Off by default; Settings → Show Progressive Jester Odds.
         v.isProgressiveJester && h('div', { style: css('margin-top:12px; animation:masq-rise .2s ease both;') },
           v.showJesterOdds && h(React.Fragment, null,
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:7px;") }, 'Odds next round'),
@@ -1675,8 +1631,8 @@
       );
     }
 
-    // Step one for a new category: role category or word category. Skipped when
-    // editing, since an existing category already knows what it is.
+    // Step one for a new category. Skipped when editing — an existing category
+    // already knows what it is.
     customKindModal(v) {
       const tile = (onClick, icon, title, body) => h('div', { ...press(onClick), className: 'masq-btn', style: css('display:flex; align-items:flex-start; gap:13px; padding:16px; background:var(--m-lift); border:1px solid var(--m-border-med); border-radius:14px; cursor:pointer;') },
         h('div', { style: css('flex:none; margin-top:1px;'), dangerouslySetInnerHTML: { __html: icon } }),
@@ -1875,8 +1831,8 @@
           h('div', { ...press(v.goReveal), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
-          // Tapping away closes any modal except the category editor, where it
-          // would throw away everything you just typed.
+          // Tapping away closes any modal but the category editor, where it
+          // would discard everything typed.
           h('div', { onClick: v.isModalCustomEdit ? undefined : v.closeModal, 'aria-hidden': 'true', style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
@@ -1970,8 +1926,8 @@
         v.showOverlay && h('div', { onClick: v.dismissOverlay, style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
-          // The card stops its own click so tapping it raises the curtain (and
-          // afterwards does nothing) instead of reaching the backdrop handler.
+          // Stops its own click so tapping the card raises the curtain instead
+          // of reaching the backdrop's dismiss handler.
           h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },

@@ -1,9 +1,7 @@
-// Masq word/role data — Locations, Biomes, Historical Eras, Movies, and Music
-// Genres catalogs.
-// Loaded as a plain script (not a dc-runtime file) so it can sit in its own
-// file; exposes everything on window.MASQ_LOCATIONS_DATA for
-// "index.html" to read at render time.
-// All catalog keys and their role/word lists are sorted alphabetically.
+// Masq word/role data: the role catalogs (Locations, Biomes, Historical Eras,
+// Movie/TV Genres, Music Genres), a matching fake-role catalog for each, and
+// the word-only catalogs. Plain script, exposed on window.MASQ_LOCATIONS_DATA.
+// All keys and their role/word lists are sorted alphabetically.
 (function () {
   var biomeCatalog = {
     'Alpine Mountains': ['Bighorn Sheep', 'Condor', 'Eagle', 'Ibex', 'Marmot', 'Mountain Goat', 'Snow Leopard', 'Yak'],
