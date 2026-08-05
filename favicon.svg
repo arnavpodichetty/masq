@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 2 110 110">
+  <!-- The comedy mask from src/app.js, simplified for 16px. Transparent
+       background; the viewBox is squared and centred on the mask so the glyph
+       fills the tab icon instead of being letterboxed. -->
+  <path d="M50 6C26 6 13 26 13 52c0 30 17 56 37 56s37-26 37-56C87 26 74 6 50 6z" fill="#e6cb7e" stroke="#7a1620" stroke-width="3"/>
+  <path d="M25 50q9-6 18 0-9 5-18 0z" fill="#7a1620"/>
+  <path d="M57 50q9-6 18 0-9 5-18 0z" fill="#7a1620"/>
+  <path d="M28 70q22 26 44 0" fill="none" stroke="#7a1620" stroke-width="8" stroke-linecap="round"/>
+</svg>
