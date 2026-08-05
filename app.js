@@ -18,6 +18,27 @@
   }
 
 
+  // Every control in this app is a styled <div>. This gives one real button
+  // semantics: reachable by Tab, activated with Enter or Space, and announced
+  // with a name. `label` is only needed when the visible content is a bare
+  // glyph like '×' — otherwise the div's own text is the accessible name.
+  // `extra` carries a different role where one fits, e.g. a switch.
+  function press(onClick, label, extra) {
+    if (!onClick) return {};
+    return {
+      onClick,
+      onKeyDown: (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+        e.preventDefault();
+        onClick(e);
+      },
+      role: 'button',
+      tabIndex: 0,
+      ...(label ? { 'aria-label': label } : null),
+      ...extra,
+    };
+  }
+
   // ---- custom categories (the only thing that survives a reload) ----
   // Shape: [{ id, name, kind, entries: [{ word, roles: [] }] }].
   // kind 'roles' — every word carries its own role list, like Locations.
@@ -550,7 +571,12 @@
       const randMin = Math.min(st.jesterRandMin, randMax);
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
+      // Everything about a round — who's seen their card, who holds which role,
+      // who's a jester — is keyed by this id, never by name. Two players called
+      // "Alex" are two players.
+      const playerId = (i) => ((st.playerKeys && st.playerKeys[i] != null) ? st.playerKeys[i] : i);
       const players = st.playerList.map((name, i) => ({
+        id: playerId(i),
         name,
         comedy: i % 2 === 0,
         tragedy: i % 2 !== 0,
@@ -558,7 +584,6 @@
         line: lineColors[i % lineColors.length],
         jester: jesterIndices.has(i),
       }));
-      const jesterNames = players.filter(p => p.jester).map(p => p.name);
 
       const roundCategory = st.roundCategory || 'Locations';
       const roundRoleMap = st.roundRoleMap || {};
@@ -575,9 +600,9 @@
       const isMoviesWordRound = roundCategory === 'Movies';
       const isCustomRound = !!customByName[roundCategory];
       const actOnePlayers = players.map(p => {
-        const seen = !!st.viewed[p.name];
+        const seen = !!st.viewed[p.id];
         return {
-          ...p, shortName: p.name.replace(' (You)', ''), seen,
+          ...p, seen,
           rowBg: seen ? 'var(--m-ready-bg)' : 'var(--m-lift)',
           rowBorder: seen ? 'var(--m-ready-border)' : '1px solid var(--m-border-med)',
           labelColor: seen ? 'var(--m-ready-color)' : 'var(--m-idle-label)',
@@ -585,23 +610,23 @@
           onTap: () => this.setState({ activePlayer: p, cardOpen: false }),
         };
       });
-      const allSeen = players.every(p => st.viewed[p.name]);
+      const allSeen = players.every(p => st.viewed[p.id]);
       const ap = st.activePlayer;
       const apIsJester = ap && !!ap.jester;
-      const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.name] || 'PERFORMER') : null;
+      const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.id] || 'PERFORMER') : null;
       // A disguise only holds if the round actually produced one. A category
       // with a single word (or a custom one with no spare roles) has nothing to
       // fake with — those jesters are told they're the Jester instead of being
       // handed a blank card.
-      const apFakeRoleRaw = ap ? (roundJesterRoleMap[ap.name] || null) : null;
-      const apFakeWordRaw = ap ? (roundJesterWordMap[ap.name] || null) : null;
+      const apFakeRoleRaw = ap ? (roundJesterRoleMap[ap.id] || null) : null;
+      const apFakeWordRaw = ap ? (roundJesterWordMap[ap.id] || null) : null;
       const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole && !!apFakeRoleRaw;
       const apWordDisguised = apIsJester && st.gameMode === 'words' && st.jesterGetsRole && !!apFakeWordRaw;
       const apFakeRole = apRoleDisguised ? apFakeRoleRaw : null;
       const apFakeWord = apWordDisguised ? apFakeWordRaw : null;
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
       const closeOverlay = () => {
-        if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.name]: true } }));
+        if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
       const openCurtain = () => this.setState({ cardOpen: true });
 
@@ -609,8 +634,8 @@
       // actually held — gated the same way the reveal card is, so results can
       // never claim a fake role the player was never shown.
       const jesterReveals = players.filter(p => p.jester).map((p) => {
-        const fakeRole = st.gameMode === 'roles' && st.jesterGetsRole ? (roundJesterRoleMap[p.name] || null) : null;
-        const fakeWord = st.gameMode === 'words' && st.jesterGetsRole ? (roundJesterWordMap[p.name] || null) : null;
+        const fakeRole = st.gameMode === 'roles' && st.jesterGetsRole ? (roundJesterRoleMap[p.id] || null) : null;
+        const fakeWord = st.gameMode === 'words' && st.jesterGetsRole ? (roundJesterWordMap[p.id] || null) : null;
         return {
           name: p.name,
           disguise: fakeRole
@@ -622,7 +647,7 @@
         actOnePlayers, allSeen, notAllSeen: !allSeen,
         showOverlay: !!ap,
         hideOverlay: !ap,
-        apName: ap ? ap.name.replace(' (You)', '') : '',
+        apName: ap ? ap.name : '',
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
@@ -648,13 +673,14 @@
             : isMusicRound
               ? 'The genre is your secret. Give clues that fit your artist without making the answer obvious.'
             : 'Give clues that prove you know the word without giving it away to the Jester.',
-        apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterNames.length > 1
-          ? jesterNames.filter(n => n !== (ap ? ap.name : '')).join(', ')
+        // Allies are excluded by id, so a jester sharing a name with someone
+        // else is not accidentally struck from their own ally list.
+        apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1
+          ? players.filter(p => p.jester && p.id !== (ap ? ap.id : null)).map(p => p.name).join(', ')
           : null,
-        apShowAllies: apIsUndisguisedJester && st.jestersKnow && jesterNames.length > 1,
+        apShowAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1,
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
-        roundWordBlockStyle: '',
         roundWordDisplay: st.roundWord,
         cardOpen: st.cardOpen, cardNotOpen: !st.cardOpen,
         openCurtain, closeOverlay,
@@ -841,11 +867,13 @@
             }),
           };
         }),
-        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', st.jestersKnow ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
+        // A disguised jester doesn't know they're a jester, so there's no one to
+        // introduce them to — the summary only claims what the round will do.
+        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, st.showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
-          const p = players[i] || players[0];
-          const pid = (st.playerKeys && st.playerKeys[i] != null) ? st.playerKeys[i] : i;
+          const p = players[i];
+          const pid = p.id;
           const removing = (st.removingIds || []).includes(pid);
           return {
             name, i, pid, editing, notEditing: !editing, removing,
@@ -932,10 +960,20 @@
           if (st.gameMode === 'words') return;
           this.setState({ showWord: !st.showWord });
         },
-        jestersKnow: st.jestersKnow,
-        jestersKnowBg: st.jestersKnow ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
-        jestersKnowThumb: st.jestersKnow ? 'translateX(22px)' : 'translateX(2px)',
-        toggleJestersKnow: () => this.setState({ jestersKnow: !st.jestersKnow }),
+        // Dimmed and inert while the jester is disguised, the same treatment
+        // Show Word gets in Word Mode.
+        jestersKnow: st.jestersKnow && !st.jesterGetsRole,
+        jestersKnowDesc: st.jesterGetsRole
+          ? 'Unavailable while the Jester gets a fake role — a disguised jester doesn’t know they are one'
+          : 'Jesters can see their fellow jesters',
+        jestersKnowBg: (st.jestersKnow && !st.jesterGetsRole) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        jestersKnowThumb: (st.jestersKnow && !st.jesterGetsRole) ? 'translateX(22px)' : 'translateX(2px)',
+        jestersKnowToggleOpacity: st.jesterGetsRole ? '.55' : '1',
+        jestersKnowTogglePointerEvents: st.jesterGetsRole ? 'none' : 'auto',
+        toggleJestersKnow: () => {
+          if (st.jesterGetsRole) return;
+          this.setState({ jestersKnow: !st.jestersKnow });
+        },
         jesterGetsRole: st.jesterGetsRole,
         jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
         jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a similar but fake word instead of being told they’re the Jester' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
@@ -961,6 +999,7 @@
         timerLabel: st.timerPaused ? 'Paused' : 'Time Remaining',
         timerOpacity: st.timerPaused ? '.5' : '1',
         timerIcon: st.timerPaused ? ICON_PLAY : ICON_PAUSE,
+        timerPauseLabel: st.timerPaused ? 'Resume the timer' : 'Pause the timer',
         // No pausing once the clock has run out — resuming from zero would just
         // fire the time-up alarm again.
         canPauseTimer: st.secondsLeft !== null && st.secondsLeft > 0,
@@ -1052,22 +1091,24 @@
           }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
           let nextRound = { roundCategory: 'Locations', roundWord: '', roundRoleMap: {}, roundJesterRoleMap: {} };
-          const rolePlayers = players.filter(p => !p.jester);
-          const jesterIndexSet = new Set(selectedJesterIndices);
-          const jesterPlayerNames = st.playerList.filter((_, i) => jesterIndexSet.has(i));
+          // Built from this round's draw rather than the players array, which
+          // still carries the previous round's jester flags.
+          const jesterPlayerIds = selectedJesterIndices.map(i => playerId(i));
+          const jesterIdSet = new Set(jesterPlayerIds);
+          const rolePlayerIds = players.map(p => p.id).filter(id => !jesterIdSet.has(id));
           const useJesterRole = st.gameMode === 'roles' && st.jesterGetsRole;
           const useJesterWord = st.gameMode === 'words' && st.jesterGetsRole;
           const buildRound = (roundCategory, wordName, roleCatalog, fakeRoleCatalog) => {
             const roles = shuffle(roleCatalog[wordName]);
-            const roundRoleMap = rolePlayers.reduce((acc, player, index) => {
-              acc[player.name] = roles[index % roles.length];
+            const roundRoleMap = rolePlayerIds.reduce((acc, id, index) => {
+              acc[id] = roles[index % roles.length];
               return acc;
             }, {});
             let roundJesterRoleMap = {};
             if (useJesterRole) {
               const fakeRoles = shuffle(fakeRoleCatalog[wordName] || []);
-              roundJesterRoleMap = jesterPlayerNames.reduce((acc, name, index) => {
-                acc[name] = fakeRoles[index % fakeRoles.length];
+              roundJesterRoleMap = jesterPlayerIds.reduce((acc, id, index) => {
+                acc[id] = fakeRoles[index % fakeRoles.length];
                 return acc;
               }, {});
             }
@@ -1120,8 +1161,8 @@
             const pool = getWordPool(nextRound.roundCategory).filter(w => w !== nextRound.roundWord);
             if (pool.length) {
               const fakeWords = shuffle(pool);
-              roundJesterWordMap = jesterPlayerNames.reduce((acc, name, index) => {
-                acc[name] = fakeWords[index % fakeWords.length];
+              roundJesterWordMap = jesterPlayerIds.reduce((acc, id, index) => {
+                acc[id] = fakeWords[index % fakeWords.length];
                 return acc;
               }, {});
             }
@@ -1209,7 +1250,7 @@
     }
 
     settingsRow({ onClick, iconBg, icon, label, value }) {
-      return h('div', { onClick, className: 'masq-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
+      return h('div', { ...press(onClick, label + ': ' + value), className: 'masq-btn', style: css('display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; background:var(--m-lift); border:1px solid var(--m-border); cursor:pointer;') },
         h('div', { style: css(`width:34px; height:34px; border-radius:9px; background:${iconBg}; display:flex; align-items:center; justify-content:center; flex:none;`), dangerouslySetInnerHTML: { __html: icon } }),
         h('div', { style: css('flex:1;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--m-label);") }, label),
@@ -1223,18 +1264,18 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Categories'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:8px;") }, 'Role Categories'),
         h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
-          v.categoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
+          v.categoryItems.map((c, i) => h('div', { key: i, ...press(c.onToggle, null, { 'aria-pressed': String(c.sel) }), style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
             h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
           ))
         ),
         v.isWordsMode && h(React.Fragment, null,
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 8px;") }, 'Word Categories'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
-            v.wordCategoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
+            v.wordCategoryItems.map((c, i) => h('div', { key: i, ...press(c.onToggle, null, { 'aria-pressed': String(c.sel) }), style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
             ))
           )
@@ -1242,12 +1283,12 @@
         v.hasCustomInPicker && h(React.Fragment, null,
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 8px;") }, 'Your Categories'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
-            v.customCategoryItems.map((c, i) => h('div', { key: i, onClick: c.onToggle, style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
+            v.customCategoryItems.map((c, i) => h('div', { key: i, ...press(c.onToggle, null, { 'aria-pressed': String(c.sel) }), style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
             ))
           )
         ),
-        h('div', { onClick: v.openCustom, className: 'masq-btn', style: css("margin-top:16px; padding:12px; text-align:center; border:1px dashed var(--m-border-hard); border-radius:12px; cursor:pointer; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-soft);") },
+        h('div', { ...press(v.openCustom), className: 'masq-btn', style: css("margin-top:16px; padding:12px; text-align:center; border:1px dashed var(--m-border-hard); border-radius:12px; cursor:pointer; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-soft);") },
           v.customCount ? 'Edit custom categories' : 'Make your own category…')
       );
     }
@@ -1256,22 +1297,22 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Number of Jesters'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:32px;') },
-          h('div', { onClick: v.decJester, style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+          h('div', { ...press(v.decJester, 'One fewer jester'), style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
           h('div', { style: css('text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:var(--m-text); line-height:1;") }, v.jesterCount),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-label); margin-top:4px;") }, v.jesterLabel)
           ),
-          h('div', { onClick: v.incJester, style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
+          h('div', { ...press(v.incJester, 'One more jester'), style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
         ),
         h('div', { style: css('display:flex; align-items:center; gap:12px; margin:20px 0 14px;') },
           h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') }),
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-soft2);") }, 'or randomize'),
           h('div', { style: css('flex:1; height:1px; background:var(--m-border-med);') })
         ),
-        h('div', { onClick: v.toggleRandJesters, className: 'masq-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:14px;') },
+        h('div', { ...press(v.toggleRandJesters, 'Random jester count', { role: 'switch', 'aria-checked': String(v.randJesters) }), className: 'masq-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:14px;') },
           h('div', { style: css('flex:1;') },
             h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Random Count'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Pick a random number of jesters each round')
@@ -1284,18 +1325,18 @@
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Min'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMin, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { ...press(v.decRandMin, 'Lower the minimum jesters'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMin),
-              h('div', { onClick: v.incRandMin, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
+              h('div', { ...press(v.incRandMin, 'Raise the minimum jesters'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           ),
           h('div', { style: css("font-family:'Cinzel',serif; font-size:16px; color:var(--m-arrow); padding-top:20px;") }, '→'),
           h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:7px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, 'Max'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
-              h('div', { onClick: v.decRandMax, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+              h('div', { ...press(v.decRandMax, 'Lower the maximum jesters'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--m-text); min-width:28px; text-align:center; line-height:1;") }, v.jesterRandMax),
-              h('div', { onClick: v.incRandMax, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
+              h('div', { ...press(v.incRandMax, 'Raise the maximum jesters'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-strong); display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '+')
             )
           )
         )
@@ -1306,15 +1347,15 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Time Limit'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; align-items:center; justify-content:center; gap:32px; padding:10px 0 6px;') },
-          h('div', { onClick: v.decTime, style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
+          h('div', { ...press(v.decTime, 'Shorten the time limit'), style: css('width:52px; height:52px; border-radius:50%; background:var(--m-lift-input); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--m-accent); cursor:pointer; line-height:1;') }, '−'),
           h('div', { style: css('text-align:center; min-width:100px;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:var(--m-text); line-height:1;") }, v.timeLimitDisplay),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-label); margin-top:4px;") }, v.timeLimitUnit)
           ),
-          h('div', { onClick: v.incTime, style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
+          h('div', { ...press(v.incTime, 'Lengthen the time limit'), style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
         )
       );
     }
@@ -1331,7 +1372,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'How to Play'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
           cards.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
@@ -1346,10 +1387,10 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Game Options'),
-          h('div', { onClick: v.closeModal, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid var(--m-border);') },
-          h('div', { onClick: v.toggleShowCat, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
+          h('div', { ...press(v.toggleShowCat, 'Show category', { role: 'switch', 'aria-checked': String(v.showCategory) }), style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Category'),
@@ -1359,17 +1400,17 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showCatThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleJestersKnow, style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
+          h('div', { ...press(v.toggleJestersKnow, 'Jesters know each other', { role: 'switch', 'aria-checked': String(v.jestersKnow) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jestersKnowToggleOpacity}; pointer-events:${v.jestersKnowTogglePointerEvents};`) },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(178,32,47,.2); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jesters Know Each Other'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Jesters can see their fellow jesters')
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jestersKnowDesc)
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jestersKnowBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jestersKnowThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleShowWord, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
+          h('div', { ...press(v.toggleShowWord, 'Show word', { role: 'switch', 'aria-checked': String(v.showWord) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(46,91,176,.18); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_SHOW_WORD } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Word'),
@@ -1379,7 +1420,7 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showWordThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleJesterGetsRole, style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
+          h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
@@ -1397,19 +1438,19 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'All Words'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
           v.wordListGroups.map((g, i) => h('div', { key: i },
-            h('div', { onClick: g.toggle, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { ...press(g.toggle), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label);") }, g.countLabel),
               h('div', { style: css('display:flex; align-items:center; gap:10px;') },
-                g.hasCrossed ? h('div', { onClick: g.resetCat, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--m-brand); border:1px solid var(--m-border); border-radius:8px; padding:4px 8px; cursor:pointer;") }, 'Reset') : null,
+                g.hasCrossed ? h('div', { ...press(g.resetCat), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--m-brand); border:1px solid var(--m-border); border-radius:8px; padding:4px 8px; cursor:pointer;") }, 'Reset') : null,
                 h('div', { style: css(`color:var(--m-dim2); font-size:18px; transform:${g.chevron}; transition:transform .2s;`) }, '›')
               )
             ),
             g.open ? h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; padding:10px 4px 4px;') },
-              g.items.map((it, j) => h('div', { key: j, onClick: it.toggleWord, className: it.locked ? '' : 'masq-btn', style: css(it.style) }, it.word))
+              g.items.map((it, j) => h('div', { key: j, ...press(it.toggleWord, it.word + (it.crossed ? ' (crossed out)' : ''), { 'aria-pressed': String(it.crossed) }), className: it.locked ? '' : 'masq-btn', style: css(it.style) }, it.word))
             ) : null,
             g.open && g.lastOne ? h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); padding:6px 4px 0;") }, 'Every category has to keep at least one word.') : null
           ))
@@ -1421,7 +1462,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Custom Categories'),
-          h('div', { onClick: v.closeCustom, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeCustom, 'Close'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:16px;") },
           'Build a role category, where every word carries its own roles, or a word category that’s just a list of words. Both show up in the Categories picker and are saved on this device.'),
@@ -1430,7 +1471,7 @@
             ? h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
                 v.customCats.map(c => h('div', {
                   key: c.id,
-                  onClick: c.onEdit,
+                  ...press(c.onEdit),
                   className: 'masq-btn',
                   style: css('display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--m-lift); border-radius:14px; border:1px solid var(--m-border-med); cursor:pointer; animation:masq-rise .25s ease both;'),
                 },
@@ -1440,7 +1481,7 @@
                       c.inUse ? c.summary + ' · in play' : c.summary)
                   ),
                   h('div', {
-                    onClick: c.onDelete,
+                    ...press(c.onDelete, c.pendingDelete ? 'Confirm deleting ' + c.name : 'Delete ' + c.name),
                     className: 'masq-btn',
                     style: c.pendingDelete
                       ? css("padding:6px 10px; border-radius:9px; background:rgba(178,32,47,.28); border:1px solid rgba(178,32,47,.5); font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#f4c9cd; cursor:pointer; flex:none;")
@@ -1452,7 +1493,7 @@
                 'No custom categories yet.')
         ),
         h('div', { style: css('padding-top:14px;') },
-          h('div', { onClick: v.newCustom, className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
+          h('div', { ...press(v.newCustom), className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
             h('div', { style: css("font-size:22px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-soft);") }, 'New category…')
           )
@@ -1473,7 +1514,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'New Category'),
-          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.cancelDraft, 'Cancel'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:16px;") }, 'What kind of category is this?'),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
@@ -1491,7 +1532,7 @@
       const kindTab = (kind, label) => {
         const on = (kind === 'words') === v.draftIsWords;
         return h('div', {
-          onClick: () => v.setDraftKind(kind),
+          ...press(() => v.setDraftKind(kind), null, { 'aria-pressed': String(on) }),
           className: 'masq-btn',
           style: css(`flex:1; padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:${on ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)'}; border:${on ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)'}; font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:${on ? 'var(--m-tile-sel-text)' : 'var(--m-muted)'};`),
         }, label);
@@ -1499,7 +1540,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, v.draftIsNew ? 'New Category' : 'Edit Category'),
-          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.cancelDraft, 'Cancel'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:7px;") }, 'Category Type'),
@@ -1530,7 +1571,7 @@
                     h('div', { style: css('display:flex; align-items:center; gap:8px;') },
                       h('input', { onChange: e.onWordChange, value: e.word, placeholder: 'Word', style: css(inputStyle + ' flex:1;') }),
                       h('div', {
-                        onClick: e.onlyOne ? undefined : e.onRemove,
+                        ...press(e.onlyOne ? undefined : e.onRemove),
                         className: e.onlyOne ? '' : 'masq-btn',
                         style: css(`width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; line-height:1; flex:none; cursor:${e.onlyOne ? 'default' : 'pointer'}; opacity:${e.onlyOne ? '.35' : '1'};`),
                       }, '×')
@@ -1538,7 +1579,7 @@
                     h('input', { onChange: e.onRolesChange, value: e.rolesText, placeholder: 'Roles, comma separated', style: css(inputStyle + ' margin-top:8px; font-size:14px;') })
                   ))
                 ),
-                h('div', { onClick: v.addDraftEntry, className: 'masq-btn', style: css('margin-top:10px; padding:13px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;') },
+                h('div', { ...press(v.addDraftEntry), className: 'masq-btn', style: css('margin-top:10px; padding:13px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;') },
                   h('div', { style: css("font-size:19px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
                   h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-soft);") }, 'Add a word…')
                 )
@@ -1548,8 +1589,8 @@
           ? h('div', { style: css("margin-top:12px; padding:11px 13px; background:rgba(178,32,47,.15); border:1px solid rgba(178,32,47,.4); border-radius:10px; font-family:'EB Garamond',serif; font-size:14px; color:#e8a0a8; animation:masq-rise .2s ease both;") }, v.customError)
           : null,
         h('div', { style: css('display:flex; gap:9px; padding-top:14px;') },
-          h('div', { onClick: v.cancelDraft, className: 'masq-btn', style: css("flex:none; padding:16px 20px; text-align:center; border:1px solid var(--m-border-btn); border-radius:12px; font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-soft); cursor:pointer;") }, 'Cancel'),
-          h('div', { onClick: v.saveDraft, className: 'masq-btn', style: css("flex:1; padding:16px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.06em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'SAVE CATEGORY')
+          h('div', { ...press(v.cancelDraft), className: 'masq-btn', style: css("flex:none; padding:16px 20px; text-align:center; border:1px solid var(--m-border-btn); border-radius:12px; font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-soft); cursor:pointer;") }, 'Cancel'),
+          h('div', { ...press(v.saveDraft), className: 'masq-btn', style: css("flex:1; padding:16px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.06em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'SAVE CATEGORY')
         )
       );
     }
@@ -1558,33 +1599,33 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Settings'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
-          h('div', { onClick: v.openWordList, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { ...press(v.openWordList), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'View All Words'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
-          h('div', { onClick: v.openCustom, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { ...press(v.openCustom), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Custom Categories'),
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim);") }, v.customCountLabel),
               h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
             )
           ),
-          h('div', { onClick: v.toggleSoundEffects, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.toggleLightMode, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { ...press(v.toggleLightMode, 'Light mode', { role: 'switch', 'aria-checked': String(v.lightMode) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Light Mode'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.lightModeBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { onClick: v.openCredits, className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+          h('div', { ...press(v.openCredits), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
@@ -1605,7 +1646,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'Credits'),
-          h('div', { onClick: v.openSettings, className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.openSettings, 'Back to settings'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
           company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
@@ -1619,23 +1660,23 @@
     renderLobby(v) {
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
-          h('div', { onClick: v.openHelp, className: 'masq-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em; cursor:pointer;"), className: 'j-title', onClick: v.toggleJesterMode },
+          h('div', { ...press(v.openHelp, 'How to play'), className: 'masq-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
+          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em; cursor:pointer;"), className: 'j-title', ...press(v.toggleJesterMode, 'Jester mode', { role: 'switch', 'aria-checked': String(v.jesterMode) }) },
             v.jesterMode
               ? 'MASQ'.split('').map((ch, i) => h('span', { key: i, className: 'j-title j-dance', style: { animationDelay: (i * 0.13) + 's, ' + (i * 0.13) + 's' } }, ch))
               : 'MASQ'
           ),
-          h('div', { onClick: v.openSettings, className: 'masq-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
+          h('div', { ...press(v.openSettings, 'Settings'), className: 'masq-btn', style: css('width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:var(--m-accent);') }, '⚙')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Mode'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px;') },
-            h('div', { onClick: v.setRoleMode, className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
+            h('div', { ...press(v.setRoleMode, null, { 'aria-pressed': String(!v.isWordsMode) }), className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_20 } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.roleTileColor};`) }, 'Role Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.roleTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Roles and words assigned, Jester flies blind')
             ),
-            h('div', { onClick: v.setWordMode, className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
+            h('div', { ...press(v.setWordMode, null, { 'aria-pressed': String(v.isWordsMode) }), className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_WORD } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.wordTileColor};`) }, 'Word Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.wordTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Everyone gets the word but the Jester')
@@ -1651,12 +1692,12 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
-          h('div', { onClick: v.goReveal, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
+          h('div', { ...press(v.goReveal), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
           // Tapping away closes any modal except the category editor, where it
           // would throw away everything you just typed.
-          h('div', { onClick: v.isModalCustomEdit ? undefined : v.closeModal, style: css('flex:1;') }),
+          h('div', { onClick: v.isModalCustomEdit ? undefined : v.closeModal, 'aria-hidden': 'true', style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
           v.isModalTime && this.timeModal(v),
@@ -1676,7 +1717,7 @@
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'The Cast'),
-          h('div', { onClick: v.closeModal, style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+          h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
           h('div', { style: css('display:flex; flex-direction:column;') },
@@ -1691,8 +1732,8 @@
                   ),
                   p.editing
                     ? h('input', { onChange: p.onEditChange, onKeyDown: p.onEditKeyDown, onBlur: p.onEditBlur, value: p.editVal, style: css("flex:1; padding:6px 10px; background:var(--m-lift-strong); border:1px solid var(--m-accent); border-radius:8px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:17px; outline:none;") })
-                    : h('div', { onClick: p.onEditTap, style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:var(--m-text); cursor:text; padding:6px 2px;") }, p.name),
-                  h('div', { onClick: p.onRemove, className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
+                    : h('div', { ...press(p.onEditTap), style: css("flex:1; font-family:'EB Garamond',serif; font-size:17px; color:var(--m-text); cursor:text; padding:6px 2px;") }, p.name),
+                  h('div', { ...press(p.onRemove, 'Remove player'), className: 'masq-btn', style: css('width:30px; height:30px; border-radius:50%; background:rgba(178,32,47,.2); border:1px solid rgba(178,32,47,.35); display:flex; align-items:center; justify-content:center; font-size:16px; color:#e6a0a8; cursor:pointer; line-height:1; flex:none;') }, '×')
                 )
               )
             ))
@@ -1702,10 +1743,10 @@
           v.addingPlayer
             ? h('div', { style: css('display:flex; gap:8px; align-items:center; animation:masq-rise .2s ease both;') },
                 h('input', { onKeyDown: v.onNameKeyDown, onChange: v.onNameChange, value: v.newName, placeholder: 'Enter player name…', style: css("flex:1; padding:14px 16px; background:var(--m-lift-input); border:1px solid var(--m-accent); border-radius:12px; color:var(--m-text); font-family:'EB Garamond',serif; font-size:16px; outline:none;") }),
-                h('div', { onClick: v.confirmAdd, className: 'masq-btn', style: css("padding:14px 16px; background:var(--m-cta); border-radius:12px; color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
-                h('div', { onClick: v.cancelAdd, className: 'masq-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
+                h('div', { ...press(v.confirmAdd), className: 'masq-btn', style: css("padding:14px 16px; background:var(--m-cta); border-radius:12px; color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:14px; cursor:pointer;") }, 'Add'),
+                h('div', { ...press(v.cancelAdd, 'Cancel'), className: 'masq-btn', style: css('padding:14px 12px; color:#7c6a46; font-size:20px; cursor:pointer;') }, '×')
               )
-            : h('div', { onClick: v.onAddTap, className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
+            : h('div', { ...press(v.onAddTap), className: 'masq-btn', style: css('padding:16px; text-align:center; border:1.5px dashed rgba(200,162,76,.4); border-radius:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;') },
                 h('div', { style: css("font-size:22px; color:var(--m-accent); line-height:1; font-family:'EB Garamond',serif;") }, '+'),
                 h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-soft);") }, 'Add a player…')
               )
@@ -1717,7 +1758,7 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToLobby, className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { ...press(v.backToLobby, 'Back to the lobby'), className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'Tap your name in secret'),
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Each player privately sees their role, then passes the phone.'),
           v.showCategory && h('div', { style: css('display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:7px 16px; border-radius:20px; border:1px solid var(--m-border-hard);') },
@@ -1727,11 +1768,11 @@
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px;') },
           h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
-            v.actOnePlayers.map((p, i) => h('div', { key: i, onClick: p.onTap, className: 'masq-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
+            v.actOnePlayers.map((p, i) => h('div', { key: i, ...press(p.onTap), className: 'masq-btn', style: css(`display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; cursor:pointer; background:${p.rowBg}; border:${p.rowBorder};`) },
               h('div', { style: css('flex:none; width:44px; height:44px; border-radius:50%; background:var(--m-avatar-bg); display:flex; align-items:center; justify-content:center; border:1px solid var(--m-border-strong);') },
                 h(Mask, { comedy: p.comedy, tragedy: p.tragedy, cracked: false, faceColor: p.face, lineColor: p.line, size: 30, hat: v.jesterMode })
               ),
-              h('div', { style: css("flex:1; font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:var(--m-text);") }, p.shortName),
+              h('div', { style: css("flex:1; font-family:'Cinzel',serif; font-weight:600; font-size:17px; color:var(--m-text);") }, p.name),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:12px; color:${p.labelColor};`) }, p.label)
             ))
           ),
@@ -1739,13 +1780,13 @@
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
           v.allSeen
-            ? h('div', { onClick: v.goVoting, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
+            ? h('div', { ...press(v.goVoting), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
             : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
         v.showOverlay && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
-          h('div', { onClick: v.openCurtain, className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
+          h('div', { ...press(v.openCurtain), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
                 h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
@@ -1783,7 +1824,7 @@
             h('div', { style: css("position:absolute; top:12px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:12px; letter-spacing:.2em; color:#e6cb7e; pointer-events:none;") }, v.curtainHint)
           ),
           v.cardOpen
-            ? h('div', { onClick: v.closeOverlay, style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:masq-rise .35s ease both;") }, 'GOT IT')
+            ? h('div', { ...press(v.closeOverlay), style: css("margin-top:22px; padding:14px 32px; background:var(--m-lift-med); border:1px solid rgba(200,162,76,.4); color:var(--m-text-title); font-family:'Cinzel',serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-radius:10px; cursor:pointer; animation:masq-rise .35s ease both;") }, 'GOT IT')
             : h('div', { style: css("margin-top:18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--m-accent);") }, 'Tap the curtain to reveal')
         )
       );
@@ -1799,7 +1840,7 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-slide-in .3s ease both;') },
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
-          h('div', { onClick: v.backToReveal, className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { ...press(v.backToReveal, 'Back to the card reveal'), className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'The Trial'),
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Debate, accuse, unmask the jester.')
         ),
@@ -1822,7 +1863,7 @@
             h('div', { style: css(`font-family:'Cinzel Decorative',serif; font-weight:700; font-size:52px; color:${v.timerColor}; line-height:1.2; opacity:${v.timerOpacity}; transition:opacity .2s;`) }, v.timerDisplay),
             v.canPauseTimer
               ? h('div', {
-                  onClick: v.toggleTimerPause,
+                  ...press(v.toggleTimerPause, v.timerPauseLabel),
                   className: 'masq-btn',
                   style: css('margin-top:14px; width:42px; height:42px; border-radius:50%; background:var(--m-lift-med); border:1px solid var(--m-border-hard); display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none;'),
                   dangerouslySetInnerHTML: { __html: v.timerIcon },
@@ -1831,13 +1872,13 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
-          h('div', { onClick: v.goResults, className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
+          h('div', { ...press(v.goResults), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
         ),
         v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:masq-rise .3s ease both;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out. Cast your votes and unmask the jester.'),
-            h('div', { onClick: v.dismissTimeUp, className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
+            h('div', { ...press(v.dismissTimeUp), className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
       );
@@ -1854,7 +1895,7 @@
         ),
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:2px;') },
-          h('div', { onClick: v.backToLobby, style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
+          h('div', { ...press(v.backToLobby, 'Back to the lobby'), style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent);") }, 'The Final Curtain')
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
@@ -1876,11 +1917,9 @@
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;") }, v.gameCategory)
             ),
-            h('div', { style: css(v.roundWordBlockStyle) },
-              h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);') },
-                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;") }, 'ROUND WORD'),
-                h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
-              )
+            h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);') },
+              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;") }, 'ROUND WORD'),
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
             )
           ),
           h('div', { style: css('margin-top:26px; padding:0 30px; text-align:center;') },
@@ -1891,7 +1930,7 @@
           )
         ),
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
-          h('div', { onClick: v.playAgain, className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
+          h('div', { ...press(v.playAgain), className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
         )
       );
     }
