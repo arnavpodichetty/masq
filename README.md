@@ -58,6 +58,15 @@ Some options rule each other out and are dimmed rather than hidden: *Jesters Kno
 
 Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, package manager, or build step required.
 
+```
+index.html    page shell, fonts, and the CSS for Jester Mode
+src/app.js    all game state, logic, and rendering
+src/data.js   word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
+masq.png      screenshot used by this README
+```
+
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js` before `src/app.js`.
+
 ## Credits
 
 Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya. Inspired by Spyfall and Imposter.

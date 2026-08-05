@@ -27,7 +27,7 @@
   @keyframes masq-backdrop { from { opacity:0 } to { opacity:1 } }
   .masq-btn { transition: transform .12s ease, opacity .12s ease; }
   .masq-btn:active { transform: scale(.95); opacity:.82; }
-  /* Controls are divs given button/switch roles in app.js — keyboard focus has
+  /* Controls are divs given button/switch roles in src/app.js — keyboard focus has
      to be visible on top of the dark stage. */
   [role="button"]:focus-visible, [role="switch"]:focus-visible,
   input:focus-visible, textarea:focus-visible {
@@ -139,7 +139,7 @@
 <div id="root"></div>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
-<script src="./data.js"></script>
-<script src="./app.js"></script>
+<script src="./src/data.js"></script>
+<script src="./src/app.js"></script>
 </body>
 </html>
