@@ -16,6 +16,15 @@
     return o;
   }
 
+  // Poster paths are pre-resolved into src/posters.js by tools/fetch-posters.js,
+  // so nothing here talks to the TMDB API at play time. A missing map (file
+  // failed to load) just means no posters, never a crash.
+  const POSTER_BASE = 'https://image.tmdb.org/t/p/w342';
+  function posterFor(title) {
+    const path = title && window.MASQ_POSTERS ? window.MASQ_POSTERS[title] : null;
+    return path ? POSTER_BASE + path : null;
+  }
+
   // Controls here are styled <div>s; this gives one real button semantics: Tab
   // to reach, Enter/Space to activate, a name to announce. Pass `label` only
   // when the content is a bare glyph like '×'. `extra` overrides the role.
@@ -693,6 +702,21 @@
       const apFakeRole = apRoleDisguised ? apFakeRoleRaw : null;
       const apFakeWord = apWordDisguised ? apFakeWordRaw : null;
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
+      // Posters track whatever this player is actually shown, never the round's
+      // real answer: a disguised jester gets their fake movie's poster, so the
+      // card can't picture the real one.
+      const apWordShown = apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
+      const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
+      // Movies round: the word is a film. Hidden along with the word itself.
+      const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
+      // Movie/TV Show Genres round: the *role* is a title, so the poster belongs
+      // to it. 'THE JESTER' and 'PERFORMER' aren't titles and match nothing.
+      const apRolePoster = isMovieTvRound ? posterFor(apRoleShown) : null;
+      const apPoster = apWordPoster || apRolePoster;
+      // A genre round with Show Word on stacks a word block and a role block
+      // under the poster, and either can wrap to two or three lines — at the
+      // full size that combination clips against the card's overflow:hidden.
+      const apPosterCompact = !!apRolePoster && showWord;
       const closeOverlay = () => {
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
@@ -722,12 +746,18 @@
         apName: ap ? ap.name : '',
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
-        apRole: apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole),
+        apRole: apRoleShown,
         apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieTvRound ? '#2f8f7a' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))),
-        apRoleSize: apIsUndisguisedJester ? '26px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px')),
-        apWord: apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord,
+        // Same reason as apWordSize: a poster leaves less room for a long title.
+        apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))),
+        apWord: apWordShown,
+        apPoster,
+        apPosterW: apPosterCompact ? '96px' : '112px',
+        apPosterH: apPosterCompact ? '144px' : '168px',
         apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))))),
-        apWordSize: isBiomeRound ? '20px' : '22px',
+        // A poster eats most of the card, so long titles get a smaller size to
+        // stay inside it rather than clipping against overflow:hidden.
+        apWordSize: apPoster ? '17px' : (isBiomeRound ? '20px' : '22px'),
         apWordBlockStyle: showWord ? '' : 'display:none;',
         apIsUndisguisedJester,
         apIsDisguisedJester: apRoleDisguised,
@@ -741,6 +771,7 @@
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
+        resultsPoster: isMoviesWordRound ? posterFor(st.roundWord) : null,
         cardOpen: st.cardOpen,
         openCurtain, closeOverlay, cancelOverlay, dismissOverlay,
         leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt1) 0 12px,var(--m-curt2) 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
@@ -1931,7 +1962,20 @@
           h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
-                h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
+                // On a Movies round the poster stands in for the mask — the
+                // title sits right underneath, so the image is decorative and
+                // a dead URL simply collapses out of the way.
+                v.apPoster
+                  ? h('img', {
+                      // Keyed by src so each poster is a fresh element: onError
+                      // hides the node imperatively, and React would otherwise
+                      // reuse that hidden node for the next player's poster.
+                      key: v.apPoster,
+                      src: v.apPoster, alt: '', draggable: false,
+                      onError: (e) => { e.target.style.display = 'none'; },
+                      style: css(`width:${v.apPosterW}; height:${v.apPosterH}; object-fit:cover; border-radius:8px; border:1px solid rgba(20,37,74,.35); box-shadow:0 6px 18px rgba(0,0,0,.4);`),
+                    })
+                  : h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
               ),
               v.apIsUndisguisedJester && h(React.Fragment, null,
                 h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:11px; letter-spacing:.15em; text-transform:uppercase; text-decoration:underline; color:${v.apRoleColor};`) }, 'Role'),
@@ -2055,12 +2099,20 @@
               )
             : h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, 'No One'),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
-            h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4);') },
+            // Centred so this tile still reads as balanced when the word tile
+            // beside it grows to fit a poster.
+            h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4); display:flex; flex-direction:column; justify-content:center;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;") }, v.gameCategory)
             ),
             h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;") }, 'ROUND WORD'),
+              v.resultsPoster && h('img', {
+                key: v.resultsPoster,
+                src: v.resultsPoster, alt: '', draggable: false,
+                onError: (e) => { e.target.style.display = 'none'; },
+                style: css('display:block; width:84px; height:126px; object-fit:cover; margin:8px auto 0; border-radius:6px; border:1px solid rgba(178,32,47,.4);'),
+              }),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
             )
           ),

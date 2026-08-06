@@ -59,18 +59,22 @@ Some options rule each other out and are dimmed rather than hidden: *Jesters Kno
 Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, package manager, or build step required.
 
 ```
-index.html    page shell, fonts, meta, and the CSS for Jester Mode
-favicon.svg   tab icon (the comedy mask)
-src/app.js    all game state, logic, and rendering
-src/data.js   word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
-masq.png      screenshot, used by this README and as the link-preview image
+index.html              page shell, fonts, meta, and the CSS for Jester Mode
+favicon.svg             tab icon (the comedy mask)
+src/app.js              all game state, logic, and rendering
+src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
+src/posters.js          generated poster map, exposed on window.MASQ_POSTERS
+tools/fetch-posters.js  Node script that regenerates src/posters.js from TMDB
+masq.png                screenshot, used by this README and as the link-preview image
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js` before `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js`, then `src/app.js`.
 
 ## Credits
 
 Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya. Inspired by Spyfall and Imposter.
+
+Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB.
 
 ## License
 
