@@ -46,19 +46,24 @@ Options that conflict with each other are dimmed rather than hidden.
 Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, package manager, or build step required.
 
 ```
-index.html              page shell, fonts, meta, and the CSS for Jester Mode
-favicon.svg             tab icon (the comedy mask)
-CHANGELOG.md            what changed in each version
-src/app.js              all game state, logic, and rendering
-src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
-src/artwork/posters.js  generated poster map, exposed on window.MASQ_POSTERS
-src/artwork/albums.js   generated album art map, exposed on window.MASQ_ALBUMS
-src/artwork/animals.js  generated animal photo map and photo credits, on window.MASQ_ANIMALS
-                        and window.MASQ_ANIMAL_CREDITS
-tools/fetch-posters.js  Node script that regenerates src/artwork/posters.js from TMDB
-tools/fetch-albums.js   Node script that regenerates src/artwork/albums.js from Deezer
-tools/fetch-animals.js  Node script that regenerates src/artwork/animals.js from Wikipedia
-masq.png                screenshot, used by this README and as the link-preview image
+src/
+├── artwork/           the three generated artwork maps
+│   ├── albums.js      album art map, exposed on window.MASQ_ALBUMS
+│   ├── animals.js     animal photo map and photo credits, on
+│   │                  window.MASQ_ANIMALS and window.MASQ_ANIMAL_CREDITS
+│   └── posters.js     poster map, exposed on window.MASQ_POSTERS
+├── app.js             all game state, logic, and rendering
+└── data.js            word/role catalogs, on window.MASQ_LOCATIONS_DATA
+tools/
+├── fetch-albums.js    Node script, regenerates src/artwork/albums.js from Deezer
+├── fetch-animals.js   Node script, regenerates src/artwork/animals.js from Wikipedia
+└── fetch-posters.js   Node script, regenerates src/artwork/posters.js from TMDB
+CHANGELOG.md           what changed in each version
+favicon.svg            tab icon (the comedy mask)
+index.html             page shell, fonts, meta, and the CSS for Jester Mode
+LICENSE
+masq.png               screenshot, used by this README and as the link-preview image
+README.md
 ```
 
 `index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/artwork/posters.js`, `src/artwork/albums.js` and `src/artwork/animals.js`, then `src/app.js`.
