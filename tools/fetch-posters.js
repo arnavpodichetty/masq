@@ -37,11 +37,14 @@ const OVERRIDES = {
   '21 Jump Street': 64688,                  // 21 Jump Street (2012)
   'Aladdin': 812,                           // Aladdin (1992)
   'Anaconda': 9360,                         // Anaconda (1997)
+  'Austin Powers': 816,                     // International Man of Mystery (1997), not the sequel
   'Avatar: The Last Airbender': 'tv:246',   // Avatar: The Last Airbender (2005)
   'Beauty and the Beast': 10020,            // Beauty and the Beast (1991)
   'Black Christmas': 16938,                 // Black Christmas (1974)
+  'Borat': 496,                             // Borat (2006), not Subsequent Moviefilm
   'Candyman': 9529,                         // Candyman (1992)
   'Cinderella': 11224,                      // Cinderella (1950)
+  'Clueless': 9603,                         // Clueless (1995), not the 1996 series
   'Dawn of the Dead': 924,                  // Dawn of the Dead (2004)
   'Death on the Nile': 505026,              // Death on the Nile (2022)
   'Demon Slayer': 'tv:85937',               // Demon Slayer: Kimetsu no Yaiba (2019)
@@ -52,6 +55,7 @@ const OVERRIDES = {
   'Ghost in the Shell': 9323,               // Ghost in the Shell (1995)
   'Ghostbusters': 620,                      // Ghostbusters (1984)
   'Hairspray': 2976,                        // Hairspray (2007)
+  'Harry Potter': 671,                      // The Philosopher's Stone (2001), not the 2026 series
   'Home Alone': 771,                        // Home Alone (1990)
   'How to Train Your Dragon': 10191,        // How to Train Your Dragon (2010)
   'I Know What You Did Last Summer': 3597,  // I Know What You Did Last Summer (1997)
@@ -61,10 +65,12 @@ const OVERRIDES = {
   'Kingdom': 'tv:70593',                    // Kingdom (2019), Korean zombie series
   'Les Miserables': 82695,                  // Les Misérables (2012)
   'Lethal Weapon': 941,                     // Lethal Weapon (1987)
+  'Mission Impossible': 954,                // Mission: Impossible (1996), not the 1966 series
   'Moana': 277834,                          // Moana (2016)
   'Murder on the Orient Express': 392044,   // Murder on the Orient Express (2017)
   'Night of the Living Dead': 10331,        // Night of the Living Dead (1968)
   'Papillon': 5924,                         // Papillon (1973)
+  'Percy Jackson': 32657,                   // The Lightning Thief (2010), not the 2023 series
   'Pride and Prejudice': 4348,              // Pride & Prejudice (2005)
   'Resident Evil': 1576,                    // Resident Evil (2002)
   'RoboCop': 5548,                          // RoboCop (1987)
@@ -73,6 +79,7 @@ const OVERRIDES = {
   'Snow White': 408,                        // Snow White and the Seven Dwarfs (1938)
   'Snowpiercer': 110415,                    // Snowpiercer (2013), the film not the series
   'Spotlight': 314365,                      // Spotlight (2015)
+  'Star Trek': 13475,                       // Star Trek (2009), not the 1966 series
   'The Chronicles of Narnia': 411,          // The Lion, the Witch and the Wardrobe (2005)
   'The Hobbit': 49051,                      // The Hobbit: An Unexpected Journey (2012)
   'The Host': 1255,                         // The Host (2006), Korean monster film
@@ -86,16 +93,21 @@ const OVERRIDES = {
   'WALL-E': 10681,                          // WALL·E (2008), spelled with an interpunct
   'War of the Worlds': 74,                  // War of the Worlds (2005)
   'Wild': 228970,                           // Wild (2014)
+  'Willow': 847,                            // Willow (1988), not the 2022 series
   'X': 760104,                              // X (2022) — see the norm() note below
 };
 
 // ---------------------------------------------------------------- title lists
 
-// Two lists need posters, and they search differently:
+// One list needs posters: every title used in Movie/TV Show Genres rounds, as a
+// real role or one of the jester's fakes. The Movies/TV word category is drawn
+// from that same set, so it adds nothing to fetch.
 //
-//   films  — the Movies word category, where the secret word is a film.
-//   screen — titles used as roles in Movie/TV Show Genres rounds (including the
-//            jester's fake roles). Many are TV series, so these search TV too.
+// Everything searches /search/multi, because the list is roughly half TV. It
+// used to split — the old Movies word category was films only, so it searched
+// /search/movie — but that split died with the merge, and forcing the movie
+// endpoint on a series now quietly resolves it to an unrelated film of the same
+// name. resolve() drops person results, so multi is safe for films too.
 //
 // data.js is a browser file that assigns onto window, so give it a window.
 function loadTitles() {
@@ -104,18 +116,13 @@ function loadTitles() {
   vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
 
-  const films = d.wordOnlyCatalog.Movies;
   const screen = new Set();
   for (const list of Object.values(d.movieTvCatalog)) list.forEach(t => screen.add(t));
   for (const list of Object.values(d.fakeMovieTvRoleCatalog)) list.forEach(t => screen.add(t));
-  if (!films.length || !screen.size) throw new Error(`Title lists not found in ${DATA}`);
+  for (const t of d.wordOnlyCatalog['Movies/TV'] || []) screen.add(t);
+  if (!screen.size) throw new Error(`Title lists not found in ${DATA}`);
 
-  // A title in both lists keeps its film match: that list is curated and pinned.
-  const filmSet = new Set(films);
-  return [
-    ...films.map(title => ({ title, endpoint: '/search/movie' })),
-    ...[...screen].filter(t => !filmSet.has(t)).map(title => ({ title, endpoint: '/search/multi' })),
-  ];
+  return [...screen].map(title => ({ title, endpoint: '/search/multi' }));
 }
 
 // ---------------------------------------------------------------------- TMDB
@@ -183,7 +190,7 @@ function write(posters) {
     .map(t => `    ${JSON.stringify(t)}: ${JSON.stringify(posters[t])},`);
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-posters.js — do not edit by hand.',
-    '// Maps a movie/TV title to its TMDB poster path, for both the Movies word',
+    '// Maps a movie/TV title to its TMDB poster path, for both the Movies/TV word',
     '// category and the titles used as roles in Movie/TV Show Genres rounds.',
     '// app.js builds the full URL as https://image.tmdb.org/t/p/w342<path>.',
     '(function () {',
@@ -202,8 +209,7 @@ function write(posters) {
   }
 
   const jobs = loadTitles();
-  const films = jobs.filter(j => j.endpoint === '/search/movie').length;
-  console.log(`Resolving ${films} film titles + ${jobs.length - films} screen-role titles…`);
+  console.log(`Resolving ${jobs.length} movie/TV titles…`);
 
   const results = await mapPool(jobs, 5, async (job) => {
     try {

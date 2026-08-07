@@ -483,7 +483,7 @@
       // Alphabetical: these arrays are also the order the category tiles and the
       // word lists render in.
       categories: ['Biomes', 'Locations', 'Movie/TV Show Genres', 'Music Genres'],
-      wordCategories: ['Animals', 'Food', 'Movies', 'Objects'],
+      wordCategories: ['Animals', 'Food', 'Movies/TV', 'Objects'],
       selCategories: ['Biomes', 'Locations', 'Movie/TV Show Genres', 'Music Genres'],
       roundJesterIndices: null,
       roundStarterIdx: null,
@@ -736,7 +736,7 @@
       const isFoodRound = roundCategory === 'Food';
       const isAnimalsRound = roundCategory === 'Animals';
       const isObjectsRound = roundCategory === 'Objects';
-      const isMoviesWordRound = roundCategory === 'Movies';
+      const isMoviesWordRound = roundCategory === 'Movies/TV';
       const isCustomRound = !!customByName[roundCategory];
       const actOnePlayers = players.map(p => {
         const seen = !!st.viewed[p.id];
@@ -767,7 +767,7 @@
       // card can't picture the real one.
       const apWordShown = apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
       const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
-      // Movies round: the word is a film. Hidden along with the word itself.
+      // Movies/TV round: the word is a film or series. Hidden with the word.
       const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
       // Word Mode deals roles but never prints them, so their artwork stays off
       // too — a picture of a role nobody can read still gives it away.
@@ -837,7 +837,7 @@
         apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (apRoleAlbum ? '16px' : (apRoleAnimal ? '18px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))))),
         apWord: apWordShown,
         apArt, apArtW, apArtH, apArtFocus: apArtShape.focus,
-        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))))),
+        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : 'Location')))))))),
         // Artwork eats most of the card, so long titles get a smaller size to
         // stay inside it rather than clipping against overflow:hidden.
         apWordSize: apArt ? '17px' : (isBiomeRound ? '20px' : '22px'),
@@ -996,7 +996,7 @@
           { cat: 'Music Genres', words: musicGenreNames },
           { cat: 'Animals', words: wordOnlyCatalog.Animals },
           { cat: 'Food', words: wordOnlyCatalog.Food },
-          { cat: 'Movies', words: wordOnlyCatalog.Movies },
+          { cat: 'Movies/TV', words: wordOnlyCatalog['Movies/TV'] },
           { cat: 'Objects', words: wordOnlyCatalog.Objects },
         ].map(g => {
           const open = (st.wordListExpanded || []).includes(g.cat);
@@ -1284,7 +1284,7 @@
             if (category === 'Food') return wordOnlyCatalog.Food;
             if (category === 'Animals') return wordOnlyCatalog.Animals;
             if (category === 'Objects') return wordOnlyCatalog.Objects;
-            if (category === 'Movies') return wordOnlyCatalog.Movies;
+            if (category === 'Movies/TV') return wordOnlyCatalog['Movies/TV'];
             return locationNames;
           };
           // Crossed-out words are skipped; the word list keeps at least one per
@@ -1363,8 +1363,8 @@
             nextRound = buildWordOnlyRound('Animals');
           } else if (chosenCategory === 'Objects') {
             nextRound = buildWordOnlyRound('Objects');
-          } else if (chosenCategory === 'Movies') {
-            nextRound = buildWordOnlyRound('Movies');
+          } else if (chosenCategory === 'Movies/TV') {
+            nextRound = buildWordOnlyRound('Movies/TV');
           } else {
             nextRound = buildRound('Locations', pickFrom('Locations'), locationCatalog, fakeLocationRoleCatalog);
           }
