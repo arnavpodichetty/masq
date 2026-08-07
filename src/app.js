@@ -591,6 +591,41 @@
       }
     }
 
+    // Starts the fetch for every image this round can put on a card, the moment
+    // the round is dealt. The card only mounts when a player opens their
+    // overlay, so otherwise the request begins one tap before the curtain and
+    // the artwork lands late. Worst on Music rounds: our cover size isn't one of
+    // the four Deezer pre-renders, so their CDN generates it on first request
+    // and a cold cover costs ~0.3s against ~0.03s for a warm one.
+    //
+    // Fire and forget. Nothing reads the result — the point is that the bytes
+    // are in the browser cache by the time the <img> mounts — and a preload that
+    // fails costs nothing, since the card already treats a dead URL as no art.
+    __preloadRoundArt(round, gameMode) {
+      if (typeof window === 'undefined' || !window.Image) return;
+      const cat = round.roundCategory;
+      // Mirrors how renderVals picks apArt: word-only rounds print no roles, so
+      // their role artwork stays unfetched too.
+      const roleArt = gameMode === 'words' ? null
+        : cat === 'Movie/TV Show Genres' ? posterFor
+          : cat === 'Music Genres' ? albumFor
+            : cat === 'Biomes' ? animalFor
+              : null;
+      const urls = new Set();
+      const add = (fn, value) => { const url = fn(value); if (url) urls.add(url); };
+      if (roleArt) {
+        Object.values(round.roundRoleMap || {}).forEach(r => add(roleArt, r));
+        Object.values(round.roundJesterRoleMap || {}).forEach(r => add(roleArt, r));
+      }
+      // The Movies/TV word category pictures the word itself, and a disguised
+      // jester is shown their fake word's poster instead.
+      if (cat === 'Movies/TV') {
+        add(posterFor, round.roundWord);
+        Object.values(round.roundJesterWordMap || {}).forEach(w => add(posterFor, w));
+      }
+      urls.forEach((url) => { const img = new window.Image(); img.src = url; });
+    }
+
     __ensureAudioCtx() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
@@ -1380,6 +1415,9 @@
             }
           }
           nextRound = { ...nextRound, roundJesterWordMap };
+          // Ahead of the render, so the fetches are already in flight while
+          // players are still passing the phone around.
+          this.__preloadRoundArt(nextRound, st.gameMode);
           const roundStarterIdx = Math.floor(Math.random() * st.playerList.length);
           // The dealt count stays in roundJesterIndices; writing it to
           // jesterCount would let a random round overwrite the host's choice.
