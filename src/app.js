@@ -812,6 +812,18 @@
             : (fakeWord ? 'Held the fake word ' + fakeWord : null),
         };
       });
+      // Everyone who held a real role, for the results screen. Reads off the
+      // same map the reveal card did, so it can only ever show what a player was
+      // actually dealt.
+      //
+      // Word Mode is excluded outright, not left to fall out of an empty map. A
+      // role category picked in Word Mode still fills roundRoleMap — buildRound
+      // doesn't check the mode — but the cards never show a role there, so those
+      // roles were dealt to nobody. Everyone held the same word, and the tile
+      // above already says which.
+      const castReveals = st.gameMode === 'words' ? [] : players
+        .filter(p => !p.jester && roundRoleMap[p.id])
+        .map(p => ({ name: p.name, role: roundRoleMap[p.id] }));
       return {
         actOnePlayers, allSeen,
         showOverlay: !!ap,
@@ -1246,6 +1258,8 @@
         jesterRevealHeading: jesterReveals.length === 0
           ? 'There Was No Jester'
           : jesterReveals.length === 1 ? 'The Jester was…' : 'The Jesters were…',
+        castReveals,
+        castRevealHeading: jesterReveals.length ? 'The Rest of the Company' : 'The Company',
         goReveal: () => {
           let newJesterCount = jesterCount;
           if (st.randJesters) {
@@ -2226,6 +2240,17 @@
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
             )
           ),
+          // Scrolls inside its own box rather than growing the centred column,
+          // which a full table would otherwise push off the top of the screen.
+          v.castReveals.length > 0 && h('div', { style: css('margin-top:22px; padding:0 26px; width:100%; max-width:360px;') },
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-results-sub); text-align:center; margin-bottom:8px;") }, v.castRevealHeading),
+            h('div', { style: css('display:flex; flex-direction:column; gap:3px; max-height:180px; overflow-y:auto;') },
+              v.castReveals.map((p, i) => h('div', { key: i, style: css('display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:7px 12px; background:var(--m-lift); border-radius:8px;') },
+                h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:var(--m-text-bright); flex:none;") }, p.name),
+                h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); text-align:right;") }, p.role)
+              ))
+            )
+          ),
           h('div', { style: css('margin-top:26px; padding:0 30px; text-align:center;') },
             !v.hasJester && h(React.Fragment, null,
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:20px; color:#9ad2a3;") }, 'Every performer was genuine.'),
@@ -2234,7 +2259,7 @@
           )
         ),
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
-          h('div', { ...press(v.playAgain), className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'ENCORE · PLAY AGAIN')
+          h('div', { ...press(v.playAgain), className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'PLAY AGAIN')
         )
       );
     }
