@@ -52,12 +52,17 @@ src/app.js              all game state, logic, and rendering
 src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
 src/posters.js          generated poster map, exposed on window.MASQ_POSTERS
 src/albums.js           generated album art map, exposed on window.MASQ_ALBUMS
+src/animals.js          generated animal photo map and photo credits, on window.MASQ_ANIMALS
+                        and window.MASQ_ANIMAL_CREDITS
 tools/fetch-posters.js  Node script that regenerates src/posters.js from TMDB
 tools/fetch-albums.js   Node script that regenerates src/albums.js from Deezer
+tools/fetch-animals.js  Node script that regenerates src/animals.js from Wikipedia
 masq.png                screenshot, used by this README and as the link-preview image
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js` and `src/albums.js`, then `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js`, `src/albums.js` and `src/animals.js`, then `src/app.js`.
+
+The three artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js` also collects the photo credits shown in-game, and refuses to write anything if it finds a photo that needs crediting and no name to credit.
 
 ## Credits
 
@@ -65,6 +70,10 @@ Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya
 
 Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Album art comes from [Deezer](https://www.deezer.com/), which likewise does not endorse or certify it.
 
+Animal photographs are the lead images of [Wikipedia](https://en.wikipedia.org/) articles, hosted by [Wikimedia Commons](https://commons.wikimedia.org/). Each is under its own free licence — mostly Creative Commons, the rest public domain — and most of those licences ask that the photographer be credited by name. So every one of them is named in the game itself, under **Settings → Credits**, and in `src/animals.js` next to the photo they took.
+
 ## License
 
 All Rights Reserved — see [LICENSE](LICENSE). Feel free to play the game via the live link above; the source code is not licensed for reuse or redistribution.
+
+That covers this repository's own code and word lists. It doesn't cover the artwork, which belongs to the people credited above and stays under the licences they chose. Those licences don't reach back the other way either: the photographs are shown unaltered and merely sit alongside the game rather than being built into it, so the ShareAlike terms on many of them place no condition on the code here.
