@@ -182,6 +182,7 @@
     '--m-page': '#0e0810',
     '--m-page-glow': 'transparent',
     '--m-page-vignette': '#190e24',
+    '--m-chrome': '#190e24',
     '--m-shell': '#1a070b',
     '--m-screen': '#0e0810',
     '--m-modal': '#16101a',
@@ -357,7 +358,7 @@
     document.body.classList.toggle('jester', !!jesterMode);
     document.body.style.background = theme['--m-page'];
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme['--m-page']);
+    if (meta) meta.setAttribute('content', theme['--m-chrome'] || theme['--m-page']);
     const scheme = document.querySelector('meta[name="color-scheme"]');
     if (scheme) scheme.setAttribute('content', (darkMode || jesterMode) ? 'dark' : 'light');
   }
@@ -2154,7 +2155,7 @@
       const v = this.renderVals();
       const jester = this.state.jesterMode;
       const glyphs = ['◆', '✦', '♦', '✧'];
-      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); display:flex; align-items:center; justify-content:center;') },
+      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(180deg, var(--m-page-vignette) 0, var(--m-page-vignette) env(safe-area-inset-top, 0px), transparent env(safe-area-inset-top, 0px), transparent calc(100% - env(safe-area-inset-bottom, 0px)), var(--m-page-vignette) calc(100% - env(safe-area-inset-bottom, 0px))), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); display:flex; align-items:center; justify-content:center;') },
         jester && h('div', { className: 'jester-page-fx' }),
         h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
