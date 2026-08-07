@@ -48,6 +48,7 @@ Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, packag
 ```
 index.html              page shell, fonts, meta, and the CSS for Jester Mode
 favicon.svg             tab icon (the comedy mask)
+CHANGELOG.md            what changed in each version
 src/app.js              all game state, logic, and rendering
 src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
 src/artwork/posters.js  generated poster map, exposed on window.MASQ_POSTERS
