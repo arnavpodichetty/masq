@@ -25,6 +25,15 @@
     return path ? POSTER_BASE + path : null;
   }
 
+  // Album art works the same way, from src/albums.js — except Deezer hands out a
+  // per-album URL prefix rather than a path onto one host, so the size is what
+  // gets appended. 300px covers the 132px square the card draws at 2x.
+  const ALBUM_SIZE = '300x300-000000-80-0-0.jpg';
+  function albumFor(entry) {
+    const prefix = entry && window.MASQ_ALBUMS ? window.MASQ_ALBUMS[entry] : null;
+    return prefix ? prefix + ALBUM_SIZE : null;
+  }
+
   // Controls here are styled <div>s; this gives one real button semantics: Tab
   // to reach, Enter/Space to activate, a name to announce. Pass `label` only
   // when the content is a bare glyph like '×'. `extra` overrides the role.
@@ -702,21 +711,27 @@
       const apFakeRole = apRoleDisguised ? apFakeRoleRaw : null;
       const apFakeWord = apWordDisguised ? apFakeWordRaw : null;
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
-      // Posters track whatever this player is actually shown, never the round's
+      // Artwork tracks whatever this player is actually shown, never the round's
       // real answer: a disguised jester gets their fake movie's poster, so the
       // card can't picture the real one.
       const apWordShown = apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
       const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
       // Movies round: the word is a film. Hidden along with the word itself.
       const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
+      // Word Mode deals roles but never prints them, so their artwork stays off
+      // too — a picture of a role nobody can read still gives it away.
+      const apRoleVisible = st.gameMode !== 'words';
       // Movie/TV Show Genres round: the *role* is a title, so the poster belongs
       // to it. 'THE JESTER' and 'PERFORMER' aren't titles and match nothing.
-      const apRolePoster = isMovieTvRound ? posterFor(apRoleShown) : null;
-      const apPoster = apWordPoster || apRolePoster;
+      const apRolePoster = isMovieTvRound && apRoleVisible ? posterFor(apRoleShown) : null;
+      // Music Genres round: the role is "Artist (Song)", pictured by that song's
+      // album. Square, so it gets its own size rather than a poster's 2:3.
+      const apRoleAlbum = isMusicRound && apRoleVisible ? albumFor(apRoleShown) : null;
+      const apArt = apWordPoster || apRolePoster || apRoleAlbum;
       // A genre round with Show Word on stacks a word block and a role block
-      // under the poster, and either can wrap to two or three lines — at the
+      // under the artwork, and either can wrap to two or three lines — at the
       // full size that combination clips against the card's overflow:hidden.
-      const apPosterCompact = !!apRolePoster && showWord;
+      const apArtCompact = !!(apRolePoster || apRoleAlbum) && showWord;
       const closeOverlay = () => {
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
@@ -748,16 +763,19 @@
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apRoleShown,
         apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isHistoricalRound ? '#b5893c' : (isMovieTvRound ? '#2f8f7a' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))),
-        // Same reason as apWordSize: a poster leaves less room for a long title.
-        apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))),
+        // Same reason as apWordSize: artwork leaves less room for a long title,
+        // and "Artist (Song)" runs longer than a film title does.
+        apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (apRoleAlbum ? '16px' : (isBiomeRound ? '22px' : ((isMusicRound || isMovieTvRound) ? '19px' : '23px')))),
         apWord: apWordShown,
-        apPoster,
-        apPosterW: apPosterCompact ? '96px' : '112px',
-        apPosterH: apPosterCompact ? '144px' : '168px',
+        apArt,
+        // A square cover can stand taller than a poster and still leave the same
+        // room underneath, so it isn't shrunk as hard.
+        apArtW: apRoleAlbum ? (apArtCompact ? '108px' : '132px') : (apArtCompact ? '96px' : '112px'),
+        apArtH: apRoleAlbum ? (apArtCompact ? '108px' : '132px') : (apArtCompact ? '144px' : '168px'),
         apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie' : 'Location')))))))),
-        // A poster eats most of the card, so long titles get a smaller size to
+        // Artwork eats most of the card, so long titles get a smaller size to
         // stay inside it rather than clipping against overflow:hidden.
-        apWordSize: apPoster ? '17px' : (isBiomeRound ? '20px' : '22px'),
+        apWordSize: apArt ? '17px' : (isBiomeRound ? '20px' : '22px'),
         apWordBlockStyle: showWord ? '' : 'display:none;',
         apIsUndisguisedJester,
         apIsDisguisedJester: apRoleDisguised,
@@ -1962,18 +1980,18 @@
           h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
-                // On a Movies round the poster stands in for the mask — the
-                // title sits right underneath, so the image is decorative and
-                // a dead URL simply collapses out of the way.
-                v.apPoster
+                // On a Movies or Music round the poster or album cover stands in
+                // for the mask — the title sits right underneath, so the image
+                // is decorative and a dead URL simply collapses out of the way.
+                v.apArt
                   ? h('img', {
-                      // Keyed by src so each poster is a fresh element: onError
+                      // Keyed by src so each image is a fresh element: onError
                       // hides the node imperatively, and React would otherwise
-                      // reuse that hidden node for the next player's poster.
-                      key: v.apPoster,
-                      src: v.apPoster, alt: '', draggable: false,
+                      // reuse that hidden node for the next player's artwork.
+                      key: v.apArt,
+                      src: v.apArt, alt: '', draggable: false,
                       onError: (e) => { e.target.style.display = 'none'; },
-                      style: css(`width:${v.apPosterW}; height:${v.apPosterH}; object-fit:cover; border-radius:8px; border:1px solid rgba(20,37,74,.35); box-shadow:0 6px 18px rgba(0,0,0,.4);`),
+                      style: css(`width:${v.apArtW}; height:${v.apArtH}; object-fit:cover; border-radius:8px; border:1px solid rgba(20,37,74,.35); box-shadow:0 6px 18px rgba(0,0,0,.4);`),
                     })
                   : h(Mask, { comedy: v.apComedy, tragedy: v.apTragedy, cracked: v.apIsUndisguisedJester, faceColor: v.apFace, lineColor: v.apLine, size: 60, hat: v.jesterMode })
               ),

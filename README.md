@@ -64,17 +64,19 @@ favicon.svg             tab icon (the comedy mask)
 src/app.js              all game state, logic, and rendering
 src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
 src/posters.js          generated poster map, exposed on window.MASQ_POSTERS
+src/albums.js           generated album art map, exposed on window.MASQ_ALBUMS
 tools/fetch-posters.js  Node script that regenerates src/posters.js from TMDB
+tools/fetch-albums.js   Node script that regenerates src/albums.js from Deezer
 masq.png                screenshot, used by this README and as the link-preview image
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js`, then `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js` and `src/albums.js`, then `src/app.js`.
 
 ## Credits
 
 Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya. Inspired by Spyfall and Imposter.
 
-Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB.
+Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Album art comes from [Deezer](https://www.deezer.com/), which likewise does not endorse or certify it.
 
 ## License
 
