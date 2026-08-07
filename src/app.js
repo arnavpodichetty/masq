@@ -1215,6 +1215,7 @@
         soundEffects: st.soundEffects,
         soundEffectsBg: st.soundEffects ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         soundEffectsThumb: st.soundEffects ? 'translateX(22px)' : 'translateX(2px)',
+        soundEffectsNote: st.timeLimit === 0 ? 'Nothing to chime with no limit' : 'Chimes when the round runs out',
         toggleSoundEffects: () => this.setState({ soundEffects: !st.soundEffects }),
         playerCount: st.playerList.length,
         isLobby: st.screen === 'lobby',
@@ -1591,6 +1592,17 @@
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-label); margin-top:4px;") }, v.timeLimitUnit)
           ),
           h('div', { ...press(v.incTime, 'Lengthen the time limit'), style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
+        ),
+        // The chime only ever plays when this timer expires, so it lives here
+        // rather than in Settings. Dimmed at 'No limit', where nothing expires.
+        h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css(`display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin-top:20px; background:var(--m-lift); border-radius:12px; cursor:pointer; opacity:${v.hasTimeLimit ? '1' : '.45'}; transition:opacity .2s;`) },
+          h('div', null,
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); margin-top:2px;") }, v.soundEffectsNote)
+          ),
+          h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
+            h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
+          )
         )
       );
     }
@@ -1852,12 +1864,6 @@
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Show Progressive Jester Odds'),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showJesterOddsBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showJesterOddsThumb}; transition:transform .25s;`) })
-            )
-          ),
-          h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
-            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
-              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
             )
           ),
           h('div', { ...press(v.toggleLightMode, 'Light mode', { role: 'switch', 'aria-checked': String(v.lightMode) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
