@@ -11,10 +11,29 @@ whatever the label said at the time.
 
 ## 1.3.0 — 2026-08-07
 
-The table stays set between sessions, the screen catalogs got a pass, and the
-results screen finally shows what everyone was holding.
+A new category, the table stays set between sessions, the screen catalogs got a
+pass, and the results screen finally shows what everyone was holding.
 
 **Added**
+- **Cuisines**, a new role category for either mode — the secret word is a
+  cuisine and your role is a dish from it. 20 cuisines, 12 dishes each. Same
+  shape as Biomes: the fake roles handed to a disguised jester are real dishes
+  from a *different* cuisine, so an Italian card holding `Pad Thai` gives them
+  away the moment they describe it. Dish names are deaccented to match the house
+  style in `musicGenreCatalog`; Wikipedia redirects `Spatzle` to `Spätzle` on its
+  own, so nothing is lost by it.
+- **Dish photographs on Cuisines cards**, from Wikipedia lead images, the same
+  source as the Biomes animals. All 240 dishes are pictured. They sit in the
+  animals' landscape frame but cropped centrally rather than high — food is
+  photographed centred on the plate, where an upright animal keeps its head near
+  the top.
+- `tools/fetch-cuisines.js`, the generator behind `src/artwork/dishes.js`.
+  Output is committed, so a round never waits on Wikipedia. Like
+  `fetch-animals.js` it collects photographer credits and refuses to write if a
+  photo needs one and hasn't got one. It adds a check that fetcher didn't need:
+  it refuses when two dishes resolve to the same photograph, which would hand
+  two players the same card. That check earned itself immediately — `Niter
+  Kibbeh`'s article leads with a kitfo photo, so it and `Kitfo` collided.
 - **The player list is saved** to `localStorage` under `masq.players`, so the
   same group is waiting when you reopen the game instead of `Player 1` through
   `Player 4`. Names and their ids are stored together as one list — round state

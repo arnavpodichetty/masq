@@ -1,6 +1,6 @@
-// Masq word/role data: the role catalogs (Locations, Biomes, Movie/TV Genres,
-// Music Genres), a matching fake-role catalog for each, and the word-only
-// catalogs. Plain script, exposed on window.MASQ_LOCATIONS_DATA.
+// Masq word/role data: the role catalogs (Locations, Biomes, Cuisines, Movie/TV
+// Genres, Music Genres), a matching fake-role catalog for each, and the
+// word-only catalogs. Plain script, exposed on window.MASQ_LOCATIONS_DATA.
 //
 // Real catalogs come first, then the fake-role catalogs that shadow them, then
 // anything parked. Within each catalog, keys and their role/word lists are
@@ -29,6 +29,31 @@
     'Tropical Rainforest': ['Anaconda', 'Gorilla', 'Harpy Eagle', 'Howler Monkey', 'Jaguar', 'Poison Dart Frog', 'Sloth', 'Toucan'],
     'Urban Environment (City)': ['Cockroach', 'Opossum', 'Pigeon', 'Raccoon', 'Rat', 'Sparrow', 'Squirrel', 'Stray Cat'],
     'Volcanic Island': ['Fire Salamander', 'Galápagos Iguana', 'Hawaiian Hoary Bat', 'Lava Lizard', 'Peregrine Falcon', 'Vampire Ground Finch', 'Volcanic Mouse', 'Volcano Rabbit'],
+  };
+
+  // Dish names are deaccented, like the artist names in musicGenreCatalog, so
+  // the lists sort plainly and nothing depends on the font having the glyph.
+  var cuisineCatalog = {
+    'American': ['BLT', 'Buffalo Wings', 'Cheeseburger', 'Chicken Fried Steak', 'Clam Chowder', 'Cobb Salad', 'Corn Dog', 'Grilled Cheese', 'Mac and Cheese', 'Meatloaf', 'Pecan Pie', 'Pulled Pork'],
+    'Brazilian': ['Acai Bowl', 'Acaraje', 'Brigadeiro', 'Coxinha', 'Farofa', 'Feijoada', 'Moqueca', 'Pao de Queijo', 'Pastel', 'Picanha', 'Quindim', 'Vatapa'],
+    'British': ['Bangers and Mash', 'Beef Wellington', 'Black Pudding', 'Cornish Pasty', 'Eton Mess', 'Fish and Chips', 'Full English Breakfast', 'Scotch Egg', "Shepherd's Pie", 'Sticky Toffee Pudding', 'Toad in the Hole', 'Yorkshire Pudding'],
+    'Chinese': ['Char Siu', 'Congee', 'Dan Dan Noodles', 'Dim Sum', 'Hot Pot', 'Kung Pao Chicken', 'Mapo Tofu', 'Peking Duck', 'Sweet and Sour Pork', 'Wonton Soup', 'Xiao Long Bao', 'Zhajiangmian'],
+    'Ethiopian': ['Beyaynetu', 'Dabo Kolo', 'Doro Wat', 'Fir Fir', 'Genfo', 'Gored Gored', 'Himbasha', 'Injera', 'Kitfo', 'Kocho', 'Shiro', 'Tihlo'],
+    'Filipino': ['Adobo', 'Bibingka', 'Bicol Express', 'Halo-Halo', 'Kare-Kare', 'Lechon', 'Lumpia', 'Pancit', 'Sinigang', 'Sisig', 'Taho', 'Tinola'],
+    'French': ['Baguette', 'Bouillabaisse', 'Cassoulet', 'Coq au Vin', 'Creme Brulee', 'Croissant', 'Croque Monsieur', 'Duck Confit', 'Escargot', 'Macaron', 'Quiche Lorraine', 'Ratatouille'],
+    'German': ['Bratwurst', 'Currywurst', 'Kasespatzle', 'Leberkase', 'Maultaschen', 'Pretzel', 'Rouladen', 'Sauerbraten', 'Schwarzwalder Kirschtorte', 'Spatzle', 'Stollen', 'Wiener Schnitzel'],
+    'Greek': ['Baklava', 'Dolmades', 'Gyro', 'Horiatiki Salad', 'Kleftiko', 'Moussaka', 'Pastitsio', 'Souvlaki', 'Spanakopita', 'Taramasalata', 'Tzatziki', 'Youvetsi'],
+    'Indian': ['Biryani', 'Butter Chicken', 'Chaat', 'Chole Bhature', 'Dosa', 'Idli', 'Palak Paneer', 'Rogan Josh', 'Samosa', 'Tandoori Chicken', 'Vada Pav', 'Vindaloo'],
+    'Italian': ['Bruschetta', 'Carbonara', 'Focaccia', 'Gnocchi', 'Lasagna', 'Minestrone', 'Osso Buco', 'Panna Cotta', 'Risotto', 'Saltimbocca', 'Tiramisu', 'Vitello Tonnato'],
+    'Japanese': ['Chawanmushi', 'Katsu Curry', 'Miso Soup', 'Okonomiyaki', 'Onigiri', 'Ramen', 'Soba', 'Sushi', 'Takoyaki', 'Tempura', 'Tonkatsu', 'Yakitori'],
+    'Korean': ['Banchan', 'Bibimbap', 'Bulgogi', 'Gimbap', 'Japchae', 'Jjajangmyeon', 'Kimchi Jjigae', 'Mandu', 'Samgyeopsal', 'Sundubu Jjigae', 'Tteokbokki', 'Yangnyeom Chicken'],
+    'Lebanese': ['Baba Ghanoush', 'Falafel', 'Fattoush', 'Hummus', 'Kafta', 'Kibbeh', 'Knafeh', 'Manakish', 'Mujadara', 'Sfiha', 'Shawarma', 'Tabbouleh'],
+    'Mexican': ['Birria', 'Chilaquiles', 'Enchiladas', 'Esquites', 'Guacamole', 'Mole Poblano', 'Pozole', 'Quesadilla', 'Tacos al Pastor', 'Tamales', 'Tlayuda', 'Torta'],
+    'Moroccan': ['Baghrir', 'Bastilla', 'Briouat', 'Chebakia', 'Couscous', 'Harcha', 'Harira', 'Mechoui', 'Msemen', 'Rfissa', 'Tagine', 'Zaalouk'],
+    'Peruvian': ['Aji de Gallina', 'Anticuchos', 'Causa', 'Ceviche', 'Chicharron', 'Lomo Saltado', 'Papa a la Huancaina', 'Picarones', 'Pollo a la Brasa', 'Rocoto Relleno', 'Tacu Tacu', 'Tiradito'],
+    'Spanish': ['Churros', 'Croquetas', 'Fabada', 'Gambas al Ajillo', 'Gazpacho', 'Jamon Iberico', 'Paella', 'Patatas Bravas', 'Pisto', 'Pulpo a la Gallega', 'Salmorejo', 'Tortilla Espanola'],
+    'Thai': ['Green Curry', 'Khao Soi', 'Larb', 'Mango Sticky Rice', 'Massaman Curry', 'Pad Kra Pao', 'Pad See Ew', 'Pad Thai', 'Satay', 'Som Tam', 'Tom Kha Gai', 'Tom Yum'],
+    'Vietnamese': ['Banh Mi', 'Banh Xeo', 'Bun Bo Hue', 'Bun Cha', 'Bun Rieu', 'Cao Lau', 'Cha Ca', 'Com Tam', 'Goi Cuon', 'Hu Tieu', 'Mi Quang', 'Pho'],
   };
 
   var locationCatalog = {
@@ -250,6 +275,32 @@
     'Volcanic Island': ['Harpy Eagle', 'Sparrow', 'Zebra'],
   };
 
+  // Each fake is a real dish from a different cuisine — near enough to read as
+  // a genuine card, far enough that saying anything true about it gives the
+  // jester away.
+  var fakeCuisineRoleCatalog = {
+    'American': ['Kibbeh', 'Okonomiyaki', 'Tagine'],
+    'Brazilian': ['Bangers and Mash', 'Kimchi Jjigae', 'Spatzle'],
+    'British': ['Ceviche', 'Mapo Tofu', 'Tteokbokki'],
+    'Chinese': ['Bouillabaisse', 'Cornish Pasty', 'Injera'],
+    'Ethiopian': ['Croque Monsieur', 'Takoyaki', 'Tortilla Espanola'],
+    'Filipino': ['Beef Wellington', 'Harira', 'Pecan Pie'],
+    'French': ['Bibimbap', 'Pad Thai', 'Vada Pav'],
+    'German': ['Anticuchos', 'Goi Cuon', 'Moqueca'],
+    'Greek': ['Corn Dog', 'Doro Wat', 'Xiao Long Bao'],
+    'Indian': ['Cassoulet', 'Feijoada', 'Yorkshire Pudding'],
+    'Italian': ['Adobo', 'Kitfo', 'Pozole'],
+    'Japanese': ['Baba Ghanoush', 'Chilaquiles', "Shepherd's Pie"],
+    'Korean': ['Escargot', 'Lomo Saltado', 'Maultaschen'],
+    'Lebanese': ['Bun Cha', 'Clam Chowder', 'Quindim'],
+    'Mexican': ['Congee', 'Eton Mess', 'Yakitori'],
+    'Moroccan': ['Bulgogi', 'Gnocchi', 'Pho'],
+    'Peruvian': ['Fish and Chips', 'Samosa', 'Sauerbraten'],
+    'Spanish': ['Genfo', 'Kare-Kare', 'Tom Yum'],
+    'Thai': ['Cobb Salad', 'Osso Buco', 'Rfissa'],
+    'Vietnamese': ['Baklava', 'Currywurst', 'Papa a la Huancaina'],
+  };
+
   var fakeLocationRoleCatalog = {
     'Airplane': ['Lifeguard', 'Nail Specialist', 'Security Officer'],
     'Airport': ['Bellhop', 'Coach', 'Shackled Prisoner'],
@@ -407,11 +458,13 @@
 
   window.MASQ_LOCATIONS_DATA = {
     'biomeCatalog': biomeCatalog,
+    'cuisineCatalog': cuisineCatalog,
     'locationCatalog': locationCatalog,
     'movieTvCatalog': movieTvCatalog,
     'musicGenreCatalog': musicGenreCatalog,
     'wordOnlyCatalog': wordOnlyCatalog,
     'fakeBiomeRoleCatalog': fakeBiomeRoleCatalog,
+    'fakeCuisineRoleCatalog': fakeCuisineRoleCatalog,
     'fakeLocationRoleCatalog': fakeLocationRoleCatalog,
     'fakeMovieTvRoleCatalog': fakeMovieTvRoleCatalog,
     'fakeMusicGenreRoleCatalog': fakeMusicGenreRoleCatalog,
