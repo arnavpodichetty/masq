@@ -2154,7 +2154,7 @@
       const v = this.renderVals();
       const jester = this.state.jesterMode;
       const glyphs = ['◆', '✦', '♦', '✧'];
-      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); display:flex; align-items:center; justify-content:center;') },
+      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); display:flex; align-items:center; justify-content:center;') },
         jester && h('div', { className: 'jester-page-fx' }),
         h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
