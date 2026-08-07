@@ -40,16 +40,22 @@ const PACE_MS = 150;
 // The trailing comment says what each id actually is — the point of pinning is
 // that these can't drift, so verify before editing one. Sorted by entry.
 const OVERRIDES = {
-  'Bach (Air on the G String)': 'album:387441267',                // English Baroque Soloists — Bach: Orchestral Suites BWV 1066-1069
-  'Beethoven (Fur Elise)': 'album:254829962',                     // Stephanie McCallum — Für Elise: Bagatelles for Piano
-  'Brahms (Lullaby)': 'album:95830652',                           // Renée Fleming — Brahms: Wiegenlied (Lullaby), Op. 49 No. 4
-  'Chopin (Nocturne in E-flat Major)': 'album:556230022',         // Olga Scheps — Chopin Nocturnes
-  'Debussy (Clair de Lune)': 'album:282737252',                   // Daniel Barenboim — Debussy: Suite bergamasque: III. Clair de lune
-  'Diplo (Lean On)': 'album:458930985',                           // Major Lazer — Peace Is the Mission
-  'Grieg (In the Hall of the Mountain King)': 'album:6585186',    // Berliner Philharmoniker — Grieg: Peer Gynt Suites
-  'Mozart (Eine kleine Nachtmusik)': 'album:477390715',           // George Szell — Mozart: Eine kleine Nachtmusik, K. 525
-  'Tchaikovsky (Swan Lake)': 'album:239084412',                   // Berliner Philharmoniker — Tchaikovsky: Ballet Suites
-  'Vivaldi (The Four Seasons)': 'album:1171382',                  // La Petite Bande — Vivaldi: The Four Seasons
+  'Bach (Air on the G String)': 'album:387441267',              // English Baroque Soloists — Bach: Orchestral Suites BWV 1066-1069
+  'Beethoven (Fur Elise)': 'album:254829962',                   // Stephanie McCallum — Für Elise: Bagatelles for Piano
+  'Brahms (Lullaby)': 'album:95830652',                         // Renée Fleming — Brahms: Wiegenlied (Lullaby), Op. 49 No. 4
+  'Chopin (Nocturne in E-flat Major)': 'album:556230022',       // Olga Scheps — Chopin Nocturnes
+  'Debussy (Clair de Lune)': 'album:282737252',                 // Daniel Barenboim — Debussy: Suite bergamasque: III. Clair de lune
+  'Diplo (Lean On)': 'album:458930985',                         // Major Lazer — Peace Is the Mission
+  'Grieg (In the Hall of the Mountain King)': 'album:6585186',  // Berliner Philharmoniker — Grieg: Peer Gynt Suites
+  'Handel (Hallelujah Chorus)': 'album:389933',                 // Monteverdi Choir — Handel: Messiah
+  'Mozart (Eine kleine Nachtmusik)': 'album:477390715',         // George Szell — Mozart: Eine kleine Nachtmusik, K. 525
+  'Pachelbel (Canon in D)': 'album:46605972',                   // London Baroque — Pachelbel: Canon & Gigue
+  'Ravel (Bolero)': 'album:13702452',                           // Charles Dutoit — Ravel: Boléro
+  'Strauss (The Blue Danube)': 'album:6425403',                 // Wiener Philharmoniker — The Blue Danube & Famous Viennese Waltzes
+  'Tchaikovsky (Swan Lake)': 'album:239084412',                 // Berliner Philharmoniker — Tchaikovsky: Ballet Suites
+  'Vivaldi (The Four Seasons)': 'album:1171382',                // La Petite Bande — Vivaldi: The Four Seasons
+  'Wagner (Ride of the Valkyries)': 'album:6585319',            // Berliner Philharmoniker — Wagner: Die Walküre
+  'Wallows (Are You Bored Yet?)': 'album:87808862',             // Nothing Happens, not the live EP
 };
 
 // ---------------------------------------------------------------- entry lists
