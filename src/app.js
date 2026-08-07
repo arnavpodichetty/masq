@@ -179,8 +179,9 @@
   }
 
   const THEME_DARK = {
-    '--m-page': '#05020a',
-    '--m-page-glow': 'rgba(46,91,176,.12)',
+    '--m-page': '#0e0810',
+    '--m-page-glow': 'transparent',
+    '--m-page-vignette': '#190e24',
     '--m-shell': '#1a070b',
     '--m-screen': '#0e0810',
     '--m-modal': '#16101a',
@@ -217,7 +218,7 @@
     '--m-arrow': '#5a4a2a',
     '--m-results-bg': 'radial-gradient(80% 45% at 50% 26%, rgba(230,203,126,.28), transparent 60%), #14070c',
     '--m-results-sub': '#d8c79f',
-    '--m-shell-shadow': '0 30px 90px rgba(0,0,0,.6)',
+    '--m-shell-shadow': 'none',
     '--m-ready-bg': 'rgba(144,200,144,.07)',
     '--m-ready-border': '1px solid rgba(144,200,144,.3)',
     '--m-ready-color': '#7fcf8a',
@@ -239,6 +240,7 @@
   const THEME_LIGHT = {
     '--m-page': '#e4ddd0',
     '--m-page-glow': 'rgba(46,91,176,.08)',
+    '--m-page-vignette': 'transparent',
     '--m-shell': '#f3eee4',
     '--m-screen': '#f7f2e8',
     '--m-modal': '#faf6ef',
@@ -299,6 +301,7 @@
     ...THEME_DARK,
     '--m-page': '#07010f',
     '--m-page-glow': 'rgba(123,47,247,.25)',
+    '--m-page-vignette': 'transparent',
     '--m-shell': '#150627',
     '--m-screen': '#100420',
     '--m-modal': '#1a0930',
@@ -2151,7 +2154,7 @@
       const v = this.renderVals();
       const jester = this.state.jesterMode;
       const glyphs = ['◆', '✦', '♦', '✧'];
-      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), var(--m-page); display:flex; align-items:center; justify-content:center;') },
+      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); display:flex; align-items:center; justify-content:center;') },
         jester && h('div', { className: 'jester-page-fx' }),
         h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
