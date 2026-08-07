@@ -9,6 +9,63 @@ The 1.0 line is drawn where the game stopped being a work in progress: the
 accessibility pass and the jester reveal screen. Everything before it was 0.x,
 whatever the label said at the time.
 
+## 1.3.0 — 2026-08-07
+
+The table stays set between sessions, the screen catalogs got a pass, and the
+results screen finally shows what everyone was holding.
+
+**Added**
+- **The player list is saved** to `localStorage` under `masq.players`, so the
+  same group is waiting when you reopen the game instead of `Player 1` through
+  `Player 4`. Names and their ids are stored together as one list — round state
+  keys off the id, so a name coming back attached to the wrong one would hand a
+  player someone else's card. A corrupt or hand-edited entry falls back to the
+  four defaults rather than starting with an empty table; entries with a usable
+  name but a missing or duplicate id keep the name and get a fresh id.
+- **The results screen lists the rest of the company** — every non-jester and
+  the role they held, under the jester reveal. It reads off the same map the
+  reveal cards did, so it can only show what was actually dealt, and it scrolls
+  inside its own box rather than pushing a full table off the top of the screen.
+  Word Mode is excluded: a role category picked there still fills the role map,
+  but the cards never print those roles, so they were dealt to nobody.
+
+**Changed**
+- **Movie/TV Show Genres reworked** — 39 genres, 467 titles. `Alien Invasion`
+  became `Aliens` and took in the rest of the first-contact material; `Biopic`
+  and `Docudrama` merged into `Biopic / Docudrama`; the coming-of-age titles
+  moved out of `Romance` into `Teen Drama` and the rom-coms went the other way;
+  `Back to the Future` moved from `Sci-Fi / Space Opera` to `Time Travel`.
+  Genres now run 8–15 titles by how much material each really has, instead of
+  everything padded to 12.
+- **The Movies word category is now Movies/TV**, drawn from the same 467 titles
+  as Movie/TV Show Genres rather than its own 204-film list. The two can no
+  longer disagree about what counts as a screen title. Cards label it
+  `Movie / TV`.
+- **Music Genres expanded** from 250 to 338 tracks across the same 25 genres —
+  Classical, Country, EDM, Heavy Metal, Hip Hop, Indie, Jazz, K-Pop, Latin, Pop
+  and R&B all grew to 15.
+- `tools/fetch-posters.js` resolves one merged title list against
+  `/search/multi`. It used to split the list and send the films-only category to
+  `/search/movie`; with the merge, that endpoint would quietly resolve a series
+  to an unrelated film of the same name. New pins for `Austin Powers`, `Borat`,
+  `Clueless`, `Harry Potter`, `Mission Impossible`, `Percy Jackson`,
+  `Star Trek` and `Willow`, each of which has a remake or series that outranks
+  the intended one in search.
+- `tools/fetch-albums.js` pins the new Classical additions and `Wallows
+  (Are You Bored Yet?)`, which otherwise matches a live EP.
+- Custom categories are no longer the only thing that outlives a reload. The
+  jester's progressive weights still are in-memory by design, and still reset on
+  a reload or a roster change.
+- The results button reads `PLAY AGAIN` instead of `ENCORE · PLAY AGAIN`.
+
+**Fixed**
+- **Card artwork no longer lands late.** Every image a round can show is now
+  fetched the moment the round is dealt, instead of when a player opens their
+  overlay — one tap before the curtain, which wasn't enough. Worst on Music
+  rounds: the cover size isn't one of Deezer's four pre-renders, so their CDN
+  generates it on first request, and a cold cover costs ~0.3s against ~0.03s
+  warm.
+
 ## 1.2.0 — 2026-08-07
 
 Housekeeping and one setting in a better place.

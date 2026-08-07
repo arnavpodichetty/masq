@@ -12,6 +12,8 @@ Masq is a pass-and-play social deduction party game for one phone and a group of
 
 Open `index.html` in a browser (or use the live link above) — no install or build step. Add your players, pick a game mode and categories, then pass the phone around.
 
+Your player list is saved in `localStorage`, so the same group is still there next time you open the game on that device. Everything else about a round — game mode, categories, options — starts fresh.
+
 **Game modes**
 
 - **Role Mode** — every performer gets a role tied to the secret word; the Jester flies blind.
@@ -19,8 +21,8 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 
 **Categories**
 
-- Either mode: Locations, Biomes, Movie/TV Show Genres, Music Genres
-- Word Mode only: Food, Animals, Objects, Movies
+- Either mode: Biomes, Locations, Movie/TV Show Genres, Music Genres
+- Word Mode only: Animals, Food, Movies/TV, Objects
 - Your own, via Settings → Custom Categories — saved in `localStorage`, so they stay on that device
 
 **A round**
@@ -28,7 +30,7 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 1. Whoever opens asks a question to another player.
 2. That player answers, then asks the next — clues that fit your role without giving it away.
 3. Once everyone's had a turn (or the timer runs out), the group votes.
-4. The Jester is unmasked. Guess right and the Cast wins; guess wrong and the Jester escapes.
+4. The Jester is unmasked, along with the role every other player was holding. Guess right and the Cast wins; guess wrong and the Jester escapes.
 
 **Options**
 

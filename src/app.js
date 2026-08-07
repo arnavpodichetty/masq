@@ -162,7 +162,7 @@
     return next;
   }
 
-  // ---- custom categories (the only state that survives a reload) ----
+  // ---- custom categories (saved, like the roster below) ----
   // [{ id, name, kind, entries: [{ word, roles: [] }] }]
   // 'roles' — every word carries its own role list, like Locations.
   // 'words' — just words, like Food. Hidden from Role Mode: no roles to deal.
@@ -218,6 +218,54 @@
   function newCustomId() {
     return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
+
+  // ---- roster ----
+  // The table usually plays with the same people, so the names outlast the tab.
+  // Stored as [{ id, name }] rather than two arrays, so a name can never come
+  // back paired with the wrong id. Round state keys off `id`, so ids are saved
+  // too — see `playerId` for why names alone won't do.
+  const PLAYERS_KEY = 'masq.players';
+  const DEFAULT_PLAYERS = [
+    { id: 0, name: 'Player 1' }, { id: 1, name: 'Player 2' },
+    { id: 2, name: 'Player 3' }, { id: 3, name: 'Player 4' },
+  ];
+
+  function loadPlayers() {
+    try {
+      const raw = window.localStorage.getItem(PLAYERS_KEY);
+      if (!raw) return DEFAULT_PLAYERS;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return DEFAULT_PLAYERS;
+      const seen = new Set();
+      const players = [];
+      parsed.forEach((p) => {
+        if (!p || typeof p.name !== 'string' || !p.name.trim()) return;
+        // A duplicate or unusable id would collide in the round maps, so the
+        // name is kept and the id reissued below.
+        const id = (typeof p.id === 'number' && isFinite(p.id) && !seen.has(p.id)) ? p.id : null;
+        if (id !== null) seen.add(id);
+        players.push({ id, name: p.name.trim() });
+      });
+      if (!players.length) return DEFAULT_PLAYERS;
+      let nextId = players.reduce((max, p) => (p.id === null ? max : Math.max(max, p.id)), -1) + 1;
+      return players.map(p => (p.id === null ? { id: nextId++, name: p.name } : p));
+    } catch (err) {
+      return DEFAULT_PLAYERS;
+    }
+  }
+
+  function savePlayers(names, keys) {
+    try {
+      const players = names.map((name, i) => ({ id: keys[i], name }));
+      window.localStorage.setItem(PLAYERS_KEY, JSON.stringify(players));
+    } catch (err) {
+      // Private mode / quota — the roster still works for this session.
+    }
+  }
+
+  // Read once: the two state fields and the id counter must agree, and a second
+  // read could see a different store if another tab wrote in between.
+  const INITIAL_PLAYERS = loadPlayers();
 
   const THEME_DARK = {
     '--m-page': '#0e0810',
@@ -469,8 +517,8 @@
     state = {
       screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, gameMode: 'roles',
       modal: null,
-      playerList: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
-      playerKeys: [0, 1, 2, 3],
+      playerList: INITIAL_PLAYERS.map(p => p.name),
+      playerKeys: INITIAL_PLAYERS.map(p => p.id),
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
       jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
       // 'random' | 'progressive'. Weights are in-memory only: a reload or a
@@ -507,7 +555,9 @@
       customFrom: 'settings',
     };
 
-    __nextPlayerId = 4;
+    // Past the highest saved id, so an added player can't collide with a
+    // restored one and inherit their round card.
+    __nextPlayerId = INITIAL_PLAYERS.reduce((max, p) => Math.max(max, p.id), -1) + 1;
 
     componentDidMount() {
       applyTheme(this.state.darkMode, this.state.jesterMode);
@@ -537,6 +587,11 @@
 
     componentDidUpdate(_, prev) {
       if (prev.darkMode !== this.state.darkMode || prev.jesterMode !== this.state.jesterMode) applyTheme(this.state.darkMode, this.state.jesterMode);
+      // Catches every edit, add and remove in one place — each rebuilds the
+      // arrays, so identity is enough to spot a change.
+      if (prev.playerList !== this.state.playerList || prev.playerKeys !== this.state.playerKeys) {
+        savePlayers(this.state.playerList, this.state.playerKeys);
+      }
     }
 
     componentWillUnmount() {
@@ -1930,7 +1985,7 @@
           ),
           h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);"), className: 'j-title' }, 'MASQ'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.2.0')
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.3.0')
           )
         )
       );
