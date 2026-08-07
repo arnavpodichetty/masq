@@ -1,5 +1,5 @@
-// Regenerates src/animals.js — the animal -> photo map that app.js reads for
-// Biomes rounds, where every role is a creature. The generated file is
+// Regenerates src/artwork/animals.js — the animal -> photo map that app.js
+// reads for Biomes rounds, where every role is a creature. The generated file is
 // committed, so the site ships no API key and makes no calls to Wikipedia while
 // people are playing. Re-run it when the biome catalogs in src/data.js change.
 //
@@ -20,7 +20,7 @@ const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data.js');
-const OUT = path.join(REPO, 'src', 'animals.js');
+const OUT = path.join(REPO, 'src', 'artwork', 'animals.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
 

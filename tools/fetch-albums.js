@@ -1,7 +1,7 @@
-// Regenerates src/albums.js — the "Artist (Song)" -> album art map that app.js
-// reads. The generated file is committed, so the site ships no API key and makes
-// no calls to Deezer while people are playing. Re-run it when the music catalogs
-// in src/data.js change.
+// Regenerates src/artwork/albums.js — the "Artist (Song)" -> album art map that
+// app.js reads. The generated file is committed, so the site ships no API key and
+// makes no calls to Deezer while people are playing. Re-run it when the music
+// catalogs in src/data.js change.
 //
 //   node tools/fetch-albums.js [--verbose]
 //
@@ -16,7 +16,7 @@ const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data.js');
-const OUT = path.join(REPO, 'src', 'albums.js');
+const OUT = path.join(REPO, 'src', 'artwork', 'albums.js');
 const API = 'https://api.deezer.com';
 
 const VERBOSE = process.argv.includes('--verbose');

@@ -1,6 +1,6 @@
-// Regenerates src/posters.js — the title -> TMDB poster path map that app.js
-// reads. The generated file is committed, so the site ships no API key and makes
-// no TMDB calls while people are playing. Re-run it when the title lists in
+// Regenerates src/artwork/posters.js — the title -> TMDB poster path map that
+// app.js reads. The generated file is committed, so the site ships no API key and
+// makes no TMDB calls while people are playing. Re-run it when the title lists in
 // src/data.js change.
 //
 //   TMDB_API_KEY=xxxx node tools/fetch-posters.js [--verbose]
@@ -11,7 +11,7 @@ const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data.js');
-const OUT = path.join(REPO, 'src', 'posters.js');
+const OUT = path.join(REPO, 'src', 'artwork', 'posters.js');
 const API = 'https://api.themoviedb.org/3';
 
 const KEY = process.env.TMDB_API_KEY;

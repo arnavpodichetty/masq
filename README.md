@@ -19,7 +19,7 @@ Open `index.html` in a browser (or use the live link above) — no install or bu
 
 **Categories**
 
-- Either mode: Locations, Biomes, Historical Eras, Movie/TV Show Genres, Music Genres
+- Either mode: Locations, Biomes, Movie/TV Show Genres, Music Genres
 - Word Mode only: Food, Animals, Objects, Movies
 - Your own, via Settings → Custom Categories — saved in `localStorage`, so they stay on that device
 
@@ -50,17 +50,17 @@ index.html              page shell, fonts, meta, and the CSS for Jester Mode
 favicon.svg             tab icon (the comedy mask)
 src/app.js              all game state, logic, and rendering
 src/data.js             word/role catalogs, exposed on window.MASQ_LOCATIONS_DATA
-src/posters.js          generated poster map, exposed on window.MASQ_POSTERS
-src/albums.js           generated album art map, exposed on window.MASQ_ALBUMS
-src/animals.js          generated animal photo map and photo credits, on window.MASQ_ANIMALS
+src/artwork/posters.js  generated poster map, exposed on window.MASQ_POSTERS
+src/artwork/albums.js   generated album art map, exposed on window.MASQ_ALBUMS
+src/artwork/animals.js  generated animal photo map and photo credits, on window.MASQ_ANIMALS
                         and window.MASQ_ANIMAL_CREDITS
-tools/fetch-posters.js  Node script that regenerates src/posters.js from TMDB
-tools/fetch-albums.js   Node script that regenerates src/albums.js from Deezer
-tools/fetch-animals.js  Node script that regenerates src/animals.js from Wikipedia
+tools/fetch-posters.js  Node script that regenerates src/artwork/posters.js from TMDB
+tools/fetch-albums.js   Node script that regenerates src/artwork/albums.js from Deezer
+tools/fetch-animals.js  Node script that regenerates src/artwork/animals.js from Wikipedia
 masq.png                screenshot, used by this README and as the link-preview image
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/posters.js`, `src/albums.js` and `src/animals.js`, then `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/artwork/posters.js`, `src/artwork/albums.js` and `src/artwork/animals.js`, then `src/app.js`.
 
 The three artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js` also collects the photo credits shown in-game, and refuses to write anything if it finds a photo that needs crediting and no name to credit.
 
@@ -70,7 +70,7 @@ Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya
 
 Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Album art comes from [Deezer](https://www.deezer.com/), which likewise does not endorse or certify it.
 
-Animal photographs are the lead images of [Wikipedia](https://en.wikipedia.org/) articles, hosted by [Wikimedia Commons](https://commons.wikimedia.org/). Each is under its own free licence — mostly Creative Commons, the rest public domain — and most of those licences ask that the photographer be credited by name. So every one of them is named in the game itself, under **Settings → Credits**, and in `src/animals.js` next to the photo they took.
+Animal photographs are the lead images of [Wikipedia](https://en.wikipedia.org/) articles, hosted by [Wikimedia Commons](https://commons.wikimedia.org/). Each is under its own free licence — mostly Creative Commons, the rest public domain — and most of those licences ask that the photographer be credited by name. So every one of them is named in the game itself, under **Settings → Credits**, and in `src/artwork/animals.js` next to the photo they took.
 
 ## License
 
