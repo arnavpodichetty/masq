@@ -561,6 +561,10 @@
       soundEffects: true,
       jesterMode: false,
       wordListExpanded: [],
+      // The results screen keeps the round word covered so the jester still has
+      // a shot at guessing it, with the category's words on hand to pick from.
+      resultsWordShown: false,
+      resultsPoolOpen: false,
       disabledWords: {},
       customCategories: loadCustomCategories(),
       customDraft: null,
@@ -791,6 +795,28 @@
       const customNames = custom.map(c => c.name);
       const wordOnlyNames = [...st.wordCategories, ...customWordOnlyNames];
       const allCategoryNames = [...st.categories, ...st.wordCategories, ...customNames];
+      const rawWordPool = (category) => {
+        if (customByName[category]) return customByName[category].entries.map(e => e.word);
+        if (category === 'Biomes') return biomeNames;
+        if (category === 'Cuisines') return cuisineNames;
+        // if (category === 'Historical Eras') return historicalEraNames;
+        if (category === 'Movie/TV Show Genres') return movieTvGenreNames;
+        if (category === 'Music Genres') return musicGenreNames;
+        if (category === 'Food') return wordOnlyCatalog.Food;
+        if (category === 'Animals') return wordOnlyCatalog.Animals;
+        if (category === 'Objects') return wordOnlyCatalog.Objects;
+        if (category === 'Movies/TV') return wordOnlyCatalog['Movies/TV'];
+        return locationNames;
+      };
+      // Crossed-out words are skipped; the word list keeps at least one per
+      // category, so a pool is never empty.
+      const getWordPool = (category) => {
+        const raw = rawWordPool(category);
+        const off = (st.disabledWords || {})[category] || [];
+        if (!off.length) return raw;
+        const kept = raw.filter(w => !off.includes(w));
+        return kept.length ? kept : raw;
+      };
       const mapCategoryItem = (cat) => ({
         cat,
         sel: st.selCategories.includes(cat),
@@ -967,6 +993,18 @@
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
         resultsPoster: isMoviesWordRound ? posterFor(st.roundWord) : null,
+        // Results screen: the word stays under a cover until someone taps it, so
+        // the jester can take their guess first. The poster is part of the
+        // answer, so it waits too.
+        roundWordShown: st.resultsWordShown,
+        revealRoundWord: () => this.setState({ resultsWordShown: true }),
+        // What the jester picks from. Same pool the round was dealt out of —
+        // crossed-out words included — sorted for scanning rather than left in
+        // catalog order.
+        roundWordPool: [...getWordPool(roundCategory)].sort((a, b) => a.localeCompare(b)),
+        poolOpen: st.resultsPoolOpen,
+        openWordPool: () => this.setState({ resultsPoolOpen: true }),
+        closeWordPool: () => this.setState({ resultsPoolOpen: false }),
         cardOpen: st.cardOpen,
         openCurtain, closeOverlay, cancelOverlay, dismissOverlay,
         leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt1) 0 12px,var(--m-curt2) 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
@@ -1389,28 +1427,6 @@
           const nextWeights = isProgressive
             ? applyProgressive(jesterWeights, playerIds, selectedJesterIndices.map(i => playerId(i)))
             : jesterWeights;
-          const rawWordPool = (category) => {
-            if (customByName[category]) return customByName[category].entries.map(e => e.word);
-            if (category === 'Biomes') return biomeNames;
-            if (category === 'Cuisines') return cuisineNames;
-            // if (category === 'Historical Eras') return historicalEraNames;
-            if (category === 'Movie/TV Show Genres') return movieTvGenreNames;
-            if (category === 'Music Genres') return musicGenreNames;
-            if (category === 'Food') return wordOnlyCatalog.Food;
-            if (category === 'Animals') return wordOnlyCatalog.Animals;
-            if (category === 'Objects') return wordOnlyCatalog.Objects;
-            if (category === 'Movies/TV') return wordOnlyCatalog['Movies/TV'];
-            return locationNames;
-          };
-          // Crossed-out words are skipped; the word list keeps at least one per
-          // category, so a pool is never empty.
-          const getWordPool = (category) => {
-            const raw = rawWordPool(category);
-            const off = (st.disabledWords || {})[category] || [];
-            if (!off.length) return raw;
-            const kept = raw.filter(w => !off.includes(w));
-            return kept.length ? kept : raw;
-          };
           const pickFrom = (category) => { const pool = getWordPool(category); return pool[Math.floor(Math.random() * pool.length)]; };
           let pickableCategories = st.selCategories.length ? st.selCategories : ['Locations'];
           if (st.gameMode === 'roles') {
@@ -1506,7 +1522,9 @@
           this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, jesterWeights: nextWeights, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
-        goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false }); },
+        // Reset here rather than on the way out, so every trip into the results
+        // starts with the word covered again.
+        goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false, resultsWordShown: false, resultsPoolOpen: false }); },
         backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
         backToReveal: () => { this.__clearTimer(); this.setState({ screen: 'reveal', activePlayer: null, cardOpen: false, secondsLeft: null, timeUp: false, timerPaused: false }); },
         playAgain: () => { this.__clearTimer(); this.setState({ screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
@@ -2353,25 +2371,51 @@
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;") }, v.gameCategory)
             ),
-            h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);') },
+            // Covered until tapped: the jester gets their guess in before the
+            // answer is on screen. The poster is withheld with it.
+            h('div', {
+              ...(v.roundWordShown ? {} : press(v.revealRoundWord, 'Reveal the round word')),
+              className: v.roundWordShown ? '' : 'masq-btn',
+              style: css(`flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);${v.roundWordShown ? '' : ' cursor:pointer;'}`),
+            },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;") }, 'ROUND WORD'),
-              v.resultsPoster && h('img', {
+              v.roundWordShown && v.resultsPoster && h('img', {
                 key: v.resultsPoster,
                 src: v.resultsPoster, alt: '', draggable: false,
                 onError: (e) => { e.target.style.display = 'none'; },
                 style: css('display:block; width:84px; height:126px; object-fit:cover; margin:8px auto 0; border-radius:6px; border:1px solid rgba(178,32,47,.4);'),
               }),
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
+              v.roundWordShown
+                ? h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)
+                : h(React.Fragment, null,
+                    h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:#f4c9cd; margin-top:5px; letter-spacing:.12em;") }, '? ? ?'),
+                    h('div', { style: css("font-family:'Archivo',sans-serif; font-size:8px; letter-spacing:.18em; color:#e3a6ac; margin-top:5px; opacity:.85;") }, 'TAP TO REVEAL')
+                  )
             )
+          ),
+          // The jester's last chance: name the word and they still win. Kept
+          // above the word tile's reveal so it can be read while the answer is
+          // still covered.
+          !v.roundWordShown && v.hasJester && h('div', { style: css('margin-top:14px; padding:0 26px; width:100%; max-width:360px; text-align:center;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); line-height:1.4;") },
+              v.jesterReveals.length > 1 ? 'The jesters may still steal it by naming the word.' : 'The jester may still steal it by naming the word.'),
+            h('div', { ...press(v.openWordPool), className: 'masq-btn', style: css("margin-top:8px; display:inline-block; padding:9px 16px; border-radius:10px; background:var(--m-lift); border:1px solid var(--m-border-hard); font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--m-accent); cursor:pointer;") },
+              `See all ${v.roundWordPool.length} ${v.gameCategory} words`)
           ),
           // Scrolls inside its own box rather than growing the centred column,
           // which a full table would otherwise push off the top of the screen.
           v.castReveals.length > 0 && h('div', { style: css('margin-top:22px; padding:0 26px; width:100%; max-width:360px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-results-sub); text-align:center; margin-bottom:8px;") }, v.castRevealHeading),
-            h('div', { style: css('display:flex; flex-direction:column; gap:3px; max-height:180px; overflow-y:auto;') },
+            // Gives back the height the guess prompt takes while it's up; the
+            // column itself can't scroll, so this box absorbs the difference.
+            h('div', { style: css(`display:flex; flex-direction:column; gap:3px; max-height:${(!v.roundWordShown && v.hasJester) ? '132px' : '180px'}; overflow-y:auto;`) },
+              // The roles come from the real word, so they stay masked until the
+              // word is tapped — the row itself stays put either way.
               v.castReveals.map((p, i) => h('div', { key: i, style: css('display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:7px 12px; background:var(--m-lift); border-radius:8px;') },
                 h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:var(--m-text-bright); flex:none;") }, p.name),
-                h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); text-align:right;") }, p.role)
+                v.roundWordShown
+                  ? h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); text-align:right;") }, p.role)
+                  : h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-dim); text-align:right; letter-spacing:.14em;") }, '??')
               ))
             )
           ),
@@ -2384,6 +2428,28 @@
         ),
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
           h('div', { ...press(v.playAgain), className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'PLAY AGAIN')
+        ),
+        // Every word the round could have been dealt, for the jester to guess
+        // from. Its own overlay rather than an inline panel, so a long category
+        // can't push the reveal off the top of the screen.
+        v.poolOpen && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
+          h('div', { onClick: v.closeWordPool, 'aria-hidden': 'true', style: css('flex:1;') }),
+          h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:75vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
+            h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'The Jester’s Guess'),
+              h('div', { ...press(v.closeWordPool, 'Close'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+            ),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:14px;") },
+              `Every word ${v.gameCategory} could have dealt. The jester names one — get it right and the round is theirs.`),
+            h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
+              h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px;') },
+                v.roundWordPool.map((w, i) => h('div', {
+                  key: i,
+                  style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-text); background:var(--m-lift); border:1px solid var(--m-border); border-radius:8px; padding:5px 10px;"),
+                }, w))
+              )
+            )
+          )
         )
       );
     }
