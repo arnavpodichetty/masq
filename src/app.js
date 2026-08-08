@@ -318,6 +318,7 @@
     '--m-icon-gold': 'rgba(200,162,76,.13)',
     '--m-icon-crimson': 'rgba(178,32,47,.26)',
     '--m-icon-blue': 'rgba(46,91,176,.24)',
+    '--m-icon-purple': 'rgba(107,78,168,.235)',
     '--m-backdrop': 'rgba(8,4,12,.7)',
     '--m-overlay': 'rgba(8,4,10,.88)',
     '--m-overlay-vote': 'rgba(8,4,10,.85)',
@@ -382,6 +383,7 @@
     '--m-icon-gold': 'rgba(154,117,40,.2)',
     '--m-icon-crimson': 'rgba(178,32,47,.14)',
     '--m-icon-blue': 'rgba(46,91,176,.16)',
+    '--m-icon-purple': 'rgba(90,63,140,.145)',
     '--m-backdrop': 'rgba(40,30,20,.4)',
     '--m-overlay': 'rgba(40,30,20,.72)',
     '--m-overlay-vote': 'rgba(40,30,20,.7)',
@@ -440,6 +442,7 @@
     // Jester mode's accent is hot pink, not gold, so the neutral wash follows it
     // there. Crimson and blue carry over from dark unchanged.
     '--m-icon-gold': 'rgba(255,61,139,.16)',
+    '--m-icon-purple': 'rgba(167,139,250,.135)',
     '--m-backdrop': 'rgba(10,2,20,.72)',
     '--m-overlay': 'rgba(10,2,20,.9)',
     '--m-overlay-vote': 'rgba(10,2,20,.86)',
@@ -492,7 +495,7 @@
   const ICON_PLAYERS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="5.6" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M2 18.6 C2 16 3.6 14.6 5.6 14.6 C6.2 14.6 6.8 14.7 7.3 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="18.4" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M22 18.6 C22 16 20.4 14.6 18.4 14.6 C17.8 14.6 17.2 14.7 16.7 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="12" cy="8.6" r="3.3" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M6.7 19.4 C6.7 15.8 9.1 13.9 12 13.9 C14.9 13.9 17.3 15.8 17.3 19.4" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   // Categories: a deck of cards to draw the round from, marked with a harlequin
   // lozenge so it can't be mistaken for the script.
-  const ICON_CATEGORIES_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M5 16.8 L5 6.2 C5 5.2 5.8 4.4 6.8 4.4 L15.4 4.4" stroke="var(--m-accent)" stroke-width="1.4" stroke-linecap="round" opacity=".55"></path><rect x="8" y="6.6" width="11.4" height="13.4" rx="2.2" stroke="var(--m-accent)" stroke-width="1.7"></rect><path d="M13.7 9.9 L16.3 13.3 L13.7 16.7 L11.1 13.3 Z" stroke="var(--m-accent)" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
+  const ICON_CATEGORIES_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M5 16.8 L5 6.2 C5 5.2 5.8 4.4 6.8 4.4 L15.4 4.4" stroke="#b9a8dd" stroke-width="1.4" stroke-linecap="round" opacity=".55"></path><rect x="8" y="6.6" width="11.4" height="13.4" rx="2.2" stroke="#b9a8dd" stroke-width="1.7"></rect><path d="M13.7 9.9 L16.3 13.3 L13.7 16.7 L11.1 13.3 Z" stroke="#b9a8dd" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
   const ICON_CATEGORIES_18 = resize(ICON_CATEGORIES_20, 18);
   // Jesters: the cap and bells, rather than another mask — the row sits next to
   // two mask icons already. Three flopping horns over a notched crown, with
@@ -1825,7 +1828,7 @@
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid var(--m-border);') },
           h('div', { ...press(v.toggleShowCat, 'Show category', { role: 'switch', 'aria-checked': String(v.showCategory) }), style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-purple); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Category'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Players can see the category of the secret word')
@@ -2152,7 +2155,7 @@
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Settings'),
           h('div', { style: css('display:flex; flex-direction:column; gap:8px; margin-bottom:8px;') },
             this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-icon-gold)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
-            this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-icon-gold)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
+            this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-icon-purple)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
             this.settingsRow({ onClick: v.openJesters, iconBg: 'var(--m-icon-crimson)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
             this.settingsRow({ onClick: v.openTime, iconBg: 'var(--m-icon-blue)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
             this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-icon-gold)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
