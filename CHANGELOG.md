@@ -15,6 +15,10 @@ The 1.0 line is drawn where the game stopped being a work in progress: the
 accessibility pass and the jester reveal screen. Everything before it was 0.x,
 whatever the label said at the time.
 
+Where an entry names a count — 39 locations, 471 titles, 140 songs — it's the
+count as of that release, read back out of the catalogs at that commit rather
+than remembered.
+
 ## 1.9.2 — 2026-08-08
 
 **Changed**
@@ -331,27 +335,44 @@ Housekeeping and one setting in a better place.
 ## 1.3.0 — 2026-08-07
 
 **Added**
-- **Animal photographs on Biomes cards**, from Wikipedia lead images, with
-  photographer credits in Settings → Credits, as their licences require.
-- `tools/fetch-animals.js`, the generator behind them. It collects the credit
-  alongside the photo and refuses to write the file at all if a picture needs a
-  name and hasn't got one — a missing credit is a licence problem, not a cosmetic
-  one, so it stops the run rather than shipping.
+- **Animal photographs on Biomes cards**, from Wikipedia lead images — the
+  picture an encyclopedia chose to stand for the animal, already cropped and
+  captioned by people who care about it, which is usually exactly what a card
+  wants. Every role in a Biomes round is a creature, so every card in one is
+  now pictured.
+- **Photographer credits in Settings → Credits.** Wikimedia's licences require
+  the name, so `tools/fetch-animals.js` collects it alongside the photo and
+  refuses to write the file at all if a picture needs a credit and hasn't got
+  one. A missing name is a licence problem rather than a cosmetic one, so it
+  stops the run instead of shipping without it.
+- `tools/fetch-animals.js`, the generator behind `src/animals.js`. Wikipedia
+  needs no key, and its Action API takes fifty titles per request, so the whole
+  catalog resolves in a handful of calls and a couple of seconds — where
+  `fetch-albums.js` has to pace itself for a minute.
 
 ## 1.2.1 — 2026-08-06
 
 **Fixed**
-- Background gradient, and top/bottom chrome coloring, fixed for Safari.
+- The stage renders in Safari again: the background gradient, and the top and
+  bottom chrome coloring around it, which had been picking up the browser's own
+  colour rather than the page's.
 
 **Changed**
-- README rewritten around what the game actually is now.
+- README rewritten around what the game actually is now, rather than what it was
+  when the file was first written.
 
 ## 1.2.0 — 2026-08-06
 
 **Added**
-- **Album art on Music Genres cards**, from Deezer.
-- `tools/fetch-albums.js`, the generator behind that map, with a table of
-  hand-pinned answers for tracks that plain search gets wrong.
+- **Album art on Music Genres cards**, from Deezer — the sleeve for the record
+  each `Artist (Song)` role came off.
+- `tools/fetch-albums.js`, the generator behind `src/albums.js`. Deezer needs no
+  key, so unlike `fetch-posters.js` there's nothing to set up first. Apple's
+  iTunes Search API answers the same question but throttles at about twenty calls
+  a minute — a couple of hundred entries there takes a quarter of an hour and
+  comes back mostly 403s, where this run takes about one. It stays well under
+  Deezer's fifty-per-five-seconds and keeps a pin table for tracks plain search
+  gets wrong.
 
 ## 1.1.0 — 2026-08-05
 
@@ -359,8 +380,13 @@ Artwork. The first cards that can carry a picture do.
 
 **Added**
 - **Movie and TV posters on Movies and Movie/TV Show Genres cards**, from TMDB.
-- `tools/fetch-posters.js`. Output is committed, so a round never waits on
-  someone else's API and the site ships no API key.
+- `tools/fetch-posters.js`, and the committed `src/posters.js` it writes — so the
+  site ships no API key and makes no TMDB calls while people are playing. It
+  carries a table of titles pinned to a TMDB id, because search fails in four
+  distinct ways and none of them is rare: a series outranks the film of the same
+  name (`21 Jump Street` finds the 1987 show), a new release recycles an old
+  title (`Anaconda` finds the 2025 comedy), nothing matches at all (`Wild` finds
+  `The Wild Robot`), or the right title belongs to the wrong franchise entry.
 - A favicon: the comedy mask, simplified for 16px.
 
 **Changed**
@@ -370,32 +396,71 @@ Artwork. The first cards that can carry a picture do.
 ## 1.0.2 — 2026-08-05
 
 **Added**
-- A dedicated jester reveal screen.
+- A dedicated jester reveal screen, and a way back off it. Tapping the wrong
+  name is the one mistake the reveal can't undo by itself — without a door out
+  you'd have to open a card that isn't yours to be rid of it. Backing out before
+  the curtain rises leaves that player unviewed, so they can still take their
+  turn. Tapping the dark space around the card does whatever the visible button
+  does: back out while the curtain is down, dismiss-as-read once it's up. The
+  card swallows its own clicks, so reading your role never closes the screen out
+  from under you.
 
 **Changed**
-- Jester-facing wording rewritten.
+- Jester-facing wording rewritten throughout.
+- **Show Word is derived rather than obeyed.** Two modes force its hand: Word
+  Mode always shows the word, because that is the mode, and Role Mode with a
+  disguised jester always hides it, because the jester's fake role is borrowed
+  from some *other* word — there is no word that fits their card, and printing
+  one for everyone else would out them at a glance. The stored setting now only
+  ever means "what the host picked for an ordinary Role Mode round".
 
 **Fixed**
-- A run of bugs across the reveal and voting flow.
+- An empty cast is no longer possible. The round would deal nothing and the
+  trial would open with "undefined asks the first question", so the last
+  player's × goes inert rather than disappearing — the row doesn't reflow the
+  moment the cast gets short.
+- A run of further bugs across the reveal and voting flow.
 
 ## 1.0.1 — 2026-08-05
 
 **Added**
 - **Progressive jester odds** — an option to weight selection toward players who
-  haven't been the jester yet, instead of drawing uniformly at random. Weights
-  are in-memory; a reload or roster change resets the cycle.
+  haven't been the jester yet, instead of drawing uniformly at random. Random is
+  memoryless, which is why the same player can land it three rounds running;
+  progressive nudges the role around the table instead. Weights are shares:
+  everyone starts on one, a player's chance is their share of the table's total,
+  and taking the role costs five percentage points of the whole table's chance,
+  split evenly among everyone who didn't. The total never drifts, so the cost is
+  exactly five points every time whatever the player count — at a table of six,
+  one share is 16.7%, and a fresh jester drops to 11.7% while the other five
+  each gain one. It's a nudge, not a lockout: one turn barely dents your odds,
+  and only about four picks in quick succession can bottom anyone out.
+- Weights are in-memory, and any change to the roster starts the cycle over —
+  stored weights only mean anything for the exact set of players that earned
+  them.
 
 ## 1.0.0 — 2026-08-04
 
 The game stopped being a draft.
 
 **Changed**
-- Accessibility overhaul: controls that are `div`s given proper button and
-  switch roles, keyboard focus, and `aria-checked` state throughout.
+- **Accessibility overhaul.** Every control in the app is a styled `div`; one
+  `press()` helper now gives each of them real semantics — reachable by Tab,
+  activated with Enter or Space, and announced with a name. A label is only
+  supplied where the visible content is a bare glyph like `×`; everywhere else
+  the element's own text is the accessible name. Toggles carry `switch` and
+  `aria-checked`, category tiles carry `aria-pressed`, and keyboard focus is
+  visible on top of the dark stage.
+- **Round state is keyed by player id, never by name.** Two players called Alex
+  are two players. Allies are excluded by id too, so a jester sharing a name
+  with someone else isn't struck from their own ally list.
 - Instructions rewritten to match how the game actually plays.
 
 **Fixed**
-- A run of bugs across the lobby and the deal.
+- The Jesters summary no longer claims what the round won't do — a disguised
+  jester doesn't know they're a jester, so there's nobody to introduce them to,
+  and the "Jesters Know Each Other" row is dimmed and inert while a disguise is
+  in play.
 
 ## 0.9.1 — 2026-08-04
 
@@ -403,14 +468,37 @@ The game stopped being a draft.
 - Timer pause and resume.
 
 **Fixed**
-- Assorted bugs found while the custom-category work was going in.
+- **The shuffle wasn't uniform.** `sort(() => Math.random() - .5)` is not a
+  shuffle — the comparator is inconsistent, and the result quietly favours
+  certain seats. Replaced with Fisher-Yates.
+- A randomized jester count no longer overwrites the number the host chose. The
+  dealt count lives on the round; writing it back into the setting meant one
+  random round silently rewrote the Jesters modal.
+- Jester counts are shown clamped to the current cast. Removing players could
+  strand a saved count above what the table can seat, leaving the lobby
+  promising more jesters than the round would deal.
+- Every jester is named at the final curtain with the disguise they actually
+  held, gated the same way the reveal card was — results can never print a fake
+  role the player was never shown.
 
 ## 0.9.0 — 2026-08-04
 
 **Added**
 - **Custom Categories** — build your own word/role lists from Settings, saved to
-  `localStorage` so they stay on the device. Word-only customs are hidden in
-  Role Mode, matching how the built-ins behave.
+  `localStorage` under `masq.customCategories`, the only thing at this point that
+  survives a reload. Two kinds: a role category, where every word carries its own
+  role list like Locations, and a word category, which is just a list like Food.
+  Word categories are hidden in Role Mode, since there'd be no roles to deal —
+  and so is a role category that somehow lost all of its roles, so Role Mode can
+  never deal a roleless round. Words for a word category are typed as one blob,
+  with commas and newlines both separating, so a pasted list works as-is.
+  Categories saved before the `kind` field existed are classified by whether
+  anyone ever gave them a role.
+- A disguise only holds if the round actually produced one: a category with a
+  single word, or a custom one with no spare roles, has nothing to fake with, so
+  those jesters are told they're the Jester rather than handed a blank card.
+- The custom-category editor is reachable from Settings and from the Categories
+  picker, and its close button returns to whichever one you came in through.
 
 ## 0.8.2 — 2026-08-04
 
@@ -423,25 +511,41 @@ The game stopped being a draft.
 ## 0.8.1 — 2026-08-03
 
 **Changed**
-- Both new catalogs revised the day after they landed — genre lists rebalanced
-  and titles moved to where they belonged.
+- Both catalogs revised within a day of landing: Music Genres to 25 genres and
+  250 tracks, Movie/TV Show Genres to 475 titles, with genre lists rebalanced and
+  titles moved to where they belonged.
 - Site verification for the public page.
 
 ## 0.8.0 — 2026-08-02 → 2026-08-03
 
-Two catalogs arrived.
+Two catalogs, one of them new.
 
 **Added**
-- **Music Genres** and **Movie/TV Show Genres** categories.
+- **Music Genres** — 23 genres, 10 tracks each. The word is the genre and your
+  role is a track in it, written `Artist (Song)`.
+
+**Changed**
+- **Movie Genres became Movie/TV Show Genres.** The category had shipped with the
+  first extras back in July as 12 film genres holding 8 films each; television
+  went in beside them and it came out at 40 genres and 471 titles. `Sci-Fi` split,
+  the genres that had been padded to eight grew to ten and twelve, and the ones
+  that only ever existed to hold four good films went away.
 
 ## 0.7.3 — 2026-08-02
 
 **Added**
-- Crossing out words in Settings, so anything you'd rather not see never comes
-  up. A category always keeps at least one live word, so a pool is never empty.
-- Spoiler dropdowns in View All Words, so opening settings mid-game doesn't
-  hand the table the answer.
-- A reset button.
+- **Crossing out words in Settings**, so anything you'd rather not see never
+  comes up. A crossed word is dropped from the pool before the round is dealt.
+  The last surviving word in a category is locked and drawn with a dashed border
+  rather than a solid one — an empty category would leave a round with no word
+  to deal.
+- **Spoiler dropdowns in View All Words.** Every category is collapsed behind its
+  own name and count, so opening Settings mid-game doesn't hand the table the
+  answer. A category that's had words crossed out reads `Locations (34/37)`
+  rather than `Locations (37)`.
+- **A per-category reset**, next to the chevron and only on categories that have
+  something crossed out, so undoing a session's crossings doesn't mean tapping
+  back through them one at a time.
 
 ## 0.7.2 — 2026-07-30
 
@@ -451,60 +555,111 @@ Two catalogs arrived.
 ## 0.7.1 — 2026-07-29
 
 **Changed**
-- Jester Mode revised, and an easter egg added for finding it.
+- **Jester Mode became the easter egg.** Its Settings toggle was removed, and the
+  mode is now turned on by tapping the `MASQ` wordmark in the lobby header —
+  nothing marks it, and nothing in Settings admits the mode exists.
+- The neon palette revised once more against the screens it hadn't been checked
+  on.
 
 ## 0.7.0 — 2026-07-28
 
 **Added**
-- **Jester Mode** — the alternate presentation.
+- **Jester Mode** — a chaotic neon-carnival take on the whole stage, and the
+  first thing to prove the app could be themed at all. Every colour the interface
+  uses moved behind CSS custom properties in the same commit, split into a dark
+  theme and a jester theme that overrides it — the curtain, the card stock, the
+  call-to-action gradient and its glow, the selected-tile treatment, the toggles.
 
 ## 0.6.1 — 2026-07-28
 
 **Added**
-- Settings screen, rebuilt around what had accumulated in it.
-- How to Play rules cards.
-- Credits.
+- **A real Settings screen**, rebuilt around what had accumulated in it: Game
+  Options split off from Settings proper, with Show Category, Show Word, Jesters
+  Know Each Other and Sound Effects on one side, and All Words, Credits, How to
+  Play and Light Mode on the other. Light Mode arrives here — the first time the
+  app could be anything but dark.
+- **How to Play**, as rules cards rather than a wall of text: The Setup, The
+  Round, Role Mode and Word Mode, each with the voting steps under it.
+- **Credits**, naming the three people the game came from.
 
 ## 0.6.0 — 2026-07-28
 
 **Changed**
-- Roles and words overhauled across the board, and the data file restructured
-  around it — roughly half of every catalog rewritten.
+- **Roles and words overhauled across the board**, and the data file restructured
+  around it — 227 lines rewritten against 247 removed, roughly half of every
+  catalog. Locations went from 39 words to 37 and Biomes from 21 to 22, but the
+  churn is almost entirely inside them: weak words retired, better ones written
+  in their place, and the role lists reworked so that eight roles per word are
+  eight things a player can actually describe.
 
 ## 0.5.3 — 2026-07-24
 
 **Added**
-- View All Words, browsable per category, from Settings.
+- **All Words**, reachable from Settings: every category listed with its word
+  count, each word a chip, so a table can see what's in the box before they play
+  it. Eight groups at this point — Locations, Biomes, Historical Eras and Movie
+  Genres on the role side, Food, Animals, Objects and Movies on the word side.
 
 **Changed**
-- Player list and word list UI reworked.
+- The player list and the word list reworked together, since they were the two
+  screens that had grown by accretion rather than design.
 
 ## 0.5.2 — 2026-07-23
 
 **Added**
-- Timer sound effect, as a Settings toggle.
+- Timer sound effect, as a Settings toggle — a chime when the clock runs out, for
+  tables that put the phone face down.
 
 **Fixed**
-- Categories displaying the wrong list.
+- **Categories displaying the wrong list.** Every category shipped selected —
+  all four role categories *and* all four word categories — so a Role Mode round
+  could be dealt out of Food or Objects, which have no roles in them. The
+  selection now opens on the role categories alone, and the mode decides which
+  half is on offer.
+- The default roster is `Player 1` through `Player 4` rather than the three names
+  of the people who wrote the game.
 
 ## 0.5.1 — 2026-07-23
 
 **Changed**
-- **impfall → Masq.** Data files renamed to match.
+- **impfall → Masq**, and `MASQUERADE` → `MASQ` in the app itself. Data files
+  renamed to match.
 - README, licence, and project naming settled.
 
 ## 0.5.0 — 2026-07-23
 
-**Added**
-- **Historical Eras** and **Biomes** categories.
+Both role catalogs rewritten, not added — Biomes shipped with the first build
+and Historical Eras arrived the same evening.
+
+**Changed**
+- **Historical Eras rewritten**, from 21 eras to 17, and every role in them made
+  specific to its era. `Scribe` became `Hieroglyph Scribe`, `Philosopher` became
+  `Athenian Philosopher`, `Emperor` became `Toga-Clad Emperor`, `Ninja` became
+  `Ninja Assassin`. The old lists had the same generic role — `Slave`,
+  `Blacksmith`, `Farmer`, `Merchant` — sitting in four eras at once, which gave a
+  jester a card they could describe without knowing anything, and gave everyone
+  else no way to prove they did. The four eras cut were the ones that couldn't be
+  saved by rewriting.
+- **Biomes rewritten** on the same principle, 20 biomes to 21, all 168 roles
+  reworked. Roles that appeared in three biomes at once — `Beaver`, `Rattlesnake`,
+  `Owl`, `Black Bear` — were the whole problem, since naming one told the table
+  nothing about which biome you were in.
+- A spacing pass over the lobby and the modals: headers, padding and the gap
+  under each section brought to one measure.
 
 ## 0.4.1 — 2026-07-09
 
 **Added**
-- Starting player is chosen and shown.
+- **A starting player**, drawn at random each round and named on the way into the
+  trial, so nobody has to decide who goes first.
 
 **Changed**
-- Minimum jester count can be 0.
+- **The minimum jester count can be 0**, which makes a jesterless round a real
+  round rather than a broken one. The final curtain gets its own ending for it —
+  an uncracked comedy mask instead of the cracked tragedy one, "Every performer
+  was genuine", and no accusation to be right or wrong about, where before the
+  results screen would have declared a wrong vote against a jester who didn't
+  exist.
 - Player names sort predictably.
 - Instructions updated.
 
@@ -515,45 +670,75 @@ The rewrite that made the rest possible.
 **Changed**
 - Dropped the visual-builder scaffolding the project started in: `support.js`
   (1,581 lines) and the `.dc.html` shells deleted, game logic extracted into a
-  hand-written `app.js` against plain React. Roughly 2,700 lines removed.
+  hand-written `app.js` (985 lines) against plain React, and `index.html` cut from
+  1,112 lines to a shell that loads three scripts. Roughly 2,700 lines removed
+  against 994 added. Nothing about the game changed; everything about working on
+  it did.
 
 ## 0.3.2 — 2026-07-08
 
+**Added**
+- **Movies as a word category** — 204 titles, twice the size of the three word
+  lists it joined, bringing Word Mode to four categories and 504 words.
+
 **Changed**
-- A much longer Movies list.
-- General styling.
+- The catalogs reflowed to a consistent shape in the data file — ten words to a
+  line, one category per block.
 
 ## 0.3.1 — 2026-07-08
 
 **Added**
-- Round timer.
+- **A round timer**, set from the lobby, counting down through the trial. When it
+  runs out the screen says so outright — "Time to Vote!", over a dimmed stage —
+  rather than letting a table argue past a clock nobody was watching.
 
 ## 0.3.0 — 2026-07-08
 
 **Added**
-- **Word Mode** — everyone gets the same secret word, no roles — with its own
-  categories and a fake-word setting.
+- **Word Mode** — everyone gets the same secret word, no roles — with three word
+  categories of its own: Food, Animals and Objects, 100 words each. A flat pool
+  per category, no per-word role lists, since there are no roles to deal.
+- **A fake-word setting** for it, the Word Mode counterpart to the disguised
+  jester: rather than being told they're the jester, they're handed a word of
+  their own and left to work out that nobody else has it.
 
 ## 0.2.1 — 2026-07-08
 
 **Added**
-- Published to GitHub Pages.
+- **Published to GitHub Pages**, and given a title to be published under.
+- **A phone shell for desktop.** The game is a phone game, so on anything wider
+  than 640px it now renders into a fixed 480×900 frame and scales that up to
+  1.7× rather than stretching a phone layout across a monitor. Below the
+  breakpoint it goes full-bleed as before.
 
 **Changed**
-- Mobile coloring, an upscaled layout, and a spelling pass.
+- Mobile coloring: `theme-color` and `color-scheme` meta tags, and a page
+  background behind the stage, so the browser's own chrome stops flashing white
+  around a dark game.
+- A spelling pass over the interface copy.
 
 ## 0.2.0 — 2026-07-07
 
 **Added**
-- The first extra categories, hours after the first build.
+- **Historical Eras** — 21 eras, 8 roles each.
+- **Movie Genres** — 12 genres, 8 films each. The word is the genre and your role
+  is a film in it.
+- Both arrive with fake-role lists of their own, so the disguised jester works in
+  them the way it already worked in Locations and Biomes.
 
 ## 0.1.1 — 2026-07-07
 
 **Fixed**
-- The first round of fixes on the first build.
+- The first round of fixes on the first build, hours after it existed.
 
 ## 0.1.0 — 2026-07-07
 
 **Added**
-- First playable build: pass-the-phone social deduction, secret roles tied to a
-  location, one player left out.
+- **First playable build**: pass-the-phone social deduction, one phone, a secret
+  word and a role apiece, and one player left out of it.
+- **Locations** — 39 words, 8 roles each — and **Biomes** — 20 biomes, 8 animals
+  each. Both shipped on day one; the changelog above only ever added to them.
+- **The disguised jester**, from the very first commit: alongside each catalog is
+  a shadow catalog of three fake roles per word, drawn from somewhere else
+  entirely, so the jester can be handed a plausible-looking card instead of being
+  told what they are.
