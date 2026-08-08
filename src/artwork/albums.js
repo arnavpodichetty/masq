@@ -207,7 +207,7 @@
     "Muddy Waters (Hoochie Coochie Man)": "https://cdn-images.dzcdn.net/images/cover/3e88958597953961e40995cc347ffec9/",
     "Mudhoney (Touch Me I'm Sick)": "https://cdn-images.dzcdn.net/images/cover/f4a122e78e70b9ef8ea1a2862171bcfa/",
     "Mumford & Sons (Little Lion Man)": "https://cdn-images.dzcdn.net/images/cover/cae19831ff34157b108b04b4d8ea9b12/",
-    "Muse (Uprising)": "https://cdn-images.dzcdn.net/images/cover/79845461299661387ade37f8e34d643c/",
+    "Muse (Supermassive Black Hole)": "https://cdn-images.dzcdn.net/images/cover/fc457d27a8c0b7fc6f9b56fb94e22a0d/",
     "My Chemical Romance (Teenagers)": "https://cdn-images.dzcdn.net/images/cover/0f23ab7de2b53c5298044ef1de148c50/",
     "NOFX (Linoleum)": "https://cdn-images.dzcdn.net/images/cover/add4eecf4224fe2341d55c06e13c096a/",
     "Neil Young (Heart of Gold)": "https://cdn-images.dzcdn.net/images/cover/0c97eabcd5664feece862bf7db940c26/",
