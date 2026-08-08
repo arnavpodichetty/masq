@@ -2346,8 +2346,9 @@
           }, ['◆', '✦', '♦', '✧'][i % 4]))
         ),
         h('div', { style: css('height:24px;') }),
+        // No way back from here: the round is spent, and Play Again is the only
+        // door out.
         h('div', { style: css('position:relative; width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:2px;') },
-          h('div', { ...press(v.backToLobby, 'Back to the lobby'), style: css("position:absolute; left:20px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent);") }, 'The Final Curtain')
         ),
         h('div', { style: css('flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;') },
