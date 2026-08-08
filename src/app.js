@@ -2198,7 +2198,7 @@
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
           v.allSeen
-            ? h('div', { ...press(v.goVoting), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL →')
+            ? h('div', { ...press(v.goVoting), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer; animation:masq-rise .4s ease both;") }, 'BEGIN THE TRIAL')
             : h('div', { style: css("padding:17px; text-align:center; border:1px dashed var(--m-border-hard); color:var(--m-soft2); font-family:'Cinzel',serif; font-weight:700; font-size:15px; border-radius:12px;") }, 'ALL PLAYERS MUST TAP FIRST')
         ),
         v.showOverlay && h('div', { onClick: v.dismissOverlay, style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
