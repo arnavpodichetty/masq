@@ -1,18 +1,14 @@
-// Regenerates src/artwork/animals.js — the animal -> photo map that app.js
-// reads for Biomes rounds, where every role is a creature. The generated file is
-// committed, so the site ships no API key and makes no calls to Wikipedia while
-// people are playing. Re-run it when the biome catalogs in src/data.js change.
+// Regenerates src/artwork/animals.js — the animal -> photo map app.js reads for
+// Biomes rounds. The generated file is committed, so the site ships no API key
+// and makes no calls to Wikipedia at play time. Re-run when the biome catalogs
+// in src/data.js change.
 //
 //   node tools/fetch-animals.js [--verbose]
 //
-// Wikipedia needs no key. Its Action API also takes fifty titles per request,
-// so the whole catalog resolves in a handful of calls rather than a hundred and
-// sixty-odd — which is why this one has no pacing delay to speak of and
-// finishes in a couple of seconds, unlike fetch-albums.js.
-//
-// What comes back is the article's lead image: the picture an encyclopedia
-// chose to represent the animal, already cropped and captioned by people who
-// care about it. That is usually exactly what a card wants.
+// Wikipedia needs no key and takes fifty titles per request, so the whole
+// catalog resolves in a handful of calls and a couple of seconds — no pacing
+// delay needed, unlike fetch-albums.js. What comes back is the article's lead
+// image, which is usually exactly what a card wants.
 
 const fs = require('fs');
 const path = require('path');
@@ -39,28 +35,13 @@ const THUMB_PX = 400;
 
 // Entries the plain lookup gets wrong, pinned to what to use instead: a page
 // title, or 'file:Some File.jpg' to name a Commons image outright. Prefer a
-// page — the lead image of the right article keeps improving as editors find
-// better photographs, while a pinned file is frozen. Four things go wrong:
+// page — a lead image keeps improving as editors find better photographs, while
+// a pinned file is frozen. Four things go wrong:
 //
-//   the name means something else   Cricket -> the sport; Gray Owl -> the
-//   more famous                     Canadian conservationist who took the name
-//
-//   the name is ours, not science's Troglodyte Beetle, Volcanic Mouse and Deep
-//                                   Sea Jellyfish are descriptions rather than
-//                                   species, so nothing is filed under them
-//
-//   the article is about a group    which usually means it leads with a collage
-//                                   of members, or — for River Dolphin — a
-//                                   range map. Neither reads as an animal at
-//                                   132 pixels, so those point at one
-//                                   representative species instead
-//
-//   the lead photo isn't free       four of the savanna animals lead with
-//   enough to use                   GFDL-1.2-only photographs, which can only
-//                                   be reused by shipping the whole licence
-//                                   text alongside. Pinned past to Creative
-//                                   Commons ones, which the credit line can
-//                                   actually satisfy
+//   the name means something else    Cricket -> the sport
+//   the name is ours, not science's  nothing is filed under Volcanic Mouse
+//   the article is about a group     leads with a collage or a range map
+//   the lead photo isn't free enough GFDL-1.2-only, so pinned to a CC one
 //
 // The trailing comment says why each is pinned. Sorted by entry.
 const OVERRIDES = {
@@ -84,19 +65,15 @@ const OVERRIDES = {
   'Seal': 'Harbor seal',                          // "Seal" alone is a disambiguation page
   'Sparrow': 'House sparrow',                     // "Sparrow" alone is a disambiguation page
   'Squirrel': 'Eastern gray squirrel',            // the family's article leads with a montage of eight
-  // Spinosaurus leads with a photograph of one fossil bone, three times as wide
-  // as it is tall. This is the skeleton, framed like the other dinosaurs'.
+  // the article leads with one fossil bone, 3:1; this is the whole skeleton
   'Spinosaurus': 'file:Spinosaurus Skeleton Cast at the National Geographic Museum.jpg',
   'Starfish': 'Common starfish',                  // the class article leads with a montage
   'Toucan': 'Toco toucan',                        // the family's article leads with a montage of six
   'Troglodyte Beetle': 'Leptodirus',              // the first cave beetle ever described
   'Volcanic Mouse': 'Neotomodon',                 // the Mexican volcano mouse
-  // The species article leads with a CDC photograph credited to a laboratory
-  // and three named people — accurate, but it fills the credits screen. This
-  // one is a closer portrait of the snake and is credited to one person.
+  // the article's CDC photo is credited to a lab and three people; this to one
   'Water Moccasin': 'file:Florida Water Moccasin 056.jpg',
-  // Both "Wildebeest" and "Blue wildebeest" lead with the same GFDL-1.2-only
-  // photo, so this is the one entry with no article to fall back on.
+  // both "Wildebeest" and "Blue wildebeest" lead with the same GFDL-1.2 photo
   'Wildebeest': 'file:Blue wildebeest (Connochaetes taurinus taurinus), male.jpg',
   'Zebra': 'Plains zebra',                        // "Zebra" leads with a GFDL-1.2-only photo
 };
@@ -105,17 +82,10 @@ const FILE_PIN = 'file:';
 const isFilePin = (pin) => typeof pin === 'string' && pin.startsWith(FILE_PIN);
 
 // Who to credit, where Commons' own answer can't be used as it stands. Keyed by
-// file name, and covering two cases:
-//
-//   nobody is named  The photographer is written into the file's own name or
-//                    into prose only a person can read. These photos require
-//                    attribution, so without this they would ship crediting
-//                    nobody, and the run refuses to finish.
-//
-//   too much is      The field holds a name wrapped in a sentence, or the same
-//   named            name twice. tidyCredit below unpicks the common shapes;
-//                    these are the ones where only a reader can tell which
-//                    words are the name.
+// file name, covering two cases: nobody is named (the photographer is in the
+// file name or in prose only a person can read, and the run refuses to finish
+// without a name), or too much is named (tidyCredit below unpicks the common
+// shapes; these are the ones only a reader can untangle).
 //
 // Every one of these must keep every person and institution the original names
 // — dropping a request or an address is fine, dropping a name is not.
@@ -125,35 +95,27 @@ const CREDIT_OVERRIDES = {
   'Scarus frenatus by Ewa Barska.jpg': 'Ewa Barska',                // named only in the file name
   'Sockeye salmon swimming right.jpg': 'Milton Love, Marine Science Institute, UCSB',  // was: the same, plus a postal address
   'SpottedSalamander.jpg': 'Scott Camazine',                        // was: the surname, a stray bracket, then the full name
-  // Somebody cropped or retouched someone else's photograph, so two people are
-  // owed a line and Commons writes both into one field — sometimes editor
-  // first, sometimes photographer first, always labelled in the middle. Which
-  // is which is the part no rule can read, so it is said here: photographer,
-  // then who worked on it.
+  // Someone cropped someone else's photo, so two people are owed a line and
+  // Commons writes both into one field in either order. Which is which is what
+  // no rule can read, so it's said here: photographer, then who worked on it.
   'Crotalus cerastes mesquite springs CA-2.jpg': 'Tigerhawkvok, edited by Victorrocha',
   'Gyps rueppellii -Nairobi National Park, Kenya-8-4c.jpg': 'Jorge Láscar, edited by Snowmanradio',
   'LA-Triceratops mount-2.jpg': 'Allie Caulfield, edited by MathKnight',
-  // The same chain, except both halves are the same man: Wsiegmund is Walter
-  // Siegmund's account, cropping his own photograph.
+  // the same chain, but both halves are one man cropping his own photograph
   'Lepus americanus 5459 cropped.jpg': 'Walter Siegmund',
-  // The author line is a link to the photographer's own site, and the name
-  // behind it is on his user page.
+  // the author line is a link to his own site; the name is on his user page
   'Harpia harpyja 001 800.jpg': 'Tom Friedel (birdphotos.com)',
-  // A public-domain photo whose author line records how the archive came by it
-  // rather than who took it — the farm's keeper, at the farm.
+  // the author line records how the archive came by it, not who took it
   "SaltwaterCrocodile('Maximo').jpg": 'Molly Ebersold, St. Augustine Alligator Farm',
-  // Four turtles, four photographs, four photographers — the collage credits
-  // "his respective owners", which is nobody. Named here in the order they
-  // appear on the file page.
+  // a four-photo collage credited to "his respective owners", i.e. nobody;
+  // named here in the order they appear on the file page
   'Turtle diversity.jpg': 'Petra Karstedt, CLpramod, Matthew Field, Hoffryan',
 };
 
 // ---------------------------------------------------------------- entry lists
 
-// One category needs animal photos: the creatures used as roles in Biomes
-// rounds, the real ones and the jester's fakes alike.
-//
-// data.js is a browser file that assigns onto window, so give it a window.
+// The creatures used as roles in Biomes rounds, real and fake alike. data.js is
+// a browser file that assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -186,9 +148,9 @@ async function api(endpoint, params) {
 
 const chunk = (arr, n) => arr.reduce((out, x, i) => ((i % n ? out[out.length - 1].push(x) : out.push([x])), out), []);
 
-// Asks for a batch of titles at once and hands back what each *requested* title
-// ended up at. MediaWiki reports capitalization fixes and redirects as separate
-// from-to lists rather than on the page, so the hops have to be walked back.
+// Batches titles and hands back what each *requested* title ended up at.
+// MediaWiki reports capitalization fixes and redirects as separate from-to
+// lists rather than on the page, so the hops have to be walked back.
 async function fetchPages(titles) {
   const pages = new Map();
   for (const group of chunk([...new Set(titles)], BATCH)) {
@@ -216,71 +178,56 @@ async function fetchPages(titles) {
 const usable = (p) => !!(p && !p.missing && p.thumbnail
   && !(p.pageprops && 'disambiguation' in p.pageprops));
 
-// Wikipedia titles are case-sensitive past the first letter, and species
-// articles are written in sentence case — so the catalog's "Polar Bear" is a
-// different title from the article "Polar bear", and lands on whatever else
-// claims the capitalized form. Asking both ways costs nothing in a batch.
+// Wikipedia titles are case-sensitive past the first letter and species
+// articles use sentence case, so "Polar Bear" is a different title from "Polar
+// bear". Asking both ways costs nothing in a batch.
 const sentenceCase = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 
-// Wikidata's one-line descriptions are formulaic for animals — "species of
-// bird", "genus of beetles" — so an article that doesn't describe itself in
-// those terms is usually about something other than the creature. Loose on
-// purpose: this only picks out entries to look at by hand, it never rejects
-// one. The trap it's aimed at is the article that resolves cleanly, carries a
-// handsome photo, and is about a cricket match.
-//
-// Open at the end rather than anchored on both sides, because these read as
-// "superfamily of crustaceans" far more often than as one crustacean.
+// Wikidata descriptions are formulaic for animals — "species of bird", "genus
+// of beetles" — so an article not describing itself that way is usually about
+// something else. Loose on purpose: this only flags entries for a human to
+// check, never rejects one. The trap is the article that resolves cleanly,
+// carries a handsome photo, and is about a cricket match. Left open at the end,
+// since these read as "superfamily of crustaceans" more often than not.
 const ZOOLOGICAL = /\b(speci(es|men)|genus|genera|subspecies|famil(y|ies)|subfamily|superfamily|order|suborder|infraorder|class|tribe|breed|taxon|clade|population|group of|index of animal|animal|bird|fish|mammal|reptile|amphibian|insect|dinosaur|theropod|pterosaur|arachnid|crustacean|mollus[ck]|cephalopod|invertebrate|primate|rodent|marsupial|ruminant|carnivore|omnivore|herbivore|felid|canid|bovid|seabird|whale|dolphin|shark|frog|toad|snake|lizard|urchin|krill|monkey|ape|cat|dog|bear|owl|penguin|antelope|sheep|goat|pinniped|arthropod|beetle|spider|crab|eel|hawk|eagle|falcon|wolf|fox|deer|squirrel|rabbit|hare|rat|mouse|bat)/i;
 
-// The thumbnail URL arrives with campaign tracking on the end. It works either
-// way, but the parameters say "someone browsed Wikipedia", which isn't what
-// happened, and they'd be baked into a committed file forever.
+// The thumbnail URL arrives with campaign tracking on the end — harmless, but
+// untrue, and it would be baked into a committed file forever.
 const cleanUrl = (u) => (u || '').split('?')[0];
 
 // -------------------------------------------------------------------- credits
 
-// Every one of these photos is somebody's work, and most are licensed on terms
-// that require crediting them by name. So the credit is collected here and
-// written into the generated file as data, not just as a comment: the game's
-// Credits screen reads it and lists every photographer. A run that can't find a
-// name for a photo that needs one says so and refuses to finish.
+// Most of these photos are licensed on terms requiring a credit by name, so the
+// credit is written into the generated file as data and read by the Credits
+// screen. A run that can't find a name for a photo that needs one refuses to
+// finish.
 
-// MediaWiki treats an underscore and a space as the same character and answers
-// in spaces, while pageimages reports the file in underscores. Key both sides
-// the same way or every lookup quietly misses.
+// MediaWiki treats underscore and space alike and answers in spaces, while
+// pageimages reports the file in underscores. Key both sides the same way or
+// every lookup quietly misses.
 const fileKey = (name) => (name || '').replace(/^File:/, '').replace(/_/g, ' ');
 
-// A wiki username signs itself with a link to its own talk page, and the word
-// on that link is whatever language the person who uploaded the photo writes
-// in. Any of them is a signature rather than a name, so any of them goes.
+// A wiki username signs itself with a link to its own talk page, worded in
+// whatever language the uploader writes in. That's a signature, not a name.
 const TALK_LINK = /\(\s*(?:talk|thảo luận|diskussion|discussion|discussione|discusión|discussão|обсуждение|討論|토론|会話)\s*(?:[·|]\s*contribs\s*)?\)/gi;
 
-// Commons' author field is a free-text box, so a name arrives wearing whatever
-// its uploader wrapped it in: a sentence announcing it, a note about how to
-// reach them, the licence restated, where they live. The credits screen wants
-// the name.
-//
-// Every rule here removes only words that are certainly not part of one — a
-// stock phrase, a licence name, an address. Nothing trims by length and nothing
-// stops at the first name it finds, because a photo can have two authors (one
-// took it, one edited it) and both have to survive. Where that can't be done by
-// rule, CREDIT_OVERRIDES says the answer outright rather than guessing.
+// Commons' author field is free text, so a name arrives wearing whatever its
+// uploader wrapped it in: a sentence announcing it, contact details, the licence
+// restated. Every rule below removes only words certainly not part of a name.
+// Nothing trims by length and nothing stops at the first name found, since a
+// photo can have two authors and both have to survive. Where no rule can tell,
+// CREDIT_OVERRIDES says the answer outright.
 const TIDY = [
-  // Two answers that name nobody at all. "Own work" belongs to the question of
-  // where a picture came from, not who made it, and reaches the author line
-  // only when that line held nothing readable — a bare link to the
-  // photographer's own site, say. A licence tag is a licence. Emptying them
-  // beats printing them: an empty name is what the missing-name check below
-  // looks for, so the run stops and asks for a real one.
+  // Two answers that name nobody. Emptying them beats printing them: an empty
+  // name is what the missing-name check looks for, so the run stops and asks.
   [/^own(?:\s+work)?$/i, ''],
   [/^pd-\S*\b.*$/i, ''],
   // "This illustration was made by Citron" -> "Citron"
   [/^this\s+(?:illustration|image|file|photo(?:graph)?|picture)\s+(?:was\s+)?(?:made|taken|created|produced|drawn)\s+by\s+/i, ''],
   // "Photography captured by Giles Laurent" -> "Giles Laurent"
   [/^(?:photo(?:graph)?y?\s+)?(?:captured|photographed|shot|taken)\s+by\s+/i, ''],
-  // Field labels the uploader typed by hand, and wiki user-page prefixes — the
-  // second of which can arrive as an interwiki link, "w:en:User:Kguirnela".
+  // Hand-typed field labels, and user-page prefixes — which can arrive as an
+  // interwiki link, "w:en:User:Kguirnela".
   [/^(?:source|photo|photograph|photographer|image|author|credit|copyright)\s*:\s*/i, ''],
   [/^(?:w|c|wikipedia|commons)\s*:\s*(?:[a-z]{2,3}\s*:\s*)?/i, ''],
   [/\bUser\s*:\s*/g, ''],
@@ -291,16 +238,13 @@ const TIDY = [
   // "You must credit this : Citron / CC-BY-SA-3.0" — an instruction about the
   // credit, not the credit.
   [/\s*you\s+must\s+credit\s+this\s*:.*$/i, ''],
-  // Photographers add what they'd like to happen next — an email before you
-  // use it, a link back. Courteous, and worth honouring, but the licence asks
-  // for the name and the credits screen has room for the name.
+  // Requests the photographer added — an email first, a link back. Worth
+  // honouring, but the credits screen has room for the name.
   [/[.,]?\s*\bif\s+you\s+(?:plan|intend|wish|want|would)\b.*$/i, ''],
-  // How to reach the photographer, and the address itself: a bracket holding
-  // an email is contact details, never a name.
+  // Contact details: a bracket holding an email is never a name.
   [/\s*\((?:to\s+contact|contact|for\s+permission)[^)]*\)\s*$/i, ''],
   [/\s*\([^()]*@[^()]*\)/g, ' '],
-  // "Renee Comet (photographer)" — how an encyclopedia tells two people of one
-  // name apart, which a list of photographers doesn't need saying.
+  // "Renee Comet (photographer)" — a disambiguator this list doesn't need.
   [/\s*\((?:photographer|photograph|photo)\)\s*$/i, ''],
   // A footnote marker left standing where a link used to be.
   [/\s*\[\d+\]/g, ''],
@@ -311,9 +255,8 @@ const TIDY = [
   [/\s+at\s+[a-z]{2,3}\.wikipedia\b/gi, ''],
   // A wiki username spells a space as an underscore.
   [/_/g, ' '],
-  // Tidying leaves gaps and orphaned punctuation behind. Brackets are not swept
-  // up with the rest: a credit can legitimately end in one — "Becker1999 (Paul
-  // and Cathy)" — and taking that closing bracket away leaves the pair open.
+  // Tidying leaves gaps and orphaned punctuation. Brackets aren't swept up with
+  // it: a credit can legitimately end in one, "Becker1999 (Paul and Cathy)".
   [/\s+([.,;:])/g, '$1'],
   [/\(\s+/g, '('],
   [/\s+\)/g, ')'],
@@ -322,15 +265,10 @@ const TIDY = [
   [/^[\s,;:·-]+|[\s,;:·-]+$/g, ''],
 ];
 
-// Uploaders sign off with where they were, and the sentence for that looks
-// exactly like the sentence for who gave them the picture:
-//
-//   Steve Sayles from Rankin Inlet, Nunavut, Canada        a name, then a place
-//   Obtained from Molly Ebersold of the St. Augustine       a place, then a name
-//   Alligator Farm
-//
-// So the clause only goes when what stands in front of it already reads as a
-// name — two words at least, which "Obtained" is not — and when what follows
+// "X from Y" is either a name then a place ("Steve Sayles from Rankin Inlet") or
+// a place then a name ("Obtained from Molly Ebersold of the St. Augustine
+// Alligator Farm"). So the clause only goes when what precedes it already reads
+// as a name — two words at least, which "Obtained" is not — and what follows
 // neither belongs to somebody nor introduces a second author.
 function dropTrailingOrigin(s) {
   const m = /^(.+?)\s+from\s+([^()]*)$/i.exec(s);
@@ -376,12 +314,8 @@ async function fetchCredits(fileNames) {
     for (const p of query.pages || []) {
       const meta = (p.imageinfo && p.imageinfo[0] && p.imageinfo[0].extmetadata) || {};
       // These arrive as scraps of HTML — a link, sometimes a whole vcard — and
-      // the credit for a photo someone has since cropped or retouched arrives
-      // as a chain: "original.jpg : first author, derivative work: second".
-      // Strip the plumbing and keep the people. What's left goes on screen, so
-      // the URL a photographer signed with, the file name at the head of the
-      // chain, and the "( talk · contribs )" trailing every wiki username are
-      // all noise in a list of names.
+      // a cropped photo's credit arrives as a chain: "original.jpg : first
+      // author, derivative work: second". Strip the plumbing, keep the people.
       const text = (k) => (meta[k]
         ? String(meta[k].value)
           .replace(/<[^>]*>/g, ' ')
@@ -394,9 +328,7 @@ async function fetchCredits(fileNames) {
           .replace(/^[\s,;:·-]+|[\s,;:·-]+$/g, '')
         : '');
       const file = fileKey(p.title);
-      // Three fields can hold the name and any of them may be the only one
-      // filled in. Where Commons records it nowhere at all, fall back to what
-      // was read off the file page by hand.
+      // Three fields can hold the name and any may be the only one filled in.
       // A hand-written answer wins outright — it exists precisely because the
       // fields below it are unusable.
       const artist = CREDIT_OVERRIDES[file]
@@ -405,8 +337,7 @@ async function fetchCredits(fileNames) {
         artist,
         license: text('LicenseShortName') || 'unknown',
         // Commons states this outright, which beats inferring it from the
-        // licence name — a public-domain photo needs no credit, and saying so
-        // is what lets the missing-name check be strict about the rest.
+        // licence — and is what lets the missing-name check be strict.
         required: text('AttributionRequired') !== 'false',
       });
     }
@@ -414,9 +345,9 @@ async function fetchCredits(fileNames) {
   return credits;
 }
 
-// Locally hosted files aren't on Commons, so their credit lookup comes back
-// empty rather than wrong. Free licences all name themselves; anything else is
-// worth a human deciding about before it ships.
+// Free licences all name themselves; anything else is worth a human deciding
+// about before it ships. (Locally hosted files aren't on Commons, so their
+// lookup comes back empty rather than wrong.)
 const FREE = /^(cc0|cc by|cc by-sa|public domain|pd|no restrictions)/i;
 
 // ---------------------------------------------------------------------- main
@@ -425,25 +356,24 @@ function write(rows) {
   const urls = rows.map(({ entry, url, page }) => (
     `    ${JSON.stringify(entry)}: ${JSON.stringify(url)},  // ${page}`
   ));
-  // [animal, photographer, licence]. A triple per line rather than an object
-  // because the Credits screen prints all three and wants nothing else.
+  // [animal, photographer, licence] — a triple rather than an object, since the
+  // Credits screen prints all three and wants nothing else.
   const credits = rows.map(({ entry, credit }) => (
     `    [${JSON.stringify(entry)}, ${JSON.stringify(credit.artist)}, ${JSON.stringify(credit.license)}],`
   ));
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-animals.js — do not edit by hand.',
-    '// Maps an animal from the Biomes catalogs to its lead photo on Wikipedia,',
-    '// as a ready-to-use URL — unlike the album art, there is no size to append.',
-    '// The comment on each line is the article the photo was taken from.',
+    '// Maps a Biomes-catalog animal to its Wikipedia lead photo, as a finished',
+    '// URL — unlike the album art, there is no size to append. Each trailing',
+    '// comment is the article the photo came from.',
     '(function () {',
     '  window.MASQ_ANIMALS = {',
     ...urls,
     '  };',
     '',
-    '  // Who took each of the photos above and under what licence, which is what',
-    '  // most of those licences ask for in return. Read by the Credits screen.',
-    '  // An empty name is a picture in the public domain with no author on',
-    '  // record — there is nobody to credit, and its licence asks for nobody.',
+    '  // Photographer and licence for each photo above — what most of those',
+    '  // licences ask in return. Read by the Credits screen. An empty name is a',
+    '  // public-domain photo with no author on record, so there is nobody owed.',
     '  window.MASQ_ANIMAL_CREDITS = [',
     ...credits,
     '  ];',
@@ -456,8 +386,8 @@ function write(rows) {
   const entries = loadEntries();
   console.log(`Resolving photos for ${entries.length} biome animals…`);
 
-  // Every title this run might want, asked for in as few round trips as
-  // possible: the pin if there is one, otherwise the entry both ways up.
+  // Every title this run might want, in as few round trips as possible: the pin
+  // if there is one, otherwise the entry both ways up.
   const wanted = [];
   const pinnedFiles = [];
   for (const entry of entries) {
@@ -478,8 +408,8 @@ function write(rows) {
       const file = pin.slice(FILE_PIN.length);
       const url = files.get(fileKey(file));
       if (!url) { missing.push(`${entry} (${file}: no such file on Commons)`); continue; }
-      // A pinned file has no article behind it, so there's no description to
-      // check and nothing it could have strayed from — it is the answer.
+      // A pinned file has no article behind it: nothing to check, nothing to
+      // stray from — it is the answer.
       resolved.push({ entry, page: file, file, url, description: '', pinned: true });
       continue;
     }
@@ -513,9 +443,9 @@ function write(rows) {
     credit: credits.get(fileKey(r.file)) || { artist: '', license: 'unknown', required: true },
   }));
 
-  // A photo whose licence demands a credit, with no name to put in it, is the
-  // one failure here that can't be left for someone to notice later — it ships
-  // looking finished and isn't. Name it in CREDIT_OVERRIDES and run again.
+  // A photo whose licence demands a credit with no name to put in it ships
+  // looking finished and isn't — the one failure that can't wait to be noticed.
+  // Name it in CREDIT_OVERRIDES and run again.
   const uncredited = rows.filter(r => r.credit.required && !r.credit.artist);
   if (uncredited.length) {
     console.error(`\nAttribution required but no photographer named — add these to CREDIT_OVERRIDES:\n${
@@ -528,22 +458,18 @@ function write(rows) {
   write(rows);
   console.log(`\nWrote ${rows.length}/${entries.length} animals to ${OUT}`);
 
-  // Worth a look, in the order that a wrong picture is easiest to miss: an
-  // article that doesn't describe an animal is probably the wrong article, and
-  // one reached under a name we didn't ask for may be the wrong animal.
+  // Worth a look, in the order a wrong picture is easiest to miss: an article
+  // that doesn't describe an animal is probably the wrong one, and a name we
+  // didn't ask for may be the wrong animal.
   const odd = rows.filter(r => !r.pinned && !ZOOLOGICAL.test(r.description));
   const strayed = rows.filter(r => !r.pinned
     && r.page.toLowerCase().replace(/[^a-z]/g, '') !== r.entry.toLowerCase().replace(/[^a-z]/g, ''));
   const unfree = rows.filter(r => !FREE.test(r.credit.license));
-  // A picture crediting a crowd is a picture of a crowd: the articles about a
-  // whole family tend to lead with a grid of members, and the giveaway is that
-  // every photographer in the grid has to be named. One animal per card, so
-  // these want pinning to whichever species stands for the group.
-  //
-  // The cutoff is high because a single photographer can run long all on their
-  // own — a chain of derivative-work credits, or a note asking to be emailed
-  // before you use it. Those land near 130 characters; a genuine grid of eight
-  // ran to several hundred.
+  // A picture crediting a crowd is a picture of a crowd: family articles lead
+  // with a grid, and every photographer in it has to be named. One animal per
+  // card, so these want pinning to a representative species. The cutoff is high
+  // because one photographer can run to ~130 characters on their own; a genuine
+  // grid of eight ran to several hundred.
   const composite = rows.filter(r => !r.pinned && r.credit.artist.length > 180);
 
   if (odd.length) {

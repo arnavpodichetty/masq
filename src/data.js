@@ -2,9 +2,8 @@
 // Genres, Music Genres), a matching fake-role catalog for each, and the
 // word-only catalogs. Plain script, exposed on window.MASQ_LOCATIONS_DATA.
 //
-// Real catalogs come first, then the fake-role catalogs that shadow them, then
-// anything parked. Within each catalog, keys and their role/word lists are
-// sorted alphabetically.
+// Real catalogs, then the fake-role catalogs that shadow them, then anything
+// parked. Keys and their lists are sorted alphabetically throughout.
 (function () {
   var biomeCatalog = {
     'Alpine Mountains': ['Bighorn Sheep', 'Condor', 'Eagle', 'Ibex', 'Marmot', 'Mountain Goat', 'Snow Leopard', 'Yak'],
@@ -31,8 +30,8 @@
     'Volcanic Island': ['Fire Salamander', 'Galápagos Iguana', 'Hawaiian Hoary Bat', 'Lava Lizard', 'Peregrine Falcon', 'Vampire Ground Finch', 'Volcanic Mouse', 'Volcano Rabbit'],
   };
 
-  // Dish names are deaccented, like the artist names in musicGenreCatalog, so
-  // the lists sort plainly and nothing depends on the font having the glyph.
+  // Dish names are deaccented, like the artists in musicGenreCatalog: the lists
+  // sort plainly and nothing depends on the font having the glyph.
   var cuisineCatalog = {
     'American': ['BLT', 'Buffalo Wings', 'Cheeseburger', 'Chicken Fried Steak', 'Clam Chowder', 'Cobb Salad', 'Corn Dog', 'Grilled Cheese', 'Mac and Cheese', 'Meatloaf', 'Pecan Pie', 'Pulled Pork'],
     'Brazilian': ['Acai Bowl', 'Acaraje', 'Brigadeiro', 'Coxinha', 'Farofa', 'Feijoada', 'Moqueca', 'Pao de Queijo', 'Pastel', 'Picanha', 'Quindim', 'Vatapa'],
@@ -289,9 +288,8 @@
     'Volcanic Island': ['Harpy Eagle', 'Sparrow', 'Zebra'],
   };
 
-  // Each fake is a real dish from a different cuisine — near enough to read as
-  // a genuine card, far enough that saying anything true about it gives the
-  // jester away.
+  // Each fake is a real dish from another cuisine: near enough to read as a
+  // genuine card, far enough that anything true about it gives the jester away.
   var fakeCuisineRoleCatalog = {
     'American': ['Kibbeh', 'Okonomiyaki', 'Tagine'],
     'Brazilian': ['Bangers and Mash', 'Kimchi Jjigae', 'Spatzle'],
@@ -432,10 +430,9 @@
     'Soul / Motown': ["Alicia Keys (If I Ain't Got You)", 'Ella Fitzgerald (Dream a Little Dream of Me)', 'Kirk Franklin (Stomp)'],
   };
 
-  // Historical Eras is parked: the catalog is drafted but the category still
-  // needs a lot of reworking before it is fit to play, so it ships commented
-  // out and is left off window.MASQ_LOCATIONS_DATA below. app.js drops the
-  // category from its lists to match — restore both sides together.
+  // Historical Eras is parked: drafted, but not yet fit to play, so it ships
+  // commented out and off window.MASQ_LOCATIONS_DATA below. app.js drops the
+  // category to match — restore both sides together.
 
   // var historicalErasCatalog = {
   //   'Age of Exploration': ['Caravel Captain', 'Conquistador', 'Indigenous Interpreter', 'Missionary Priest', 'New World Cartographer', 'Scurvy-Stricken Sailor', 'Ship\'s Navigator', 'Spice Trade Merchant'],

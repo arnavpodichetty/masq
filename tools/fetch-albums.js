@@ -1,14 +1,13 @@
-// Regenerates src/artwork/albums.js — the "Artist (Song)" -> album art map that
-// app.js reads. The generated file is committed, so the site ships no API key and
-// makes no calls to Deezer while people are playing. Re-run it when the music
-// catalogs in src/data.js change.
+// Regenerates src/artwork/albums.js — the "Artist (Song)" -> album art map
+// app.js reads. The generated file is committed, so the site ships no API key
+// and makes no calls to Deezer at play time. Re-run when the music catalogs in
+// src/data.js change.
 //
 //   node tools/fetch-albums.js [--verbose]
 //
-// Deezer needs no key, so unlike fetch-posters.js there's nothing to set up
-// first. Apple's iTunes Search API answers the same question, but it throttles
-// at about twenty calls a minute — a couple of hundred entries there takes a
-// quarter of an hour and comes back mostly 403s. This run takes about a minute.
+// Deezer needs no key, so unlike fetch-posters.js there's nothing to set up.
+// Apple's iTunes Search API answers the same question but throttles at ~20
+// calls a minute, taking a quarter hour and mostly 403s. This run: a minute.
 
 const fs = require('fs');
 const path = require('path');
@@ -26,19 +25,14 @@ const VERBOSE = process.argv.includes('--verbose');
 const PACE_MS = 150;
 
 // Entries that search gets wrong, pinned to a Deezer id: 'album:N' is an album,
-// 'track:N' a song. Two things go wrong, and both are about who gets credited:
-//
-//   the composer never recorded it  Bach -> whichever budget compilation of the
-//                                   piece ranks highest this week, since Deezer
-//                                   credits the performer
-//   the act records under another   Diplo (Lean On) -> remixes of it, since the
-//   name                            record is credited to Major Lazer
+// 'track:N' a song. Both failures are about who gets credited — Deezer credits
+// the performer, so a composer lands on whichever budget compilation ranks
+// highest this week, and an act recording under another name (Diplo's "Lean On"
+// is credited to Major Lazer) lands on remixes.
 //
 // Album ids win over track ids: a song ships on many releases, and pinning the
-// album says exactly which cover to show.
-//
-// The trailing comment says what each id actually is — the point of pinning is
-// that these can't drift, so verify before editing one. Sorted by entry.
+// album says exactly which cover to show. The trailing comment says what each
+// id is — pins can't drift, so verify before editing one. Sorted by entry.
 const OVERRIDES = {
   'Bach (Air on the G String)': 'album:387441267',              // English Baroque Soloists — Bach: Orchestral Suites BWV 1066-1069
   'Beethoven (Fur Elise)': 'album:254829962',                   // Stephanie McCallum — Für Elise: Bagatelles for Piano
@@ -60,10 +54,8 @@ const OVERRIDES = {
 
 // ---------------------------------------------------------------- entry lists
 
-// One list needs album art: the "Artist (Song)" entries used as roles in Music
-// Genres rounds, the real ones and the jester's fakes alike.
-//
-// data.js is a browser file that assigns onto window, so give it a window.
+// The "Artist (Song)" entries used as roles in Music Genres rounds, real and
+// fake alike. data.js assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -112,48 +104,45 @@ async function deezer(urlPath, params) {
   }
 }
 
-// Compare loosely: "ROSALÍA", "Rosalia" and "rosalía" are all the same artist.
-// Keep any letter, not just a-z, so a name in another script doesn't collapse to
-// ''. An ampersand is spelled out rather than dropped, so "KC and the Sunshine
-// Band" still reads as the same name as "KC & The Sunshine Band".
+// Compare loosely: "ROSALÍA", "Rosalia" and "rosalía" are one artist. Keep any
+// letter, not just a-z, so a name in another script doesn't collapse to ''. An
+// ampersand is spelled out so "KC and the Sunshine Band" matches "KC & The
+// Sunshine Band".
 const norm = (s) => (s || '')
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/&/g, ' and ').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 
-// Either side may carry the extra: we say "The Village People" where Deezer says
-// "Village People", and Deezer says "Nicky Jam & J Balvin" where we say "Nicky
-// Jam".
+// Either side may carry the extra: we say "The Village People" to Deezer's
+// "Village People", and Deezer says "Nicky Jam & J Balvin" to our "Nicky Jam".
 const nameMatch = (a, b) => a.includes(b) || b.includes(a);
 
-// Re-recordings are cheap to publish, so they crowd the results for a famous
-// song, and none of them carry a cover anyone would recognize. Who released it
-// can be read strictly — no real act is called "Rockabye Baby!" — but the title
-// only loosely, since Brahms really did write a "Lullaby".
+// Re-recordings crowd the results for a famous song and carry covers nobody
+// would recognize. The credit can be read strictly — no real act is called
+// "Rockabye Baby!" — but the title only loosely, since Brahms did write a
+// "Lullaby".
 const IMPOSTOR_CREDIT = /karaoke|tribute|made famous|made popular|in the style of|kidz bop|8-bit|8 bit|rockabye|music box|lullaby/i;
 const IMPOSTOR_TITLE = /karaoke|instrumental version|cover version|in the style of/i;
 const isImpostor = (r) => IMPOSTOR_CREDIT.test(`${r.artist.name} ${r.album.title}`)
   || IMPOSTOR_TITLE.test(r.title || '');
 
-// A hit ships on a dozen releases and search ranks them by popularity, so the
-// top result is often a remix, a live record or a hits package. Three things
-// separate the cover people picture, weighted in the order they matter: a name
-// that *is* the act's rather than merely containing it (loose matching is what
-// lets "Village People" answer for "The Village People", and equally lets
-// "Fleetwood Mac Experience" answer for Fleetwood Mac); an unqualified title,
-// since a "(Thin White Duke Mix)" is a different recording wearing a sleeve
-// nobody has seen; and a release that introduced the song rather than one that
-// re-issues it, last because a compilation at least shows the right artist.
+// A hit ships on a dozen releases ranked by popularity, so the top result is
+// often a remix, a live record or a hits package. Three things separate the
+// cover people picture, weighted in that order: a name that *is* the act's
+// rather than merely containing it (loose matching lets "Village People" answer
+// for "The Village People", but equally lets "Fleetwood Mac Experience" answer
+// for Fleetwood Mac); an unqualified title, since a "(Thin White Duke Mix)"
+// wears a sleeve nobody has seen; and a release that introduced the song, last
+// because a compilation at least shows the right artist.
 //
-// Preferences, not filters. Where a song only ever appeared live — plenty of the
-// gospel entries — every candidate takes the same hit and relevance order
-// decides, exactly as it would have without any of this.
+// Preferences, not filters — where a song only ever appeared live, every
+// candidate takes the same hit and relevance order decides.
 const REISSUE = /greatest hits|best of|\bhits\b|the essential|essential |collection|anthology|compilation|singles|soundtrack|\bvol\.? ?\d|\d+th anniversary|\blive\b|unplugged|in concert|remixes|re-?record/i;
 const penalty = (r, a, t) => (norm(r.artist.name) === a ? 0 : 4)
   + (norm(r.title) === t ? 0 : 2)
   + (REISSUE.test(r.album.title) ? 1 : 0);
 
-// cover_medium ends in the size it was asked for; everything before that is a
-// prefix any size can be appended to. app.js appends the size it displays.
+// cover_medium ends in the size asked for; everything before is a prefix any
+// size can be appended to. app.js appends the size it displays.
 function artPrefix(album) {
   const m = /^(.*\/)\d+x\d+-[\d-]+\.jpg$/.exec((album && album.cover_medium) || '');
   return m ? m[1] : null;
@@ -172,10 +161,9 @@ async function fetchPinned(spec) {
   };
 }
 
-// Deezer's field search is exact on the artist name, which is precise when it
-// lands and empty when it doesn't — "The Village People" finds nothing, since
-// Deezer files them without the "The". So ask precisely, then fall back to the
-// same words as free text.
+// Deezer's field search is exact on the artist name: precise when it lands,
+// empty when it doesn't — "The Village People" finds nothing, since Deezer
+// files them without the "The". Ask precisely, then fall back to free text.
 async function search(artist, track) {
   const strict = await deezer('/search', { q: `artist:"${artist}" track:"${track}"`, limit: 25 });
   if ((strict.data || []).length) return strict.data;
@@ -198,17 +186,16 @@ async function resolve(entry) {
   const a = norm(artist);
   const t = norm(track);
   // title_short drops the "(feat. …)" and "(Original Mix)" tails, so a song is
-  // recognized as itself whichever way that release happened to name it.
+  // recognized however that release named it.
   const titles = (r) => [norm(r.title_short), norm(r.title)];
   const artistOk = (r) => nameMatch(norm(r.artist.name), a);
   const trackOk = (r) => titles(r).includes(t);
-  //
   //   exact    the artist we named, singing the song we named
   //   partial  the right artist on a longer title — a remix, or a classical
   //            movement listed as "Serenade in G Major: I. Allegro"
-  //   loose    the right song, credited to someone else. This is the classical
-  //            case: Deezer credits the orchestra, we credit the composer, so
-  //            the composer's name shows up in the title or the album instead
+  //   loose    the right song credited to someone else — the classical case,
+  //            where Deezer credits the orchestra and we credit the composer,
+  //            whose name then shows up in the title or album instead
   const tiers = [
     ['exact', hits.filter(r => artistOk(r) && trackOk(r))],
     ['partial', hits.filter(r => artistOk(r) && titles(r).some(x => x.includes(t)))],
@@ -217,22 +204,21 @@ async function resolve(entry) {
   ];
   const [match, list] = tiers.find(([, l]) => l.length);
   // Preferring a release only makes sense once the artist is confirmed: down in
-  // loose and fuzzy the candidates aren't one recording — the song may not even
-  // be by whom we asked — so relevance order stands. Where it does apply,
-  // reduce() keeps the first of an equal pair, so ties still fall that way.
+  // loose and fuzzy the candidates aren't one recording, so relevance order
+  // stands. Where it applies, reduce() keeps the first of an equal pair.
   const ranked = match === 'exact' || match === 'partial';
   const best = ranked ? list.reduce((x, y) => (penalty(y, a, t) < penalty(x, a, t) ? y : x)) : list[0];
   return { art: artPrefix(best.album), artist: best.artist.name, track: best.title, album: best.album.title, match };
 }
 
 // Searched by title, not by song. Re-releases carry their own artwork — Origin
-// of Symmetry's 2021 "XX Anniversary RemiXX" does — and often outrank the record
-// people picture, so prefer the exact title and the plainest edition of it.
+// of Symmetry's 2021 "XX Anniversary RemiXX" does — and often outrank the
+// record people picture, so prefer the exact title and its plainest edition.
 const ALT_EDITION = /anniversary|deluxe|remaster|expanded|edition|re-?issue|\blive\b|instrumental/i;
 
-// Catalog keys that aren't the name of a record. B-Sides is a bucket, not a
-// release: the key itself falls back to Hullabaloo's sleeve, but each track in
-// it is resolved to the single it came off — see resolveMuseTrack.
+// Catalog keys that aren't the name of a record. B-Sides is a bucket: the key
+// falls back to Hullabaloo's sleeve, but each track in it resolves to the
+// single it came off — see resolveMuseTrack.
 const MUSE_SLEEVE_OF = { 'B-Sides': 'Hullabaloo Soundtrack' };
 const MUSE_PER_TRACK = 'B-Sides';
 
@@ -252,10 +238,9 @@ async function resolveMuseAlbum(name) {
   return { art: artPrefix(best), album: best.title, exact: norm(best.title).startsWith(target) };
 }
 
-// A B-side shipped on a single, but streaming reissues scatter it across the
-// parent album's bonus edition, Hullabaloo and the odd live record. Rank the
-// single first, then the compilation, and keep the studio album last — a B-side
-// wearing 'Absolution' would read as an Absolution round.
+// A B-side shipped on a single, but reissues scatter it across bonus editions,
+// Hullabaloo and the odd live record. Single first, then the compilation, studio
+// album last — a B-side wearing 'Absolution' would read as an Absolution round.
 async function resolveMuseTrack(title, studio) {
   const r = await deezer('/search', { q: `artist:"Muse" track:"${title}"`, limit: 25 });
   const want = norm(title);
@@ -269,8 +254,8 @@ async function resolveMuseTrack(title, studio) {
   return { art: artPrefix(best.album), album: best.album.title, exact: rank(best) === 0 };
 }
 
-// One at a time, spaced out. A pool would finish a few seconds sooner and spend
-// the rest of the run apologizing for it.
+// One at a time, spaced out — a pool would finish seconds sooner and spend the
+// rest of the run apologizing for it.
 async function mapPaced(items, fn) {
   const out = [];
   for (let i = 0; i < items.length; i++) {
@@ -287,14 +272,13 @@ function write(albums, museAlbums, museTracks) {
     .map(e => `    ${JSON.stringify(e)}: ${JSON.stringify(map[e])},`);
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-albums.js — do not edit by hand.',
-    '// Maps an "Artist (Song)" entry from the Music Genres catalogs to the prefix',
-    '// of that song\'s album art on the Deezer CDN. app.js appends the size it',
-    '// wants, so the full URL is <prefix>300x300-000000-80-0-0.jpg.',
+    '// Maps a Music Genres "Artist (Song)" entry to the prefix of that song\'s',
+    '// album art on the Deezer CDN. app.js appends the size, so the full URL is',
+    '// <prefix>300x300-000000-80-0-0.jpg.',
     '//',
-    '// MASQ_MUSE_ALBUMS is the same thing keyed by album for the Muse category,',
-    '// where the word is the record and every song on it shows that one sleeve.',
-    '// MASQ_MUSE_TRACKS overrides that per song, for B-sides that each came off a',
-    '// different single.',
+    '// MASQ_MUSE_ALBUMS is the same keyed by album, for the Muse category, where',
+    '// every song on a record shows that one sleeve. MASQ_MUSE_TRACKS overrides',
+    '// that per song, for B-sides that each came off a different single.',
     '(function () {',
     '  window.MASQ_ALBUMS = {',
     ...rows(albums),
@@ -331,10 +315,9 @@ function write(albums, museAlbums, museTracks) {
     if (!hit || !hit.art) { missing.push(error ? `${entry} (${error})` : entry); continue; }
     albums[entry] = hit.art;
     const line = `${entry}  ->  ${hit.artist}${hit.track ? ` — ${hit.track}` : ''}  [${hit.album}]`;
-    // 'loose' and 'fuzzy' mean the artist, the song, or both came back as
-    // something other than what we asked for. Those are worth a look, but so is
-    // the whole --verbose list: the ones that bite are the matches that came
-    // back exact and still picked a cover nobody recognizes.
+    // 'loose' and 'fuzzy' mean the artist, song or both came back as something
+    // else. Worth a look — but so is the whole --verbose list, since the ones
+    // that bite came back exact and still picked an unrecognizable cover.
     if (hit.match === 'loose' || hit.match === 'fuzzy') review.push(`  ${hit.match.padEnd(6)}${line}`);
     if (VERBOSE) console.log(`  ${{ pin: 'pin ', exact: '    ', partial: '~   ', loose: '?   ', fuzzy: '??  ' }[hit.match]}${line}`);
   }

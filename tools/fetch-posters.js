@@ -1,7 +1,6 @@
-// Regenerates src/artwork/posters.js — the title -> TMDB poster path map that
-// app.js reads. The generated file is committed, so the site ships no API key and
-// makes no TMDB calls while people are playing. Re-run it when the title lists in
-// src/data.js change.
+// Regenerates src/artwork/posters.js — the title -> TMDB poster path map app.js
+// reads. The generated file is committed, so the site ships no API key and makes
+// no TMDB calls at play time. Re-run when the title lists in src/data.js change.
 //
 //   TMDB_API_KEY=xxxx node tools/fetch-posters.js [--verbose]
 
@@ -18,7 +17,7 @@ const KEY = process.env.TMDB_API_KEY;
 const VERBOSE = process.argv.includes('--verbose');
 
 // Titles that search gets wrong, pinned to a TMDB id: a number is a movie,
-// 'tv:N' a series. Four things go wrong, none of them often a duplicate film:
+// 'tv:N' a series. Four things go wrong:
 //
 //   a TV series outranks the film   21 Jump Street -> the 1987 series
 //   a new release recycles a title  Anaconda -> the 2025 comedy
@@ -26,12 +25,12 @@ const VERBOSE = process.argv.includes('--verbose');
 //   another film owns it exactly    E.T. -> a 2015 film, since the 1982 one
 //                                   is titled "E.T. the Extra-Terrestrial"
 //
-// A fifth reason to pin is drift: search is ranked by popularity, which moves.
-// Where a title's runner-up is a *different work of the same name* polling within
-// about 70% of the winner, it gets pinned even though today's answer is right.
+// A fifth reason is drift: results are ranked by popularity, so where the
+// runner-up is a *different work of the same name* polling within ~70% of the
+// winner, it gets pinned even though today's answer is right.
 //
-// The trailing comment says what each id actually is — the point of pinning is
-// that these can't drift, so verify before editing one. Sorted by title.
+// The trailing comment says what each id is — pins can't drift, so verify
+// before editing one. Sorted by title.
 const OVERRIDES = {
   '12 Monkeys': 63,                         // Twelve Monkeys (1995)
   '21 Jump Street': 64688,                  // 21 Jump Street (2012)
@@ -99,17 +98,14 @@ const OVERRIDES = {
 
 // ---------------------------------------------------------------- title lists
 
-// One list needs posters: every title used in Movie/TV Show Genres rounds, as a
-// real role or one of the jester's fakes. The Movies/TV word category is drawn
-// from that same set, so it adds nothing to fetch.
+// Every title used in Movie/TV Show Genres rounds, real role or jester's fake.
+// The Movies/TV word category draws from that same set, so it adds nothing.
 //
-// Everything searches /search/multi, because the list is roughly half TV. It
-// used to split — the old Movies word category was films only, so it searched
-// /search/movie — but that split died with the merge, and forcing the movie
-// endpoint on a series now quietly resolves it to an unrelated film of the same
-// name. resolve() drops person results, so multi is safe for films too.
+// Everything searches /search/multi, since the list is roughly half TV. Forcing
+// /search/movie on a series quietly resolves it to an unrelated film of the same
+// name, and resolve() drops person results, so multi is safe for films too.
 //
-// data.js is a browser file that assigns onto window, so give it a window.
+// data.js assigns onto window, so give it a window.
 function loadTitles() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -141,9 +137,9 @@ const nameOf = (r) => r.title || r.name || '';
 const yearOf = (r) => (r.release_date || r.first_air_date || '').slice(0, 4);
 const isTv = (r) => r.media_type === 'tv';
 
-// Compare loosely: "Amélie", "AMELIE" and "Amelie" are all the same title.
-// Keep any letter, not just a-z: dropping non-Latin script would collapse a
-// title like "X调查" to plain "x", making it an exact match for a title of "X".
+// Compare loosely: "Amélie", "AMELIE" and "Amelie" are one title. Keep any
+// letter, not just a-z — dropping non-Latin script would collapse "X调查" to
+// plain "x", an exact match for a title of "X".
 const norm = (s) => s
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
@@ -162,14 +158,14 @@ async function resolve({ title, endpoint }) {
     r.poster_path && (endpoint === '/search/movie' || r.media_type === 'movie' || isTv(r)));
   if (!hits.length) return null;
 
-  // Results arrive in popularity order. Prefer an exact title match among them,
-  // so "Up" doesn't lose to a more popular film merely containing the word.
+  // Results arrive in popularity order, so prefer an exact title match — else
+  // "Up" loses to a more popular film merely containing the word.
   const exact = hits.filter(r => norm(nameOf(r)) === norm(title));
   const best = (exact.length ? exact : hits).reduce((a, b) => (b.popularity > a.popularity ? b : a));
   return { name: nameOf(best), year: yearOf(best), poster: best.poster_path, tv: isTv(best), match: exact.length ? 'exact' : 'fuzzy' };
 }
 
-// A few hundred titles sits well inside TMDB's rate limit, but there's no reason
+// A few hundred titles sits well inside TMDB's rate limit, but there's no need
 // to open a socket for every one at once.
 async function mapPool(items, size, fn) {
   const out = new Array(items.length);
@@ -190,7 +186,7 @@ function write(posters) {
     .map(t => `    ${JSON.stringify(t)}: ${JSON.stringify(posters[t])},`);
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-posters.js — do not edit by hand.',
-    '// Maps a movie/TV title to its TMDB poster path, for both the Movies/TV word',
+    '// Maps a movie/TV title to its TMDB poster path, for the Movies/TV word',
     '// category and the titles used as roles in Movie/TV Show Genres rounds.',
     '// app.js builds the full URL as https://image.tmdb.org/t/p/w342<path>.',
     '(function () {',
@@ -226,9 +222,9 @@ function write(posters) {
     if (!hit) { missing.push(error ? `${title} (${error})` : title); continue; }
     posters[title] = hit.poster;
     const line = `${title}  ->  ${hit.name} (${hit.year || '?'})`;
-    // 'fuzzy' means the resolved name differs from ours. Those are worth a look,
-    // but so is the whole --verbose list: the matches that bite are the ones
-    // that came back exact and still picked the wrong film.
+    // 'fuzzy' means the resolved name differs from ours. Worth a look — but so
+    // is the whole --verbose list, since the ones that bite came back exact and
+    // still picked the wrong film.
     if (hit.match === 'fuzzy') fuzzy.push(`  ${line}`);
     if (VERBOSE) {
       const flag = { pin: 'pin ', exact: '    ', fuzzy: '?   ' }[hit.match];

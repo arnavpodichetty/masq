@@ -40,8 +40,8 @@
   @keyframes masq-backdrop { from { opacity:0 } to { opacity:1 } }
   .masq-btn { transition: transform .12s ease, opacity .12s ease; }
   .masq-btn:active { transform: scale(.95); opacity:.82; }
-  /* Controls are divs given button/switch roles in src/app.js — keyboard focus has
-     to be visible on top of the dark stage. */
+  /* Controls are divs given button/switch roles in src/app.js — focus has to be
+     visible on the dark stage. */
   [role="button"]:focus-visible, [role="switch"]:focus-visible,
   input:focus-visible, textarea:focus-visible {
     outline: 2px solid #e6cb7e;
