@@ -125,6 +125,27 @@ const CREDIT_OVERRIDES = {
   'Scarus frenatus by Ewa Barska.jpg': 'Ewa Barska',                // named only in the file name
   'Sockeye salmon swimming right.jpg': 'Milton Love, Marine Science Institute, UCSB',  // was: the same, plus a postal address
   'SpottedSalamander.jpg': 'Scott Camazine',                        // was: the surname, a stray bracket, then the full name
+  // Somebody cropped or retouched someone else's photograph, so two people are
+  // owed a line and Commons writes both into one field — sometimes editor
+  // first, sometimes photographer first, always labelled in the middle. Which
+  // is which is the part no rule can read, so it is said here: photographer,
+  // then who worked on it.
+  'Crotalus cerastes mesquite springs CA-2.jpg': 'Tigerhawkvok, edited by Victorrocha',
+  'Gyps rueppellii -Nairobi National Park, Kenya-8-4c.jpg': 'Jorge Láscar, edited by Snowmanradio',
+  'LA-Triceratops mount-2.jpg': 'Allie Caulfield, edited by MathKnight',
+  // The same chain, except both halves are the same man: Wsiegmund is Walter
+  // Siegmund's account, cropping his own photograph.
+  'Lepus americanus 5459 cropped.jpg': 'Walter Siegmund',
+  // The author line is a link to the photographer's own site, and the name
+  // behind it is on his user page.
+  'Harpia harpyja 001 800.jpg': 'Tom Friedel (birdphotos.com)',
+  // A public-domain photo whose author line records how the archive came by it
+  // rather than who took it — the farm's keeper, at the farm.
+  "SaltwaterCrocodile('Maximo').jpg": 'Molly Ebersold, St. Augustine Alligator Farm',
+  // Four turtles, four photographs, four photographers — the collage credits
+  // "his respective owners", which is nobody. Named here in the order they
+  // appear on the file page.
+  'Turtle diversity.jpg': 'Petra Karstedt, CLpramod, Matthew Field, Hoffryan',
 };
 
 // ---------------------------------------------------------------- entry lists
@@ -230,6 +251,11 @@ const cleanUrl = (u) => (u || '').split('?')[0];
 // the same way or every lookup quietly misses.
 const fileKey = (name) => (name || '').replace(/^File:/, '').replace(/_/g, ' ');
 
+// A wiki username signs itself with a link to its own talk page, and the word
+// on that link is whatever language the person who uploaded the photo writes
+// in. Any of them is a signature rather than a name, so any of them goes.
+const TALK_LINK = /\(\s*(?:talk|thảo luận|diskussion|discussion|discussione|discusión|discussão|обсуждение|討論|토론|会話)\s*(?:[·|]\s*contribs\s*)?\)/gi;
+
 // Commons' author field is a free-text box, so a name arrives wearing whatever
 // its uploader wrapped it in: a sentence announcing it, a note about how to
 // reach them, the licence restated, where they live. The credits screen wants
@@ -241,21 +267,48 @@ const fileKey = (name) => (name || '').replace(/^File:/, '').replace(/_/g, ' ');
 // took it, one edited it) and both have to survive. Where that can't be done by
 // rule, CREDIT_OVERRIDES says the answer outright rather than guessing.
 const TIDY = [
+  // Two answers that name nobody at all. "Own work" belongs to the question of
+  // where a picture came from, not who made it, and reaches the author line
+  // only when that line held nothing readable — a bare link to the
+  // photographer's own site, say. A licence tag is a licence. Emptying them
+  // beats printing them: an empty name is what the missing-name check below
+  // looks for, so the run stops and asks for a real one.
+  [/^own(?:\s+work)?$/i, ''],
+  [/^pd-\S*\b.*$/i, ''],
   // "This illustration was made by Citron" -> "Citron"
   [/^this\s+(?:illustration|image|file|photo(?:graph)?|picture)\s+(?:was\s+)?(?:made|taken|created|produced|drawn)\s+by\s+/i, ''],
-  // Field labels the uploader typed by hand, and wiki user-page prefixes.
-  [/^(?:source|photo|image|author|credit|copyright)\s*:\s*/i, ''],
-  [/\bUser:\s*/g, ''],
-  [/^\(c\)\s*/i, ''],
+  // "Photography captured by Giles Laurent" -> "Giles Laurent"
+  [/^(?:photo(?:graph)?y?\s+)?(?:captured|photographed|shot|taken)\s+by\s+/i, ''],
+  // Field labels the uploader typed by hand, and wiki user-page prefixes — the
+  // second of which can arrive as an interwiki link, "w:en:User:Kguirnela".
+  [/^(?:source|photo|photograph|photographer|image|author|credit|copyright)\s*:\s*/i, ''],
+  [/^(?:w|c|wikipedia|commons)\s*:\s*(?:[a-z]{2,3}\s*:\s*)?/i, ''],
+  [/\bUser\s*:\s*/g, ''],
+  [/^User\s+(?=\S)/, ''],
+  [/^(?:\(c\)|©)\s*/i, ''],
   // "…, some rights reserved (CC BY-SA)" — the licence is its own column here.
   [/,?\s*(?:all|some)\s+rights\s+reserved\s*(?:\([^)]*\))?\s*$/i, ''],
   // "You must credit this : Citron / CC-BY-SA-3.0" — an instruction about the
   // credit, not the credit.
   [/\s*you\s+must\s+credit\s+this\s*:.*$/i, ''],
-  // A trailing note on how to reach the photographer.
+  // Photographers add what they'd like to happen next — an email before you
+  // use it, a link back. Courteous, and worth honouring, but the licence asks
+  // for the name and the credits screen has room for the name.
+  [/[.,]?\s*\bif\s+you\s+(?:plan|intend|wish|want|would)\b.*$/i, ''],
+  // How to reach the photographer, and the address itself: a bracket holding
+  // an email is contact details, never a name.
   [/\s*\((?:to\s+contact|contact|for\s+permission)[^)]*\)\s*$/i, ''],
-  // "Camazine at English Wikipedia" -> "Camazine"
-  [/\s+at\s+(?:the\s+)?(?:english\s+)?wikipedia\b/gi, ''],
+  [/\s*\([^()]*@[^()]*\)/g, ' '],
+  // "Renee Comet (photographer)" — how an encyclopedia tells two people of one
+  // name apart, which a list of photographers doesn't need saying.
+  [/\s*\((?:photographer|photograph|photo)\)\s*$/i, ''],
+  // A footnote marker left standing where a link used to be.
+  [/\s*\[\d+\]/g, ''],
+  // Where the picture was posted is not who took it.
+  [/\s+on\s+(?:flickr|instagram|500px|deviantart)\b\s*$/i, ''],
+  // "Camazine at English Wikipedia" -> "Camazine", by either spelling.
+  [/\s+at\s+(?:the\s+)?(?:english(?:-language)?\s+)?wikipedia\b/gi, ''],
+  [/\s+at\s+[a-z]{2,3}\.wikipedia\b/gi, ''],
   // A wiki username spells a space as an underscore.
   [/_/g, ' '],
   // Tidying leaves gaps and orphaned punctuation behind. Brackets are not swept
@@ -336,7 +389,7 @@ async function fetchCredits(fileNames) {
           .replace(/https?:\/\/\S+/g, ' ')
           .replace(/\s+/g, ' ')
           .replace(/\S+\.(jpe?g|png|gif|svg|tiff?)\s*:\s*/gi, '')
-          .replace(/\(\s*talk\s*([·|]\s*contribs\s*)?\)/gi, '')
+          .replace(TALK_LINK, '')
           .replace(/\s+/g, ' ')
           .replace(/^[\s,;:·-]+|[\s,;:·-]+$/g, '')
         : '');

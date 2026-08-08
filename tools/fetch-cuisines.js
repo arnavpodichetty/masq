@@ -98,6 +98,20 @@ const CREDIT_OVERRIDES = {
   // read, and the Artist field comes back empty despite the licence requiring
   // a credit.
   'Maultaschensuppe.jpg': 'FloSch',
+  // A signature rather than a name: the account, then a link to his talk page
+  // written in Hebrew. The attribution line beside it is the name he asks for,
+  // and the one his other two photos here already carry.
+  'Bánh mì thịt nướng.png': 'Nsaum75',
+  'Empanada flor de Calabaza.jpg': 'Nsaum75',
+  // Two people, one field, and only one of them took the photograph: the
+  // second is whoever moved it to Commons, which is not a credit.
+  'Quail 07 bg 041506.jpg': 'Jon Sullivan',
+  // Named by account in the author field and in full in the attribution line,
+  // which is the one he asks to be credited by.
+  'Tlayuda12-05oaxaca013x.jpg': "Bobak Ha'Eri",
+  // The same pair as Fir Fir and Himbasha, punctuated differently by the same
+  // uploader. One dish should not read as a different photographer.
+  'Taita and shiro.jpg': 'Temesgen Woldezion (edited by Merhawie Woldezion)',
 };
 
 // ---------------------------------------------------------------- entry lists
@@ -203,20 +217,36 @@ const cleanUrl = (u) => (u || '').split('?')[0];
 // the same way or every lookup quietly misses.
 const fileKey = (name) => (name || '').replace(/^File:/, '').replace(/_/g, ' ');
 
+// A wiki username signs itself with a link to its own talk page, in whichever
+// language the person who uploaded the photo writes in. Same as the animal
+// fetcher: the signature goes, the name stays.
+const TALK_LINK = /\(\s*(?:talk|thảo luận|diskussion|discussion|discussione|discusión|discussão|обсуждение|討論|토론|会話)\s*(?:[·|]\s*contribs\s*)?\)/gi;
+
 // Commons' author field is a free-text box, so a name arrives wearing whatever
 // its uploader wrapped it in. Same rules as the animal fetcher, and the same
 // principle: remove only words that are certainly not part of a name, never
 // trim by length, never stop at the first name found — a photo can have two
 // authors and both have to survive.
 const TIDY = [
+  [/^own(?:\s+work)?$/i, ''],
+  [/^pd-\S*\b.*$/i, ''],
   [/^this\s+(?:illustration|image|file|photo(?:graph)?|picture)\s+(?:was\s+)?(?:made|taken|created|produced|drawn)\s+by\s+/i, ''],
-  [/^(?:source|photo|image|author|credit|copyright)\s*:\s*/i, ''],
-  [/\bUser:\s*/g, ''],
-  [/^\(c\)\s*/i, ''],
+  [/^(?:photo(?:graph)?y?\s+)?(?:captured|photographed|shot|taken)\s+by\s+/i, ''],
+  [/^(?:source|photo|photograph|photographer|image|author|credit|copyright)\s*:\s*/i, ''],
+  [/^(?:w|c|wikipedia|commons)\s*:\s*(?:[a-z]{2,3}\s*:\s*)?/i, ''],
+  [/\bUser\s*:\s*/g, ''],
+  [/^User\s+(?=\S)/, ''],
+  [/^(?:\(c\)|©)\s*/i, ''],
   [/,?\s*(?:all|some)\s+rights\s+reserved\s*(?:\([^)]*\))?\s*$/i, ''],
   [/\s*you\s+must\s+credit\s+this\s*:.*$/i, ''],
+  [/[.,]?\s*\bif\s+you\s+(?:plan|intend|wish|want|would)\b.*$/i, ''],
   [/\s*\((?:to\s+contact|contact|for\s+permission)[^)]*\)\s*$/i, ''],
-  [/\s+at\s+(?:the\s+)?(?:english\s+)?wikipedia\b/gi, ''],
+  [/\s*\([^()]*@[^()]*\)/g, ' '],
+  [/\s*\((?:photographer|photograph|photo)\)\s*$/i, ''],
+  [/\s*\[\d+\]/g, ''],
+  [/\s+on\s+(?:flickr|instagram|500px|deviantart)\b\s*$/i, ''],
+  [/\s+at\s+(?:the\s+)?(?:english(?:-language)?\s+)?wikipedia\b/gi, ''],
+  [/\s+at\s+[a-z]{2,3}\.wikipedia\b/gi, ''],
   [/_/g, ' '],
   [/\s+([.,;:])/g, '$1'],
   [/\(\s+/g, '('],
@@ -285,7 +315,7 @@ async function fetchCredits(fileNames) {
           .replace(/https?:\/\/\S+/g, ' ')
           .replace(/\s+/g, ' ')
           .replace(/\S+\.(jpe?g|png|gif|svg|tiff?)\s*:\s*/gi, '')
-          .replace(/\(\s*talk\s*([·|]\s*contribs\s*)?\)/gi, '')
+          .replace(TALK_LINK, '')
           .replace(/\s+/g, ' ')
           .replace(/^[\s,;:·-]+|[\s,;:·-]+$/g, '')
         : '');
