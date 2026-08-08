@@ -2030,7 +2030,7 @@
       const sources = [
         { name: 'TMDB', of: 'Movie & TV posters', note: 'This product uses the TMDB API but is not endorsed or certified by TMDB.' },
         { name: 'Deezer', of: 'Album art', note: 'Not endorsed or certified by Deezer.' },
-        { name: 'Wikimedia Commons', of: 'Animal photographs', note: 'Each under its own free licence, listed below.' },
+        { name: 'Wikimedia Commons', of: 'Animal & dish photographs', note: 'Each under its own free licence, listed below.' },
       ];
       const label = (text) => h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin:22px 0 10px;") }, text);
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
@@ -2209,10 +2209,10 @@
           h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
-                // On a Movies, Music or Biomes round the poster, album cover or
-                // animal photo stands in for the mask — the name sits right
-                // underneath, so the image is decorative and a dead URL simply
-                // collapses out of the way.
+                // On a Movies, Music, Biomes or Cuisines round the poster, album
+                // cover, animal photo or dish photo stands in for the mask — the
+                // name sits right underneath, so the image is decorative and a
+                // dead URL simply collapses out of the way.
                 v.apArt
                   ? h('img', {
                       // Keyed by src so each image is a fresh element: onError

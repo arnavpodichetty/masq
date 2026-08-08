@@ -26,7 +26,10 @@ pass, and the results screen finally shows what everyone was holding.
   source as the Biomes animals. All 240 dishes are pictured. They sit in the
   animals' landscape frame but cropped centrally rather than high — food is
   photographed centred on the plate, where an upright animal keeps its head near
-  the top.
+  the top. Their photographers are named in Settings → Credits, in a list of
+  their own beneath the animal photographers rather than mixed in with them —
+  405 names between the two, and a name is easier to find in the list it
+  belongs to.
 - `tools/fetch-cuisines.js`, the generator behind `src/artwork/dishes.js`.
   Output is committed, so a round never waits on Wikipedia. Like
   `fetch-animals.js` it collects photographer credits and refuses to write if a
