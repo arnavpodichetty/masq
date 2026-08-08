@@ -1489,11 +1489,8 @@
         incJester: () => this.setState({ jesterCount: Math.min(jesterCount + 1, maxJesters) }),
         decJester: () => this.setState({ jesterCount: Math.max(jesterCount - 1, 0) }),
         jesterLabel: jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters',
-        // Names the selection mode too, so Progressive shows without opening the
-        // modal.
         jesterRowValue: (jesterCount === 0 ? 'No Jesters' : jesterCount === 1 ? '1 Jester' : jesterCount + ' Jesters')
-          + (st.randJesters ? ' · Random Count' : '')
-          + (isProgressive ? ' · Progressive' : ''),
+          + (st.randJesters ? ' · Random Count' : ''),
         jesterRandMin: randMin,
         jesterRandMax: randMax,
         incRandMin: () => this.setState({ jesterRandMin: Math.min(randMin + 1, randMax) }),
