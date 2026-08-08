@@ -97,10 +97,12 @@ const CREDIT_OVERRIDES = {
   'SpottedSalamander.jpg': 'Scott Camazine',                        // was: the surname, a stray bracket, then the full name
   // Someone cropped someone else's photo, so two people are owed a line and
   // Commons writes both into one field in either order. Which is which is what
-  // no rule can read, so it's said here: photographer, then who worked on it.
-  'Crotalus cerastes mesquite springs CA-2.jpg': 'Tigerhawkvok, edited by Victorrocha',
-  'Gyps rueppellii -Nairobi National Park, Kenya-8-4c.jpg': 'Jorge Láscar, edited by Snowmanradio',
-  'LA-Triceratops mount-2.jpg': 'Allie Caulfield, edited by MathKnight',
+  // no rule can read, so it's said here: photographer, then who worked on it in
+  // brackets — the same shape fetch-cuisines.js writes, so one credits screen
+  // doesn't punctuate the same relationship two ways.
+  'Crotalus cerastes mesquite springs CA-2.jpg': 'Tigerhawkvok (edited by Victorrocha)',
+  'Gyps rueppellii -Nairobi National Park, Kenya-8-4c.jpg': 'Jorge Láscar (edited by Snowmanradio)',
+  'LA-Triceratops mount-2.jpg': 'Allie Caulfield (edited by MathKnight)',
   // the same chain, but both halves are one man cropping his own photograph
   'Lepus americanus 5459 cropped.jpg': 'Walter Siegmund',
   // the author line is a link to his own site; the name is on his user page
