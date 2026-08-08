@@ -9,6 +9,48 @@ The 1.0 line is drawn where the game stopped being a work in progress: the
 accessibility pass and the jester reveal screen. Everything before it was 0.x,
 whatever the label said at the time.
 
+## 1.4.0 — 2026-08-07
+
+The jester gets one last chance to steal the round, and the lobby icons were
+redrawn.
+
+**Added**
+- **The jester can still win by naming the word.** The results screen keeps the
+  round word covered until someone taps it — `? ? ?` where the word goes, and
+  the poster held back with it on Movies/TV rounds — so an unmasked jester can
+  take their guess before the answer is on screen. Everyone else's roles are
+  covered along with it, showing `??` in the rows they already occupied: those
+  are roles from the real word, so reading them out would hand the jester the
+  answer. One tap fills in the word, the poster and every role at once, and the
+  cover is back the next time the results screen opens.
+- **Every word the round could have dealt**, behind a button under the tiles, so
+  the jester picks from a list rather than out of the air. It's the same pool the
+  deal came from — words crossed out in Settings → View All Words are excluded
+  here too, so the list can never hold a word that couldn't have been the answer
+  — sorted alphabetically and scrolling in its own sheet, which keeps a long
+  category from pushing the reveal off the top of the screen. It shows only while
+  the word is still covered, and only when the round had a jester.
+
+**Changed**
+- **The lobby icons were redrawn as one set**, on a shared 24×24 grid at a
+  single stroke weight. Role Mode is a Venetian domino mask, where it was two
+  overlapping ellipses that turned to mush at 20px; Word Mode is an open script,
+  where it was a box of text lines nearly identical to Categories. Players is one
+  figure forward with the rest of the table behind it, Categories a deck of cards
+  marked with a harlequin lozenge, Jesters a cap and bells rather than a third
+  mask in a row that already had two, Time Limit an hourglass with the sand
+  running, and Options a lighting board's faders — a gear there echoed the ⚙ in
+  the header, which opens a different screen.
+- The cap and bells is filled where the rest of the set is stroked. Outlining
+  each horn put four thin lines through the same few pixels at 20px and the shape
+  stopped reading as a hat; filled, the horns can tuck behind the crown's toothed
+  rim with no seams to line up.
+- The 18px icons are now derived from their 20px twins by a resize helper rather
+  than kept as second copies, which had already drifted apart from them.
+- **No back arrow on the results screen.** The round is spent by the time it
+  shows, and `PLAY AGAIN` is the only door out of it.
+- `BEGIN THE TRIAL` lost its trailing arrow.
+
 ## 1.3.0 — 2026-08-07
 
 A new category, the table stays set between sessions, the screen catalogs got a
