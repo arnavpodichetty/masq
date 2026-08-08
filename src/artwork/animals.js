@@ -34,6 +34,7 @@
     "Cockroach": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Snodgrass_common_household_roaches.png/500px-Snodgrass_common_household_roaches.png",  // Cockroach
     "Condor": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/AndeanCondorMale.jpg/500px-AndeanCondorMale.jpg",  // Condor
     "Coyote": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/2009-Coyote-Yosemite.jpg/500px-2009-Coyote-Yosemite.jpg",  // Coyote
+    "Crayfish": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Paranephrops.jpg/500px-Paranephrops.jpg",  // Crayfish
     "Cricket": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Gryllus_campestris_MHNT.jpg/500px-Gryllus_campestris_MHNT.jpg",  // Cricket (insect)
     "Cuckoo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Cacomantis_flabelliformis.jpg/500px-Cacomantis_flabelliformis.jpg",  // Cuckoo
     "Deep Sea Jellyfish": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Atolla_wyvillei_%28Operation_Deep_Scope_2004%29.jpg/500px-Atolla_wyvillei_%28Operation_Deep_Scope_2004%29.jpg",  // Atolla jellyfish
@@ -42,6 +43,7 @@
     "Dog": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Huskiesatrest.jpg/500px-Huskiesatrest.jpg",  // Dog
     "Dumbo Octopus": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Dumbo-hires_%28cropped%29.jpg/500px-Dumbo-hires_%28cropped%29.jpg",  // Grimpoteuthis
     "Eagle": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Eagles_together.jpg/500px-Eagles_together.jpg",  // Eagle
+    "Egret": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Ardea_modesta.jpg/500px-Ardea_modesta.jpg",  // Egret
     "Elephant": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/178_Male_African_bush_elephant_in_Etosha_National_Park_Photo_by_Giles_Laurent.jpg/500px-178_Male_African_bush_elephant_in_Etosha_National_Park_Photo_by_Giles_Laurent.jpg",  // African bush elephant
     "Emperor Penguin": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg/500px-Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg",  // Emperor penguin
     "Emu": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Emu_1_-_Tidbinbilla.jpg/500px-Emu_1_-_Tidbinbilla.jpg",  // Emu
@@ -60,7 +62,9 @@
     "Gorilla": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Gorille_des_plaines_de_l%27ouest_%C3%A0_l%27Espace_Zoologique.jpg/500px-Gorille_des_plaines_de_l%27ouest_%C3%A0_l%27Espace_Zoologique.jpg",  // Gorilla
     "Gray Owl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/%D0%91%D0%BE%D1%80%D0%BE%D0%B4%D0%B0%D1%82%D0%B0%D1%8F_%D0%BD%D0%B5%D1%8F%D1%81%D1%8B%D1%82%D1%8C_%28Strix_nebulosa%2C_m%29%2C_%D0%91%D0%BE%D1%82%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D1%81%D0%B0%D0%B4.jpg/500px-%D0%91%D0%BE%D1%80%D0%BE%D0%B4%D0%B0%D1%82%D0%B0%D1%8F_%D0%BD%D0%B5%D1%8F%D1%81%D1%8B%D1%82%D1%8C_%28Strix_nebulosa%2C_m%29%2C_%D0%91%D0%BE%D1%82%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D1%81%D0%B0%D0%B4.jpg",  // Great grey owl
     "Gray Wolf": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Eurasian_wolf_2.jpg/500px-Eurasian_wolf_2.jpg",  // Wolf
+    "Grizzly Bear": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/GrizzlyBearJeanBeaufort.jpg/500px-GrizzlyBearJeanBeaufort.jpg",  // Grizzly bear
     "Gulper Eel": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Eurypharynx_pelecanoides.jpg/500px-Eurypharynx_pelecanoides.jpg",  // Pelican eel
+    "Hamster": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/European_hamster_%28Cricetus_cricetus%29_Meidling.jpg/500px-European_hamster_%28Cricetus_cricetus%29_Meidling.jpg",  // Hamster
     "Harpy Eagle": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Harpia_harpyja_001_800.jpg/500px-Harpia_harpyja_001_800.jpg",  // Harpy eagle
     "Hawaiian Hoary Bat": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Hawaiian_hoary_bat_Lasiurus_cinereus_semotus.jpg/500px-Hawaiian_hoary_bat_Lasiurus_cinereus_semotus.jpg",  // Hawaiian hoary bat
     "Hermit Crab": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Calliactis_and_Dardanus_001.JPG/500px-Calliactis_and_Dardanus_001.JPG",  // Hermit crab
@@ -81,18 +85,22 @@
     "Lynx": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Lynx_Nationalpark_Bayerischer_Wald_01.jpg/500px-Lynx_Nationalpark_Bayerischer_Wald_01.jpg",  // Eurasian lynx
     "Manta Ray": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG/500px-Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG",  // Manta ray
     "Marmot": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/071_Wild_marmot_at_Grand_Muveran_Nature_Reserve_Photo_by_Giles_Laurent.jpg/500px-071_Wild_marmot_at_Grand_Muveran_Nature_Reserve_Photo_by_Giles_Laurent.jpg",  // Marmot
+    "Meadowlark": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Sturnella_neglecta_GNP_02.jpg/500px-Sturnella_neglecta_GNP_02.jpg",  // Western meadowlark
     "Meerkat": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Meerkat_%28Suricata_suricatta%29_Tswalu.jpg/500px-Meerkat_%28Suricata_suricatta%29_Tswalu.jpg",  // Meerkat
     "Moose": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alaska_moose.jpg/500px-Alaska_moose.jpg",  // Moose
     "Moray Eel": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Moray_eel.jpg/500px-Moray_eel.jpg",  // Moray eel
     "Mountain Goat": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Mountain_Goat%2C_Enchantments_Basin.jpg/500px-Mountain_Goat%2C_Enchantments_Basin.jpg",  // Mountain goat
     "Mudskipper": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/GambianMudskippers.jpg/500px-GambianMudskippers.jpg",  // Mudskipper
+    "Mule Deer": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Mule_buck_elk_creek_m_myatt_%285489214303%29.jpg/500px-Mule_buck_elk_creek_m_myatt_%285489214303%29.jpg",  // Mule deer
     "Musk Ox": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Muskox_%28Ovibos_moschatus%29_male_Dovrefjell_4.jpg/500px-Muskox_%28Ovibos_moschatus%29_male_Dovrefjell_4.jpg",  // Muskox
+    "Muskrat": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Muskrat_swimming_Ottawa.jpg/500px-Muskrat_swimming_Ottawa.jpg",  // Muskrat
     "Mussel": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/CornishMussels.JPG/500px-CornishMussels.JPG",  // Mussel
     "Octopus": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Octopus2.jpg/500px-Octopus2.jpg",  // Octopus
     "Opossum": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Didelphis_virginiana_with_young.JPG/500px-Didelphis_virginiana_with_young.JPG",  // Opossum
     "Orca": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Killerwhales_jumping.jpg/500px-Killerwhales_jumping.jpg",  // Orca
     "Otter": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Fischotter%2C_Lutra_Lutra.JPG/500px-Fischotter%2C_Lutra_Lutra.JPG",  // Otter
     "Owl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Bubo_bubo_sibiricus_-_01.JPG/500px-Bubo_bubo_sibiricus_-_01.JPG",  // Owl
+    "Parakeet": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Male_and_female_parakeet_1.jpg/500px-Male_and_female_parakeet_1.jpg",  // Parakeet
     "Parrotfish": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scarus_frenatus_by_Ewa_Barska.jpg/500px-Scarus_frenatus_by_Ewa_Barska.jpg",  // Parrotfish
     "Pelican": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Pelikan_Walvis_Bay.jpg/500px-Pelikan_Walvis_Bay.jpg",  // Pelican
     "Peregrine Falcon": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Falco_peregrinus_m_Humber_Bay_Park_Toronto.jpg/500px-Falco_peregrinus_m_Humber_Bay_Park_Toronto.jpg",  // Peregrine falcon
@@ -101,6 +109,7 @@
     "Platypus": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Duck-billed_platypus_%28Ornithorhynchus_anatinus%29_Scottsdale.jpg/500px-Duck-billed_platypus_%28Ornithorhynchus_anatinus%29_Scottsdale.jpg",  // Platypus
     "Poison Dart Frog": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Dendrobates_tinctorius_-_Karlsruhe_Zoo_05.jpg/500px-Dendrobates_tinctorius_-_Karlsruhe_Zoo_05.jpg",  // Dyeing poison dart frog
     "Polar Bear": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Polar_Bear_-_Alaska_%28cropped%29.jpg/500px-Polar_Bear_-_Alaska_%28cropped%29.jpg",  // Polar bear
+    "Porcupine": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Erethizon_dorsatum_-_Prince_Rupert.jpg/500px-Erethizon_dorsatum_-_Prince_Rupert.jpg",  // Porcupine
     "Prairie Dog": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Black-Tailed_Prairie_Dog.jpg/500px-Black-Tailed_Prairie_Dog.jpg",  // Prairie dog
     "Proboscis Monkey": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Proboscis_Monkey_in_Borneo.jpg/500px-Proboscis_Monkey_in_Borneo.jpg",  // Proboscis monkey
     "Pterodactyl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Pteranodon_amnh_martyniuk.jpg/500px-Pteranodon_amnh_martyniuk.jpg",  // Pterosaur
@@ -115,7 +124,6 @@
     "Reindeer": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg/500px-Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg",  // Reindeer
     "Rhino": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/081_White_rhinoceros_%28male%29_in_the_Kalahari_Desert_of_Namibia_Photo_by_Giles_Laurent.jpg/500px-081_White_rhinoceros_%28male%29_in_the_Kalahari_Desert_of_Namibia_Photo_by_Giles_Laurent.jpg",  // Rhinoceros
     "River Dolphin": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Amazonas-Flussdelfin_Orinoko3.jpg/500px-Amazonas-Flussdelfin_Orinoko3.jpg",  // Amazon river dolphin
-    "River Otter": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Northern_River_Otter_on_Seedskadee_NWR_%2822802102984%29.jpg/500px-Northern_River_Otter_on_Seedskadee_NWR_%2822802102984%29.jpg",  // North American river otter
     "Roadrunner": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/20140322-0062_La_Quinta_CA.JPG/500px-20140322-0062_La_Quinta_CA.JPG",  // Roadrunner
     "Salamander": "https://upload.wikimedia.org/wikipedia/commons/b/b2/SpottedSalamander.jpg",  // Salamander
     "Salmon": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Sockeye_salmon_swimming_right.jpg/500px-Sockeye_salmon_swimming_right.jpg",  // Sockeye salmon
@@ -130,6 +138,7 @@
     "Seahorse": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg/500px-Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg",  // Seahorse
     "Seal": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Common_seal_%28Phoca_vitulina%29_2.jpg/500px-Common_seal_%28Phoca_vitulina%29_2.jpg",  // Harbor seal
     "Silverfish": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/LepismaSaccharina.jpg/500px-LepismaSaccharina.jpg",  // Silverfish
+    "Skunk": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Striped_Skunk.jpg/500px-Striped_Skunk.jpg",  // Skunk
     "Sloth": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Bicho-pregui%C3%A7a_3.jpg/500px-Bicho-pregui%C3%A7a_3.jpg",  // Sloth
     "Snake": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Trimeresurus_sabahi_fucatus%2C_Banded_pit_viper_-_Takua_Pa_District%2C_Phang-nga_Province_%2846710893582%29.jpg/500px-Trimeresurus_sabahi_fucatus%2C_Banded_pit_viper_-_Takua_Pa_District%2C_Phang-nga_Province_%2846710893582%29.jpg",  // Snake
     "Snapping Turtle": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Common_Snapping_Turtle_%2852259285400%29.jpg/500px-Common_Snapping_Turtle_%2852259285400%29.jpg",  // Chelydridae
@@ -145,6 +154,8 @@
     "Starfish": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Asterias_rubens.jpg/500px-Asterias_rubens.jpg",  // Common starfish
     "Stegosaurus": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Journal.pone.0138352.g001A.jpg/500px-Journal.pone.0138352.g001A.jpg",  // Stegosaurus
     "Stray Cat": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Feral_cat_1.JPG/500px-Feral_cat_1.JPG",  // Feral cat
+    "Swiftlet": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/AerodramusMaximus.Wokoti.jpg/500px-AerodramusMaximus.Wokoti.jpg",  // Swiftlet
+    "Tarantula": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Brachypelma_vagans_p1.jpg/500px-Brachypelma_vagans_p1.jpg",  // Tarantula
     "Tarsier": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Philippine_tarsier_%28Carlito_syrichta_fraterculus%29_Bohol_2.jpg/500px-Philippine_tarsier_%28Carlito_syrichta_fraterculus%29_Bohol_2.jpg",  // Tarsier
     "Tasmanian Devil": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Sarcophilus_harrisii_taranna.jpg/500px-Sarcophilus_harrisii_taranna.jpg",  // Tasmanian devil
     "Thorny Devil": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Thornydevil.jpg/500px-Thornydevil.jpg",  // Thorny devil
@@ -205,6 +216,7 @@
     ["Cockroach", "", "Public domain"],
     ["Condor", "Greg Hume", "CC BY-SA 3.0"],
     ["Coyote", "Yathin S Krishnappa", "CC BY-SA 3.0"],
+    ["Crayfish", "Gusmonkeyboy", "Public domain"],
     ["Cricket", "Didier Descouens", "CC BY-SA 4.0"],
     ["Cuckoo", "JJ Harrison", "CC BY-SA 3.0"],
     ["Deep Sea Jellyfish", "NOAA Ocean Explorer", "CC BY-SA 2.0"],
@@ -213,6 +225,7 @@
     ["Dog", "M. Rehemtulla", "CC BY 2.0"],
     ["Dumbo Octopus", "NOAA Okeanos Explorer", "Public domain"],
     ["Eagle", "Punetor i Rregullt5", "CC BY-SA 4.0"],
+    ["Egret", "JJ Harrison", "CC BY-SA 3.0"],
     ["Elephant", "Giles Laurent", "CC BY-SA 4.0"],
     ["Emperor Penguin", "Ian Duffy", "CC BY 2.0"],
     ["Emu", "JJ Harrison", "CC BY-SA 4.0"],
@@ -231,7 +244,9 @@
     ["Gorilla", "Thurundir", "CC BY-SA 4.0"],
     ["Gray Owl", "Dion Art", "CC BY-SA 4.0"],
     ["Gray Wolf", "Mas3cf", "CC BY-SA 4.0"],
+    ["Grizzly Bear", "Jean Beaufort", "CC0"],
     ["Gulper Eel", "", "Public domain"],
+    ["Hamster", "Charles J. Sharp", "CC BY-SA 4.0"],
     ["Harpy Eagle", "Tom Friedel (birdphotos.com)", "CC BY 3.0"],
     ["Hawaiian Hoary Bat", "Frank Bonaccorso, USGS", "Public domain"],
     ["Hermit Crab", "H. Zell", "CC BY-SA 3.0"],
@@ -252,18 +267,22 @@
     ["Lynx", "Aconcagua", "CC BY-SA 3.0"],
     ["Manta Ray", "Shiyam ElkCloner", "CC BY-SA 3.0"],
     ["Marmot", "Giles Laurent", "CC BY-SA 4.0"],
+    ["Meadowlark", "Cephas", "CC BY-SA 4.0"],
     ["Meerkat", "Charles J. Sharp", "CC BY-SA 4.0"],
     ["Moose", "Paxson Woelber", "CC BY-SA 4.0"],
     ["Moray Eel", "Mstroeck", "CC BY-SA 3.0"],
     ["Mountain Goat", "Adam Schneider", "CC BY-SA 4.0"],
     ["Mudskipper", "Bjørn Christian Tørrissen", "CC BY-SA 4.0"],
+    ["Mule Deer", "Oregon Department of Fish & Wildlife", "CC BY-SA 2.0"],
     ["Musk Ox", "Charles J. Sharp", "CC BY-SA 4.0"],
+    ["Muskrat", "D. Gordon E. Robertson", "CC BY-SA 3.0"],
     ["Mussel", "Wilson44691", "Public domain"],
     ["Octopus", "albert kok", "CC BY-SA 3.0"],
     ["Opossum", "Specialjake", "CC BY-SA 3.0"],
     ["Orca", "Robert Pittman", "Public domain"],
     ["Otter", "Bernard Landgraf", "CC BY-SA 3.0"],
     ["Owl", "Carlos Delgado", "CC BY-SA 4.0"],
+    ["Parakeet", "Karthik Easvur", "CC BY-SA 3.0"],
     ["Parrotfish", "Ewa Barska", "CC BY-SA 3.0"],
     ["Pelican", "Rui Ornelas", "CC BY 2.0"],
     ["Peregrine Falcon", "Mykola Swarnyk", "CC BY-SA 3.0"],
@@ -272,6 +291,7 @@
     ["Platypus", "Charles J. Sharp", "CC BY-SA 4.0"],
     ["Poison Dart Frog", "H. Zell", "CC BY-SA 3.0"],
     ["Polar Bear", "Alan Wilson", "CC BY-SA 3.0"],
+    ["Porcupine", "The Cosmonaut", "CC BY-SA 2.5 ca"],
     ["Prairie Dog", "Joe Ravi", "CC BY-SA 3.0"],
     ["Proboscis Monkey", "David Dennis", "CC BY-SA 2.0"],
     ["Pterodactyl", "Matt Martyniuk", "CC BY 3.0"],
@@ -286,7 +306,6 @@
     ["Reindeer", "Are G Nilsen", "CC BY-SA 3.0"],
     ["Rhino", "Giles Laurent", "CC BY-SA 4.0"],
     ["River Dolphin", "Oceancetaceen", "CC BY-SA 2.0 de"],
-    ["River Otter", "USFWS Mountain-Prairie", "Public domain"],
     ["Roadrunner", "Nandaro", "CC BY-SA 4.0"],
     ["Salamander", "Scott Camazine", "CC BY-SA 3.0"],
     ["Salmon", "Milton Love, Marine Science Institute, UCSB", "Public domain"],
@@ -301,6 +320,7 @@
     ["Seahorse", "Hans Hillewaert", "CC BY-SA 4.0"],
     ["Seal", "Charles J. Sharp", "CC BY-SA 4.0"],
     ["Silverfish", "Christian Fischer", "CC BY-SA 3.0"],
+    ["Skunk", "Tom Friedel (birdphotos.com)", "CC BY 3.0"],
     ["Sloth", "Daniella Maraschiello", "CC BY-SA 4.0"],
     ["Snake", "Rushenb", "CC BY-SA 2.0"],
     ["Snapping Turtle", "USFWS Mountain Prairie", "Public domain"],
@@ -316,6 +336,8 @@
     ["Starfish", "Hans Hillewaert", "CC BY-SA 4.0"],
     ["Stegosaurus", "Susannah Maidment et al. & Natural History Museum, London", "CC BY 4.0"],
     ["Stray Cat", "Brocken Inaglory", "CC BY-SA 3.0"],
+    ["Swiftlet", "wokoti", "CC BY-SA 2.0"],
+    ["Tarantula", "Carlos Valenzuela", "CC BY-SA 4.0"],
     ["Tarsier", "Charles J. Sharp", "CC BY-SA 4.0"],
     ["Tasmanian Devil", "JJ Harrison", "CC BY-SA 3.0"],
     ["Thorny Devil", "Bäras", "CC BY-SA 3.0"],

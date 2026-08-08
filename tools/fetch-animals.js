@@ -58,9 +58,9 @@ const OVERRIDES = {
   'Gray Owl': 'Great grey owl',                   // not Grey Owl, the writer
   'Gulper Eel': 'Pelican eel',                    // "Gulper eel" is a list of several fish
   'Lynx': 'Eurasian lynx',                        // the genus article leads with a collage of heads
+  'Meadowlark': 'Western meadowlark',             // the genus article carries no lead image at all
   'Poison Dart Frog': 'Dyeing poison dart frog',  // the family's lead photo is twice as tall as it is wide
   'River Dolphin': 'Amazon river dolphin',        // the group article leads with a range map
-  'River Otter': 'North American river otter',    // "River otter" alone is a disambiguation page
   'Salmon': 'Sockeye salmon',                     // "Salmon" leads with a 3:1 strip of a fish
   'Seal': 'Harbor seal',                          // "Seal" alone is a disambiguation page
   'Sparrow': 'House sparrow',                     // "Sparrow" alone is a disambiguation page
@@ -105,8 +105,10 @@ const CREDIT_OVERRIDES = {
   'LA-Triceratops mount-2.jpg': 'Allie Caulfield (edited by MathKnight)',
   // the same chain, but both halves are one man cropping his own photograph
   'Lepus americanus 5459 cropped.jpg': 'Walter Siegmund',
-  // the author line is a link to his own site; the name is on his user page
+  // the author line is a link to his own site; the name is on his user page.
+  // Both of these are his — the skunk's Artist field is the bare link again.
   'Harpia harpyja 001 800.jpg': 'Tom Friedel (birdphotos.com)',
+  'Striped Skunk.jpg': 'Tom Friedel (birdphotos.com)',
   // the author line records how the archive came by it, not who took it
   "SaltwaterCrocodile('Maximo').jpg": 'Molly Ebersold, St. Augustine Alligator Farm',
   // a four-photo collage credited to "his respective owners", i.e. nobody;

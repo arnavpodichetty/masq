@@ -19,6 +19,31 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.9.3 — 2026-08-08
+
+**Changed**
+- **No animal appears in two biomes.** Nine of them did — `Rattlesnake` sat in
+  Desert, Prairie and Chaparral at once, `Rat` in Cave System, House and the
+  City — which is the one thing a Biomes role must not do: naming your animal is
+  how you prove you know the biome, and an animal that lives in three of them
+  proves nothing. Each kept the biome it reads strongest in and the other slots
+  were rewritten: Cave System takes a `Swiftlet`, House loses the vermin and
+  becomes eight pets (`Hamster`, `Parakeet`), Chaparral takes `Mule Deer` and
+  `Tarantula`, Prairie a `Meadowlark`, Taiga a `Grizzly Bear` where Temperate
+  Forest keeps the black one, Temperate Forest a `Porcupine`, and the City a
+  `Skunk`. 176 animals, 176 of them distinct.
+- **Swamp and Freshwater River stop sharing a cast.** They had `Beaver` and
+  `Heron` in common outright, and `Otter` against `River Otter` — different
+  strings for what a player would describe the same way. The river keeps all
+  three; the swamp takes `Crayfish`, `Egret` and `Muskrat`.
+- Twelve new photographs to match, from the same Wikipedia lead images as the
+  rest, with their photographers added to Settings → Credits. `Meadowlark` is
+  pinned to `Western meadowlark`, the genus article carrying no lead image at
+  all, and the striped skunk's photograph turns out to be by Tom Friedel — whose
+  author line is a bare link to his own site, the same case as the harpy eagle's.
+- The fake roles a disguised jester is handed still draw from other biomes, which
+  is the trick and not a repeat.
+
 ## 1.9.2 — 2026-08-08
 
 **Changed**
