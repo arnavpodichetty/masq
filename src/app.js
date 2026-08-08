@@ -315,6 +315,9 @@
     '--m-border-hard': 'rgba(200,162,76,.3)',
     '--m-border-soft': 'rgba(200,162,76,.08)',
     '--m-border-white': 'rgba(255,255,255,.08)',
+    '--m-icon-gold': 'rgba(200,162,76,.13)',
+    '--m-icon-crimson': 'rgba(178,32,47,.26)',
+    '--m-icon-blue': 'rgba(46,91,176,.24)',
     '--m-backdrop': 'rgba(8,4,12,.7)',
     '--m-overlay': 'rgba(8,4,10,.88)',
     '--m-overlay-vote': 'rgba(8,4,10,.85)',
@@ -374,6 +377,11 @@
     '--m-border-hard': 'rgba(140,110,40,.38)',
     '--m-border-soft': 'rgba(140,110,40,.12)',
     '--m-border-white': 'rgba(60,40,20,.1)',
+    // Inverted problem from dark: over a near-white screen these wash *down*,
+    // and the two saturated hues darken far harder than gold does.
+    '--m-icon-gold': 'rgba(154,117,40,.2)',
+    '--m-icon-crimson': 'rgba(178,32,47,.14)',
+    '--m-icon-blue': 'rgba(46,91,176,.16)',
     '--m-backdrop': 'rgba(40,30,20,.4)',
     '--m-overlay': 'rgba(40,30,20,.72)',
     '--m-overlay-vote': 'rgba(40,30,20,.7)',
@@ -429,6 +437,9 @@
     '--m-border-hard': 'rgba(255,61,139,.42)',
     '--m-border-soft': 'rgba(255,61,139,.12)',
     '--m-border-white': 'rgba(255,255,255,.1)',
+    // Jester mode's accent is hot pink, not gold, so the neutral wash follows it
+    // there. Crimson and blue carry over from dark unchanged.
+    '--m-icon-gold': 'rgba(255,61,139,.16)',
     '--m-backdrop': 'rgba(10,2,20,.72)',
     '--m-overlay': 'rgba(10,2,20,.9)',
     '--m-overlay-vote': 'rgba(10,2,20,.86)',
@@ -1814,7 +1825,7 @@
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:0; border-radius:14px; overflow:hidden; border:1px solid var(--m-border);') },
           h('div', { ...press(v.toggleShowCat, 'Show category', { role: 'switch', 'aria-checked': String(v.showCategory) }), style: css('display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer;') },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_CATEGORIES_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Category'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Players can see the category of the secret word')
@@ -1824,7 +1835,7 @@
             )
           ),
           h('div', { ...press(v.toggleJestersKnow, 'Jesters know each other', { role: 'switch', 'aria-checked': String(v.jestersKnow) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jestersKnowToggleOpacity}; pointer-events:${v.jestersKnowTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(178,32,47,.2); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-crimson); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jesters Know Each Other'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jestersKnowDesc)
@@ -1834,7 +1845,7 @@
             )
           ),
           h('div', { ...press(v.toggleShowWord, 'Show word', { role: 'switch', 'aria-checked': String(v.showWord) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:rgba(46,91,176,.18); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_SHOW_WORD } }),
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-blue); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_SHOW_WORD } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Word'),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.showWordDesc)
@@ -1844,7 +1855,7 @@
             )
           ),
           h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-border-med); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
               h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jesterGetsRoleDesc)
@@ -2140,11 +2151,11 @@
           ),
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Settings'),
           h('div', { style: css('display:flex; flex-direction:column; gap:8px; margin-bottom:8px;') },
-            this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-border-med)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
-            this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-border-med)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
-            this.settingsRow({ onClick: v.openJesters, iconBg: 'rgba(178,32,47,.2)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
-            this.settingsRow({ onClick: v.openTime, iconBg: 'rgba(46,91,176,.2)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
-            this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-border-med)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
+            this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-icon-gold)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
+            this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-icon-gold)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
+            this.settingsRow({ onClick: v.openJesters, iconBg: 'var(--m-icon-crimson)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
+            this.settingsRow({ onClick: v.openTime, iconBg: 'var(--m-icon-blue)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
+            this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-icon-gold)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
           )
         ),
         h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
