@@ -12,7 +12,7 @@ Masq is a pass-and-play social deduction party game for one phone and a group of
 
 Open `index.html` in a browser (or use the live link above) — no install or build step. Add your players, pick a game mode and categories, then pass the phone around.
 
-Your player list is saved in `localStorage`, so the same group is still there next time you open the game on that device. Everything else about a round — game mode, categories, options — starts fresh.
+The lobby is saved in `localStorage`, so the table you set up is still standing next time you open the game on that device: the player list, the game mode, the categories, the jester count and how jesters are drawn, the time limit, the options, and light or dark. So are your custom categories and any words you've crossed out in Settings → View All Words. What doesn't carry over is the round itself, and the progressive jester's running odds — those start over on every reload.
 
 **Game modes**
 

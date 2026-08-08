@@ -253,6 +253,197 @@
   const MUSE_CATEGORY = 'Muse';
   const ROLE_CATEGORIES = ['Biomes', 'Cuisines', 'Locations', 'Movie/TV Show Genres', 'Muse', 'Music Genres'];
   const OPEN_ROLE_CATEGORIES = ROLE_CATEGORIES.filter(c => c !== MUSE_CATEGORY);
+  // The word-only categories, in the order their tiles render. A constant
+  // rather than state, unlike the role list: nothing ever unlocks into it.
+  const WORD_CATEGORIES = ['Animals', 'Food', 'Movies/TV', 'Objects'];
+
+  // Muse is found once, in the Credits. A refresh shouldn't hide it again, so
+  // the unlock outlasts the tab — one flag, written the moment it's found and
+  // never unwritten. Everything else about a round is deliberately per-session;
+  // this isn't a setting, it's something that happened.
+  const MUSE_KEY = 'masq.museUnlocked';
+
+  function loadMuseUnlocked() {
+    try {
+      return window.localStorage.getItem(MUSE_KEY) === '1';
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function saveMuseUnlocked() {
+    try {
+      window.localStorage.setItem(MUSE_KEY, '1');
+    } catch (err) {
+      // Private mode / quota — unlocked for this session, found again next time.
+    }
+  }
+
+  // Read once, like the roster below: two state fields are set from this and
+  // they have to agree about whether Muse is in the picker.
+  const INITIAL_MUSE_UNLOCKED = loadMuseUnlocked();
+
+  // ---- crossed-out words ----
+  // Crossing a word out is a decision about the table, not about the session —
+  // whoever doesn't want to explain that word to their family doesn't want to
+  // cross it out again tomorrow. So these outlast the tab too.
+  //
+  // Checked for shape only, never against the catalogs. A crossing names a word
+  // in a category, both of which can be renamed or retired out from under it,
+  // and one that no longer matches anything is looked up by name and quietly
+  // never fires — which is the same thing it did before it was saved.
+  const DISABLED_KEY = 'masq.disabledWords';
+
+  function loadDisabledWords() {
+    try {
+      const raw = window.localStorage.getItem(DISABLED_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+      const out = {};
+      Object.keys(parsed).forEach((cat) => {
+        if (!Array.isArray(parsed[cat])) return;
+        const words = parsed[cat].filter(w => typeof w === 'string' && w);
+        if (words.length) out[cat] = words;
+      });
+      return out;
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function saveDisabledWords(map) {
+    try {
+      window.localStorage.setItem(DISABLED_KEY, JSON.stringify(map || {}));
+    } catch (err) {
+      // Private mode / quota — the crossings still hold for this session.
+    }
+  }
+
+  // ---- lobby settings ----
+  // How this table likes to play: the mode, the categories, how many jesters
+  // and how they're drawn, the clock, the options, the theme. None of it is a
+  // decision about one round — a group that plays Word Mode on a three-minute
+  // clock plays that way again next Friday — so all of it outlasts the tab.
+  //
+  // One blob rather than a key each: they're read together at startup and
+  // written together on any change, and half a restored lobby is worse than a
+  // default one. What's deliberately not in here is the round itself, and the
+  // progressive jester's weights — a cycle in progress is not a setting, and
+  // the Jesters screen says outright that it starts over.
+  const SETTINGS_KEY = 'masq.settings';
+
+  // Every field the lobby remembers, and what it opens as before anyone has
+  // chosen. This list is also what's read back: anything else found in storage
+  // is ignored, and anything missing or unusable falls back to its value here.
+  const DEFAULT_SETTINGS = {
+    gameMode: 'roles',
+    selCategories: OPEN_ROLE_CATEGORIES,
+    jesterCount: 1,
+    randJesters: false,
+    jesterRandMin: 1,
+    jesterRandMax: 3,
+    // Progressive to start with: across an evening it passes the jester around
+    // the table, which is what most groups expect a random draw to feel like
+    // and what a truly random one keeps failing to do.
+    jesterSelection: 'progressive',
+    showJesterOdds: false,
+    timeLimit: 5,
+    soundEffects: true,
+    showCategory: true,
+    showWord: false,
+    jestersKnow: false,
+    jesterGetsRole: false,
+    darkMode: true,
+    jesterMode: false,
+  };
+  const SETTINGS_FIELDS = Object.keys(DEFAULT_SETTINGS);
+
+  const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
+  const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
+  const asCount = (v, min, max, fallback) => (typeof v === 'number' && isFinite(v)
+    ? Math.min(max, Math.max(min, Math.round(v)))
+    : fallback);
+
+  // Saved category picks are checked against what exists now rather than what
+  // existed when they were saved: a custom category can be renamed or deleted,
+  // and Muse can be locked, between one visit and the next. A name that no
+  // longer stands for anything would still be drawn to deal a round, and would
+  // quietly deal Locations instead, so it's dropped on the way in.
+  function usableCategories(names, customs, museUnlocked, gameMode) {
+    const custom = Array.isArray(customs) ? customs : [];
+    const isWordOnly = (c) => c.kind === 'words' || !c.entries.some(e => e.roles && e.roles.length);
+    const known = new Set([
+      ...(museUnlocked ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES),
+      ...WORD_CATEGORIES,
+      ...custom.map(c => c.name),
+    ]);
+    // Role Mode can't deal a category with no roles in it. Same cut setRoleMode
+    // makes when the mode is switched by hand.
+    const roleless = new Set(gameMode === 'words'
+      ? []
+      : [...WORD_CATEGORIES, ...custom.filter(isWordOnly).map(c => c.name)]);
+    const seen = new Set();
+    return names.filter((name) => {
+      if (typeof name !== 'string' || !known.has(name) || roleless.has(name) || seen.has(name)) return false;
+      seen.add(name);
+      return true;
+    });
+  }
+
+  function loadSettings(customs, museUnlocked) {
+    let saved = {};
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) saved = parsed;
+    } catch (err) {
+      // Private mode, or something unreadable under the key — take the defaults.
+    }
+    const gameMode = asOneOf(saved.gameMode, ['roles', 'words'], DEFAULT_SETTINGS.gameMode);
+    const picked = usableCategories(
+      Array.isArray(saved.selCategories) ? saved.selCategories : [],
+      customs, museUnlocked, gameMode,
+    );
+    return {
+      gameMode,
+      // Never empty: an empty picker has nothing to deal, so a list that lost
+      // everything it named falls back to the categories the game opens with.
+      selCategories: picked.length ? picked : DEFAULT_SETTINGS.selCategories,
+      jesterCount: asCount(saved.jesterCount, 0, 99, DEFAULT_SETTINGS.jesterCount),
+      randJesters: asBool(saved.randJesters, DEFAULT_SETTINGS.randJesters),
+      // Both ends are re-clamped against the cast on every render — see
+      // randMin/randMax — so this only has to be a number.
+      jesterRandMin: asCount(saved.jesterRandMin, 0, 99, DEFAULT_SETTINGS.jesterRandMin),
+      jesterRandMax: asCount(saved.jesterRandMax, 0, 99, DEFAULT_SETTINGS.jesterRandMax),
+      jesterSelection: asOneOf(saved.jesterSelection, ['random', 'progressive'], DEFAULT_SETTINGS.jesterSelection),
+      showJesterOdds: asBool(saved.showJesterOdds, DEFAULT_SETTINGS.showJesterOdds),
+      // 0 is 'no limit', and the dial stops at ten minutes.
+      timeLimit: asCount(saved.timeLimit, 0, 10, DEFAULT_SETTINGS.timeLimit),
+      soundEffects: asBool(saved.soundEffects, DEFAULT_SETTINGS.soundEffects),
+      showCategory: asBool(saved.showCategory, DEFAULT_SETTINGS.showCategory),
+      showWord: asBool(saved.showWord, DEFAULT_SETTINGS.showWord),
+      jestersKnow: asBool(saved.jestersKnow, DEFAULT_SETTINGS.jestersKnow),
+      jesterGetsRole: asBool(saved.jesterGetsRole, DEFAULT_SETTINGS.jesterGetsRole),
+      darkMode: asBool(saved.darkMode, DEFAULT_SETTINGS.darkMode),
+      jesterMode: asBool(saved.jesterMode, DEFAULT_SETTINGS.jesterMode),
+    };
+  }
+
+  function saveSettings(state) {
+    try {
+      const out = {};
+      SETTINGS_FIELDS.forEach((field) => { out[field] = state[field]; });
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(out));
+    } catch (err) {
+      // Private mode / quota — the lobby still holds for this session.
+    }
+  }
+
+  // Read once, and in this order: the custom categories have to be known before
+  // the saved category picks can be checked against them.
+  const INITIAL_CUSTOM = loadCustomCategories();
+  const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED);
 
   // ---- roster ----
   // The table usually plays with the same people, so the names outlast the tab.
@@ -500,7 +691,10 @@
     const scheme = document.querySelector('meta[name="color-scheme"]');
     if (scheme) scheme.setAttribute('content', (darkMode || jesterMode) ? 'dark' : 'light');
   }
-  applyTheme(true, false);
+  // Painted before React mounts, and painted in the theme this table chose
+  // rather than the one the page ships dark in — otherwise a light-mode table
+  // watches the stage go dark and back again on every load.
+  applyTheme(INITIAL_SETTINGS.darkMode, INITIAL_SETTINGS.jesterMode);
 
   // ---- static icon markup (no dynamic bindings, safe as raw SVG) ----
   // All drawn on a 24x24 grid at stroke-width ~1.7 so the set reads as one hand.
@@ -588,25 +782,26 @@
   // ---- App: game state + logic ----
   class App extends React.Component {
     state = {
-      screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, gameMode: 'roles',
+      screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false,
       modal: null,
       playerList: INITIAL_PLAYERS.map(p => p.name),
       playerKeys: INITIAL_PLAYERS.map(p => p.id),
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
-      jesterCount: 1, jesterRandMin: 1, jesterRandMax: 3, randJesters: false, showCategory: true, showWord: false, jestersKnow: false, jesterGetsRole: false,
-      // 'random' | 'progressive'. Weights are in-memory only: a reload or a
-      // roster change resets the cycle.
-      jesterSelection: 'random', jesterWeights: {}, showJesterOdds: false,
-      timeLimit: 5,
+      // Game mode, categories, jesters, clock, options and theme, restored as
+      // the table left them. The fields are listed in DEFAULT_SETTINGS above,
+      // which is also where their opening values live.
+      ...INITIAL_SETTINGS,
+      // The progressive cycle itself, unlike the setting that turns it on, is
+      // in-memory only: a reload or a roster change starts it over.
+      jesterWeights: {},
       // 'Historical Eras' is parked until its catalog is reworked — the catalogs
       // are commented out in src/data.js, and every use of them below is
       // commented out to match. Restore both sides together.
       // Alphabetical: these arrays are also the order the category tiles and the
       // word lists render in.
-      museUnlocked: false,
-      categories: OPEN_ROLE_CATEGORIES,
-      wordCategories: ['Animals', 'Food', 'Movies/TV', 'Objects'],
-      selCategories: OPEN_ROLE_CATEGORIES,
+      museUnlocked: INITIAL_MUSE_UNLOCKED,
+      categories: INITIAL_MUSE_UNLOCKED ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
+      wordCategories: WORD_CATEGORIES,
       roundJesterIndices: null,
       roundStarterIdx: null,
       roundCategory: 'Locations',
@@ -617,16 +812,13 @@
       secondsLeft: null,
       timeUp: false,
       timerPaused: false,
-      darkMode: true,
-      soundEffects: true,
-      jesterMode: false,
       wordListExpanded: [],
       // The results screen keeps the round word covered so the jester still has
       // a shot at guessing it, with the category's words on hand to pick from.
       resultsWordShown: false,
       resultsPoolOpen: false,
-      disabledWords: {},
-      customCategories: loadCustomCategories(),
+      disabledWords: loadDisabledWords(),
+      customCategories: INITIAL_CUSTOM,
       customDraft: null,
       customError: '',
       customDeleteId: null,
@@ -669,6 +861,18 @@
       // arrays, so identity is enough to spot a change.
       if (prev.playerList !== this.state.playerList || prev.playerKeys !== this.state.playerKeys) {
         savePlayers(this.state.playerList, this.state.playerKeys);
+      }
+      // Same trick for the crossings: every toggle and every reset builds a new
+      // map rather than editing the old one, so identity catches all of them.
+      if (prev.disabledWords !== this.state.disabledWords) {
+        saveDisabledWords(this.state.disabledWords);
+      }
+      // And once more for the lobby, which is written as one blob — so one
+      // sweep of the field list covers every setting on it. Category picks are
+      // rebuilt rather than pushed into, like everything else here, so
+      // identity is enough for the one field that isn't a scalar.
+      if (SETTINGS_FIELDS.some(field => prev[field] !== this.state[field])) {
+        saveSettings(this.state);
       }
     }
 
@@ -1093,6 +1297,7 @@
         museUnlocked: st.museUnlocked,
         unlockMuse: () => {
           if (st.museUnlocked) return;
+          saveMuseUnlocked();
           this.setState({ museUnlocked: true, categories: ROLE_CATEGORIES });
         },
         openPlayers: () => this.setState({ modal: 'players' }),
@@ -1206,7 +1411,12 @@
           customError: '',
         })),
         cancelDraft: () => this.setState({ modal: 'custom', customDraft: null, customError: '' }),
-        saveDraft: () => this.__saveCustomDraft(custom, [...st.categories, ...st.wordCategories]),
+        // Every built-in name, not the ones on screen: Muse is missing from the
+        // picker until it's found, and a category named after it would be found
+        // first everywhere the round is dealt — leaving the real one unreachable
+        // and two identical tiles in the picker, with nothing in the app to
+        // undo it but renaming your own.
+        saveDraft: () => this.__saveCustomDraft(custom, [...ROLE_CATEGORIES, ...st.wordCategories]),
         // Role categories then word categories, alphabetical within each — the
         // same split and order the category picker uses.
         wordListGroups: [
