@@ -2,6 +2,9 @@
 // Maps an "Artist (Song)" entry from the Music Genres catalogs to the prefix
 // of that song's album art on the Deezer CDN. app.js appends the size it
 // wants, so the full URL is <prefix>300x300-000000-80-0-0.jpg.
+//
+// MASQ_MUSE_ALBUMS is the same thing keyed by album for the Muse category,
+// where the word is the record and every song on it shows that one sleeve.
 (function () {
   window.MASQ_ALBUMS = {
     "2Pac (California Love)": "https://cdn-images.dzcdn.net/images/cover/f35a13d8306bcf8ba6102b1500bf6278/",
@@ -342,5 +345,18 @@
     "blink-182 (All The Small Things)": "https://cdn-images.dzcdn.net/images/cover/50627ad1a5ce0215359f0e8b2e37a01f/",
     "deadmau5 (Strobe)": "https://cdn-images.dzcdn.net/images/cover/737a24a457f860d6f73830e4b285bb15/",
     "girl in red (we fell in love in october)": "https://cdn-images.dzcdn.net/images/cover/7c4b6b8e63363004e000fa3157662c63/",
+  };
+
+  window.MASQ_MUSE_ALBUMS = {
+    "Absolution": "https://cdn-images.dzcdn.net/images/cover/539072bad64079ad057642901cf00a71/",
+    "Black Holes and Revelations": "https://cdn-images.dzcdn.net/images/cover/fc457d27a8c0b7fc6f9b56fb94e22a0d/",
+    "Drones": "https://cdn-images.dzcdn.net/images/cover/4288439f650f1f592121011c44c7ca85/",
+    "Origin of Symmetry": "https://cdn-images.dzcdn.net/images/cover/d51fca27f4e6f891e64eaab425264fce/",
+    "Showbiz": "https://cdn-images.dzcdn.net/images/cover/a7374909906fe231d13da696cbec37f7/",
+    "Simulation Theory": "https://cdn-images.dzcdn.net/images/cover/48c9aa3748e67571e62e72582b5b49d4/",
+    "The 2nd Law": "https://cdn-images.dzcdn.net/images/cover/dffef0ec67705fdca2b1dd9f55a5abb3/",
+    "The Resistance": "https://cdn-images.dzcdn.net/images/cover/79845461299661387ade37f8e34d643c/",
+    "The Wow! Signal": "https://cdn-images.dzcdn.net/images/cover/15f362eec97e06eacddfb61b404a3fdb/",
+    "Will of the People": "https://cdn-images.dzcdn.net/images/cover/aa2755c8fe4fcb65d91ac6d636bdb8b8/",
   };
 })();

@@ -138,6 +138,27 @@
     'Zombie': ['28 Days Later', 'All of Us Are Dead', 'Army of the Dead', 'Dawn of the Dead', 'Night of the Living Dead', 'Resident Evil', 'Shaun of the Dead', 'The Walking Dead', 'Train to Busan', 'Warm Bodies', 'World War Z', 'Zombieland'],
   };
 
+  // The secret category, unlocked in app.js by tapping the ampersand in the
+  // credits. The word is a studio album, the role a song off it — the whole
+  // discography, one album per key, songs sorted alphabetically like every other
+  // catalog rather than left in track order.
+  //
+  // Spoken interludes are left out: '[Drill Sergeant]', '[JFK]', 'Intro',
+  // 'Interlude' and 'Prelude' are tracks but not songs, and none of them gives a
+  // player anything to describe.
+  var museCatalog = {
+    'Absolution': ['Apocalypse Please', 'Blackout', 'Butterflies & Hurricanes', 'Endlessly', 'Falling Away with You', 'Hysteria', 'Ruled by Secrecy', 'Sing for Absolution', 'Stockholm Syndrome', 'The Small Print', 'Thoughts of a Dying Atheist', 'Time Is Running Out'],
+    'Black Holes and Revelations': ['Assassin', 'City of Delusion', 'Exo-Politics', 'Hoodoo', 'Invincible', 'Knights of Cydonia', 'Map of the Problematique', "Soldier's Poem", 'Starlight', 'Supermassive Black Hole', 'Take a Bow'],
+    'Drones': ['Aftermath', 'Dead Inside', 'Defector', 'Drones', 'Mercy', 'Psycho', 'Reapers', 'Revolt', 'The Globalist', 'The Handler'],
+    'Origin of Symmetry': ['Bliss', 'Citizen Erased', 'Dark Shines', 'Feeling Good', 'Hyper Music', 'Megalomania', 'Micro Cuts', 'New Born', 'Plug In Baby', 'Screenager', 'Space Dementia'],
+    'Showbiz': ['Cave', 'Escape', 'Falling Down', 'Fillip', "Hate This & I'll Love You", 'Muscle Museum', 'Overdue', 'Showbiz', 'Sober', 'Sunburn', 'Unintended', 'Uno'],
+    'Simulation Theory': ['Algorithm', 'Blockades', 'Break It to Me', 'Dig Down', 'Get Up and Fight', 'Pressure', 'Propaganda', 'Something Human', 'The Dark Side', 'The Void', 'Thought Contagion'],
+    'The 2nd Law': ['Animals', 'Big Freeze', 'Explorers', 'Follow Me', 'Liquid State', 'Madness', 'Panic Station', 'Save Me', 'Supremacy', 'Survival', 'The 2nd Law: Isolated System', 'The 2nd Law: Unsustainable'],
+    'The Resistance': ['Exogenesis: Symphony Part 1 (Overture)', 'Exogenesis: Symphony Part 2 (Cross-Pollination)', 'Exogenesis: Symphony Part 3 (Redemption)', 'Guiding Light', 'I Belong to You', 'MK Ultra', 'Resistance', 'Undisclosed Desires', 'United States of Eurasia', 'Unnatural Selection', 'Uprising'],
+    'The Wow! Signal': ['Be With You', 'Cryogen', 'Hexagons', 'Hush', 'Nightshift Superstar', 'Shimmering Scars', 'Space Debris', 'The Dark Forest', 'The Sickness In You & I', 'Unravelling'],
+    'Will of the People': ['Compliance', 'Euphoria', 'Ghosts (How Can I Move On)', 'Kill or Be Killed', 'Liberation', 'Verona', 'We Are Fucking Fucked', 'Will of the People', "Won't Stand Down", "You Make Me Feel Like It's Halloween"],
+  };
+
   var musicGenreCatalog = {
     'Alternative Rock': ['Coldplay (Yellow)', 'Gorillaz (Feel Good Inc)', 'Imagine Dragons (Radioactive)', 'Kings of Leon (Sex on Fire)', 'Linkin Park (In the End)', 'Muse (Supermassive Black Hole)', 'Oasis (Wonderwall)', 'R.E.M. (Losing My Religion)', 'Radiohead (Creep)', 'Red Hot Chili Peppers (Californication)', 'Smashing Pumpkins (1979)', 'The Black Keys (Lonely Boy)', 'Third Eye Blind (Semi-Charmed Life)', 'Twenty One Pilots (Stressed Out)', "Weezer (Say It Ain't So)"],
     'Bedroom Pop': ['beabadoobee (the perfect pair)', 'Cigarettes After Sex (Apocalypse)', 'Clairo (Sofia)', 'Djo (End of Beginning)', 'Dominic Fike (3 Nights)', 'Faye Webster (Kingston)', 'girl in red (we fell in love in october)', 'Joji (Glimpse of Us)', 'Mac DeMarco (Chamber of Reflection)', 'Malcolm Todd (Earrings)', 'Rex Orange County (Best Friend)', 'Steve Lacy (Dark Red)', 'The Marias (No One Noticed)', 'TV Girl (Lovers Rock)', 'Wallows (Are You Bored Yet?)'],
@@ -383,6 +404,18 @@
     'Zombie': ['10 Things I Hate About You', 'Guardians of the Galaxy', 'Shrek'],
   };
 
+  // Derived, not hand-written. The catalogs above list three fakes per word
+  // because their roles overlap between words — a 'Waiter' fits several cuisines,
+  // so which three to borrow is a judgement call. No song is on two albums, so
+  // every song off another album is automatically a wrong-album tell, and there
+  // are a hundred of them to draw from.
+  var fakeMuseRoleCatalog = {};
+  Object.keys(museCatalog).forEach(function (album) {
+    fakeMuseRoleCatalog[album] = Object.keys(museCatalog)
+      .filter(function (other) { return other !== album; })
+      .reduce(function (songs, other) { return songs.concat(museCatalog[other]); }, []);
+  });
+
   var fakeMusicGenreRoleCatalog = {
     'Alternative Rock': ['Bush (Glycerine)', 'Interpol (Evil)', 'Tame Impala (The Less I Know The Better)'],
     'Bedroom Pop': ['Johnny Cash (Hurt)', 'Metallica (Enter Sandman)', 'Mozart (Eine kleine Nachtmusik)'],
@@ -461,12 +494,14 @@
     'cuisineCatalog': cuisineCatalog,
     'locationCatalog': locationCatalog,
     'movieTvCatalog': movieTvCatalog,
+    'museCatalog': museCatalog,
     'musicGenreCatalog': musicGenreCatalog,
     'wordOnlyCatalog': wordOnlyCatalog,
     'fakeBiomeRoleCatalog': fakeBiomeRoleCatalog,
     'fakeCuisineRoleCatalog': fakeCuisineRoleCatalog,
     'fakeLocationRoleCatalog': fakeLocationRoleCatalog,
     'fakeMovieTvRoleCatalog': fakeMovieTvRoleCatalog,
+    'fakeMuseRoleCatalog': fakeMuseRoleCatalog,
     'fakeMusicGenreRoleCatalog': fakeMusicGenreRoleCatalog,
     // 'historicalErasCatalog': historicalErasCatalog,
     // 'fakeHistoricalErasRoleCatalog': fakeHistoricalErasRoleCatalog,
