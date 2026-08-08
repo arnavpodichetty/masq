@@ -77,15 +77,14 @@ function loadEntries() {
   return [...entries];
 }
 
-// The secret Muse category wants art too, but a sleeve per album rather than per
-// song: the word *is* the album, so every song off it shows the same cover.
-function loadMuseAlbums() {
+// One sleeve per album rather than per song, except the B-sides.
+function loadMuseCatalog() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
   const catalog = sandbox.window.MASQ_LOCATIONS_DATA.museCatalog;
   if (!catalog) throw new Error(`museCatalog not found in ${DATA}`);
-  return Object.keys(catalog);
+  return catalog;
 }
 
 // Song titles hold parentheses of their own, so split on the last group — the
@@ -226,24 +225,48 @@ async function resolve(entry) {
   return { art: artPrefix(best.album), artist: best.artist.name, track: best.title, album: best.album.title, match };
 }
 
-// Muse albums are searched by title rather than by song. The trap here is the
-// re-release: Origin of Symmetry has a 2021 "XX Anniversary RemiXX" edition with
-// artwork of its own, and a deluxe or remaster often outranks the record people
-// picture. Prefer the exact title, then the plainest edition of it.
+// Searched by title, not by song. Re-releases carry their own artwork — Origin
+// of Symmetry's 2021 "XX Anniversary RemiXX" does — and often outrank the record
+// people picture, so prefer the exact title and the plainest edition of it.
 const ALT_EDITION = /anniversary|deluxe|remaster|expanded|edition|re-?issue|\blive\b|instrumental/i;
 
+// Catalog keys that aren't the name of a record. B-Sides is a bucket, not a
+// release: the key itself falls back to Hullabaloo's sleeve, but each track in
+// it is resolved to the single it came off — see resolveMuseTrack.
+const MUSE_SLEEVE_OF = { 'B-Sides': 'Hullabaloo Soundtrack' };
+const MUSE_PER_TRACK = 'B-Sides';
+
 async function resolveMuseAlbum(name) {
-  const strict = await deezer('/search/album', { q: `artist:"Muse" album:"${name}"`, limit: 25 });
+  const title = MUSE_SLEEVE_OF[name] || name;
+  const strict = await deezer('/search/album', { q: `artist:"Muse" album:"${title}"`, limit: 25 });
   let list = (strict.data || []).filter(a => norm(a.artist.name) === 'muse');
   if (!list.length) {
-    const loose = await deezer('/search/album', { q: `Muse ${name}`, limit: 25 });
+    const loose = await deezer('/search/album', { q: `Muse ${title}`, limit: 25 });
     list = (loose.data || []).filter(a => norm(a.artist.name) === 'muse');
   }
   if (!list.length) return null;
-  const target = norm(name);
-  const rank = (a) => (norm(a.title) === target ? 0 : 4) + (ALT_EDITION.test(a.title) ? 1 : 0);
+  const target = norm(title);
+  const rank = (a) => (norm(a.title) === target ? 0 : (norm(a.title).startsWith(target) ? 2 : 4))
+    + (ALT_EDITION.test(a.title) ? 1 : 0);
   const best = list.reduce((x, y) => (rank(y) < rank(x) ? y : x));
-  return { art: artPrefix(best), album: best.title, exact: norm(best.title) === target };
+  return { art: artPrefix(best), album: best.title, exact: norm(best.title).startsWith(target) };
+}
+
+// A B-side shipped on a single, but streaming reissues scatter it across the
+// parent album's bonus edition, Hullabaloo and the odd live record. Rank the
+// single first, then the compilation, and keep the studio album last — a B-side
+// wearing 'Absolution' would read as an Absolution round.
+async function resolveMuseTrack(title, studio) {
+  const r = await deezer('/search', { q: `artist:"Muse" track:"${title}"`, limit: 25 });
+  const want = norm(title);
+  const hits = (r.data || []).filter(t => norm(t.artist.name) === 'muse'
+    && (norm(t.title) === want || norm(t.title).startsWith(want + ' ')));
+  if (!hits.length) return null;
+  const rank = (t) => (studio.has(norm(t.album.title)) ? 5 : 0)
+    + (ALT_EDITION.test(t.album.title) ? 3 : 0)
+    + (/hullabaloo/i.test(t.album.title) ? 1 : 0);
+  const best = hits.reduce((x, y) => (rank(y) < rank(x) ? y : x));
+  return { art: artPrefix(best.album), album: best.album.title, exact: rank(best) === 0 };
 }
 
 // One at a time, spaced out. A pool would finish a few seconds sooner and spend
@@ -259,7 +282,7 @@ async function mapPaced(items, fn) {
 
 // ---------------------------------------------------------------------- main
 
-function write(albums, museAlbums) {
+function write(albums, museAlbums, museTracks) {
   const rows = (map) => Object.keys(map).sort()
     .map(e => `    ${JSON.stringify(e)}: ${JSON.stringify(map[e])},`);
   fs.writeFileSync(OUT, [
@@ -270,6 +293,8 @@ function write(albums, museAlbums) {
     '//',
     '// MASQ_MUSE_ALBUMS is the same thing keyed by album for the Muse category,',
     '// where the word is the record and every song on it shows that one sleeve.',
+    '// MASQ_MUSE_TRACKS overrides that per song, for B-sides that each came off a',
+    '// different single.',
     '(function () {',
     '  window.MASQ_ALBUMS = {',
     ...rows(albums),
@@ -277,6 +302,10 @@ function write(albums, museAlbums) {
     '',
     '  window.MASQ_MUSE_ALBUMS = {',
     ...rows(museAlbums),
+    '  };',
+    '',
+    '  window.MASQ_MUSE_TRACKS = {',
+    ...rows(museTracks),
     '  };',
     '})();',
     '',
@@ -310,7 +339,8 @@ function write(albums, museAlbums) {
     if (VERBOSE) console.log(`  ${{ pin: 'pin ', exact: '    ', partial: '~   ', loose: '?   ', fuzzy: '??  ' }[hit.match]}${line}`);
   }
 
-  const museNames = loadMuseAlbums();
+  const museCatalog = loadMuseCatalog();
+  const museNames = Object.keys(museCatalog);
   console.log(`\nResolving sleeves for ${museNames.length} Muse albums…`);
   const museResults = await mapPaced(museNames, async (name) => {
     try {
@@ -323,13 +353,30 @@ function write(albums, museAlbums) {
   for (const { name, hit, error } of museResults) {
     if (!hit || !hit.art) { missing.push(error ? `${name} (${error})` : name); continue; }
     museAlbums[name] = hit.art;
-    // Every one of these is worth reading: ten albums is a short enough list to
-    // eyeball, and picking a remaster's artwork is silent otherwise.
+    // Printed unconditionally — a remaster's artwork is silent otherwise.
     console.log(`  ${hit.exact ? '    ' : '?   '}${name}  ->  ${hit.album}`);
   }
 
-  write(albums, museAlbums);
-  console.log(`\nWrote ${Object.keys(albums).length}/${entries.length} albums and ${Object.keys(museAlbums).length}/${museNames.length} Muse sleeves to ${OUT}`);
+  const bsides = museCatalog[MUSE_PER_TRACK] || [];
+  const studio = new Set(museNames.filter(n => n !== MUSE_PER_TRACK).map(norm));
+  console.log(`\nResolving sleeves for ${bsides.length} B-sides…`);
+  const trackResults = await mapPaced(bsides, async (title) => {
+    try {
+      return { title, hit: await resolveMuseTrack(title, studio) };
+    } catch (err) {
+      return { title, error: err.message };
+    }
+  });
+  const museTracks = {};
+  for (const { title, hit, error } of trackResults) {
+    if (!hit || !hit.art) { missing.push(error ? `${title} (${error})` : title); continue; }
+    museTracks[title] = hit.art;
+    // '?' means no single carried it and the sleeve came off a record instead.
+    console.log(`  ${hit.exact ? '    ' : '?   '}${title.padEnd(44)}${hit.album}`);
+  }
+
+  write(albums, museAlbums, museTracks);
+  console.log(`\nWrote ${Object.keys(albums).length}/${entries.length} albums, ${Object.keys(museAlbums).length}/${museNames.length} Muse sleeves and ${Object.keys(museTracks).length}/${bsides.length} B-side sleeves to ${OUT}`);
   if (review.length) console.log(`\nNot an exact artist+song match — check these:\n${review.join('\n')}`);
   if (missing.length) console.log(`\nNo album art found:\n  ${missing.join('\n  ')}`);
 })();

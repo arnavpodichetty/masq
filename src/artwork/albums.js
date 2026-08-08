@@ -5,6 +5,8 @@
 //
 // MASQ_MUSE_ALBUMS is the same thing keyed by album for the Muse category,
 // where the word is the record and every song on it shows that one sleeve.
+// MASQ_MUSE_TRACKS overrides that per song, for B-sides that each came off a
+// different single.
 (function () {
   window.MASQ_ALBUMS = {
     "2Pac (California Love)": "https://cdn-images.dzcdn.net/images/cover/f35a13d8306bcf8ba6102b1500bf6278/",
@@ -349,6 +351,7 @@
 
   window.MASQ_MUSE_ALBUMS = {
     "Absolution": "https://cdn-images.dzcdn.net/images/cover/539072bad64079ad057642901cf00a71/",
+    "B-Sides": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
     "Black Holes and Revelations": "https://cdn-images.dzcdn.net/images/cover/fc457d27a8c0b7fc6f9b56fb94e22a0d/",
     "Drones": "https://cdn-images.dzcdn.net/images/cover/4288439f650f1f592121011c44c7ca85/",
     "Origin of Symmetry": "https://cdn-images.dzcdn.net/images/cover/d51fca27f4e6f891e64eaab425264fce/",
@@ -358,5 +361,35 @@
     "The Resistance": "https://cdn-images.dzcdn.net/images/cover/79845461299661387ade37f8e34d643c/",
     "The Wow! Signal": "https://cdn-images.dzcdn.net/images/cover/15f362eec97e06eacddfb61b404a3fdb/",
     "Will of the People": "https://cdn-images.dzcdn.net/images/cover/aa2755c8fe4fcb65d91ac6d636bdb8b8/",
+  };
+
+  window.MASQ_MUSE_TRACKS = {
+    "Agitated": "https://cdn-images.dzcdn.net/images/cover/51b1c7ec21e1cb54e72fa4ad7244b340/",
+    "Ashamed": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Coma": "https://cdn-images.dzcdn.net/images/cover/3a641259f4813eabd476003e3b6c02f3/",
+    "Con-Science": "https://cdn-images.dzcdn.net/images/cover/777bfdb6d24d95f095ce4a09d62aa6b9/",
+    "Crying Shame": "https://cdn-images.dzcdn.net/images/cover/9169b09a2a789322d00b9a616a9f36b5/",
+    "Dead Star": "https://cdn-images.dzcdn.net/images/cover/912826dc4fd7e6749b57bbebbed0d7d4/",
+    "Do We Need This?": "https://cdn-images.dzcdn.net/images/cover/777bfdb6d24d95f095ce4a09d62aa6b9/",
+    "Easily": "https://cdn-images.dzcdn.net/images/cover/2f964354d4e09522095a653b507bea65/",
+    "Eternally Missed": "https://cdn-images.dzcdn.net/images/cover/92b95f7692843200fa286cb842054a5f/",
+    "Forced In": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Host": "https://cdn-images.dzcdn.net/images/cover/3a641259f4813eabd476003e3b6c02f3/",
+    "Hyper Chondriac Music": "https://cdn-images.dzcdn.net/images/cover/4c9f438983d1d6512187d22a7a6d8ff6/",
+    "In Your World": "https://cdn-images.dzcdn.net/images/cover/912826dc4fd7e6749b57bbebbed0d7d4/",
+    "Jimmy Kane": "https://cdn-images.dzcdn.net/images/cover/51b1c7ec21e1cb54e72fa4ad7244b340/",
+    "Map of Your Head": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Nature_1": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Nishe": "https://cdn-images.dzcdn.net/images/cover/a0f02f739846e7b23c6486725e2db36e/",
+    "Piano Thing": "https://cdn-images.dzcdn.net/images/cover/a57726a8047e0224a34f16d76f9cb3df/",
+    "Please Please Please Let Me Get What I Want": "https://cdn-images.dzcdn.net/images/cover/dfab07432c4282b10e339dfb7139458c/",
+    "Recess": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Shine": "https://cdn-images.dzcdn.net/images/cover/dfab07432c4282b10e339dfb7139458c/",
+    "Shrinking Universe": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "Spiral Static": "https://cdn-images.dzcdn.net/images/cover/a7374909906fe231d13da696cbec37f7/",
+    "The Gallery": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
+    "The Groove": "https://cdn-images.dzcdn.net/images/cover/3a2d055d82de71b1d370d01cf2ca33d9/",
+    "Twin": "https://cdn-images.dzcdn.net/images/cover/3a641259f4813eabd476003e3b6c02f3/",
+    "Yes Please": "https://cdn-images.dzcdn.net/images/cover/5d5da61eac4d23aa95498ae3682933ab/",
   };
 })();

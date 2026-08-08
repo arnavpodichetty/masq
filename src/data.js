@@ -138,25 +138,18 @@
     'Zombie': ['28 Days Later', 'All of Us Are Dead', 'Army of the Dead', 'Dawn of the Dead', 'Night of the Living Dead', 'Resident Evil', 'Shaun of the Dead', 'The Walking Dead', 'Train to Busan', 'Warm Bodies', 'World War Z', 'Zombieland'],
   };
 
-  // The secret category, unlocked in app.js by tapping the ampersand in the
-  // credits. The word is a studio album, the role a song off it — the whole
-  // discography, one album per key, songs sorted alphabetically like every other
-  // catalog rather than left in track order.
-  //
-  // Spoken interludes are left out: '[Drill Sergeant]', '[JFK]', 'Intro',
-  // 'Interlude' and 'Prelude' are tracks but not songs, and none of them gives a
-  // player anything to describe.
   var museCatalog = {
-    'Absolution': ['Apocalypse Please', 'Blackout', 'Butterflies & Hurricanes', 'Endlessly', 'Falling Away with You', 'Hysteria', 'Ruled by Secrecy', 'Sing for Absolution', 'Stockholm Syndrome', 'The Small Print', 'Thoughts of a Dying Atheist', 'Time Is Running Out'],
-    'Black Holes and Revelations': ['Assassin', 'City of Delusion', 'Exo-Politics', 'Hoodoo', 'Invincible', 'Knights of Cydonia', 'Map of the Problematique', "Soldier's Poem", 'Starlight', 'Supermassive Black Hole', 'Take a Bow'],
-    'Drones': ['Aftermath', 'Dead Inside', 'Defector', 'Drones', 'Mercy', 'Psycho', 'Reapers', 'Revolt', 'The Globalist', 'The Handler'],
-    'Origin of Symmetry': ['Bliss', 'Citizen Erased', 'Dark Shines', 'Feeling Good', 'Hyper Music', 'Megalomania', 'Micro Cuts', 'New Born', 'Plug In Baby', 'Screenager', 'Space Dementia'],
-    'Showbiz': ['Cave', 'Escape', 'Falling Down', 'Fillip', "Hate This & I'll Love You", 'Muscle Museum', 'Overdue', 'Showbiz', 'Sober', 'Sunburn', 'Unintended', 'Uno'],
-    'Simulation Theory': ['Algorithm', 'Blockades', 'Break It to Me', 'Dig Down', 'Get Up and Fight', 'Pressure', 'Propaganda', 'Something Human', 'The Dark Side', 'The Void', 'Thought Contagion'],
-    'The 2nd Law': ['Animals', 'Big Freeze', 'Explorers', 'Follow Me', 'Liquid State', 'Madness', 'Panic Station', 'Save Me', 'Supremacy', 'Survival', 'The 2nd Law: Isolated System', 'The 2nd Law: Unsustainable'],
-    'The Resistance': ['Exogenesis: Symphony Part 1 (Overture)', 'Exogenesis: Symphony Part 2 (Cross-Pollination)', 'Exogenesis: Symphony Part 3 (Redemption)', 'Guiding Light', 'I Belong to You', 'MK Ultra', 'Resistance', 'Undisclosed Desires', 'United States of Eurasia', 'Unnatural Selection', 'Uprising'],
-    'The Wow! Signal': ['Be With You', 'Cryogen', 'Hexagons', 'Hush', 'Nightshift Superstar', 'Shimmering Scars', 'Space Debris', 'The Dark Forest', 'The Sickness In You & I', 'Unravelling'],
-    'Will of the People': ['Compliance', 'Euphoria', 'Ghosts (How Can I Move On)', 'Kill or Be Killed', 'Liberation', 'Verona', 'We Are Fucking Fucked', 'Will of the People', "Won't Stand Down", "You Make Me Feel Like It's Halloween"],
+    'Showbiz': ['Sunburn', 'Muscle Museum', 'Fillip', 'Falling Down', 'Cave', 'Showbiz', 'Unintended', 'Uno', 'Sober', 'Escape', 'Overdue', "Hate This & I'll Love You"],
+    'Origin of Symmetry': ['New Born', 'Bliss', 'Space Dementia', 'Hyper Music', 'Plug In Baby', 'Citizen Erased', 'Micro Cuts', 'Screenager', 'Darkshines', 'Feeling Good', 'Megalomania', 'Futurism'],
+    'Absolution': ['Apocalypse Please', 'Time Is Running Out', 'Sing for Absolution', 'Stockholm Syndrome', 'Falling Away with You', 'Hysteria', 'Blackout', 'Butterflies & Hurricanes', 'The Small Print', 'Fury', 'Endlessly', 'Thoughts of a Dying Atheist', 'Ruled by Secrecy'],
+    'Black Holes and Revelations': ['Take a Bow', 'Starlight', 'Supermassive Black Hole', 'Map of the Problematique', "Soldier's Poem", 'Invincible', 'Assassin', 'Exo-Politics', 'City of Delusion', 'Hoodoo', 'Knights of Cydonia', 'Glorious'],
+    'The Resistance': ['Uprising', 'Resistance', 'Undisclosed Desires', 'United States of Eurasia', 'Guiding Light', 'Unnatural Selection', 'MK Ultra', 'I Belong to You', 'Exogenesis: Symphony Part 1 (Overture)', 'Exogenesis: Symphony Part 2 (Cross-Pollination)', 'Exogenesis: Symphony Part 3 (Redemption)'],
+    'The 2nd Law': ['Supremacy', 'Madness', 'Panic Station', 'Survival', 'Follow Me', 'Animals', 'Explorers', 'Big Freeze', 'Save Me', 'Liquid State', 'The 2nd Law: Unsustainable', 'The 2nd Law: Isolated System'],
+    'Drones': ['Dead Inside', 'Psycho', 'Mercy', 'Reapers', 'The Handler', 'Defector', 'Revolt', 'Aftermath', 'The Globalist', 'Drones'],
+    'Simulation Theory': ['Algorithm', 'The Dark Side', 'Pressure', 'Propaganda', 'Break It to Me', 'Something Human', 'Thought Contagion', 'Get Up and Fight', 'Blockades', 'Dig Down', 'The Void'],
+    'Will of the People': ['Will of the People', 'Compliance', 'Liberation', "Won't Stand Down", 'Ghosts (How Can I Move On)', "You Make Me Feel Like It's Halloween", 'Kill or Be Killed', 'Verona', 'Euphoria', 'We Are Fucking Fucked'],
+    'The Wow! Signal': ['The Dark Forest', 'Nightshift Superstar', 'Shimmering Scars', 'Cryogen', 'Be With You', 'Hexagons', 'The Sickness In You & I', 'Unravelling', 'Hush', 'Space Debris'],
+    'B-Sides': ['Con-Science', 'Do We Need This?', 'Coma', 'Host', 'Twin', 'Agitated', 'Jimmy Kane', 'Spiral Static', 'Yes Please', 'Ashamed', 'Nishe', 'Forced In', 'Shine', 'Please Please Please Let Me Get What I Want', 'Piano Thing', 'Hyper Chondriac Music', 'The Gallery', 'Map of Your Head', 'Nature_1', 'Shrinking Universe', 'Recess', 'Dead Star', 'In Your World', 'The Groove', 'Eternally Missed', 'Easily', 'Crying Shame'],
   };
 
   var musicGenreCatalog = {
@@ -404,11 +397,6 @@
     'Zombie': ['10 Things I Hate About You', 'Guardians of the Galaxy', 'Shrek'],
   };
 
-  // Derived, not hand-written. The catalogs above list three fakes per word
-  // because their roles overlap between words — a 'Waiter' fits several cuisines,
-  // so which three to borrow is a judgement call. No song is on two albums, so
-  // every song off another album is automatically a wrong-album tell, and there
-  // are a hundred of them to draw from.
   var fakeMuseRoleCatalog = {};
   Object.keys(museCatalog).forEach(function (album) {
     fakeMuseRoleCatalog[album] = Object.keys(museCatalog)

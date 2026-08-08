@@ -34,10 +34,6 @@
     return prefix ? prefix + ALBUM_SIZE : null;
   }
 
-  // Muse sleeves come from the same generated file, keyed by album rather than
-  // by song — the category deals a song as the role, so the song has to be
-  // looked up to the record it's on first. Built once from the catalog, and
-  // empty rather than broken if either file failed to load.
   const MUSE_ALBUM_OF = (() => {
     const catalog = (window.MASQ_LOCATIONS_DATA || {}).museCatalog || {};
     const index = {};
@@ -48,8 +44,10 @@
   })();
 
   function museCoverFor(song) {
-    const album = song ? MUSE_ALBUM_OF[song] : null;
-    const prefix = album && window.MASQ_MUSE_ALBUMS ? window.MASQ_MUSE_ALBUMS[album] : null;
+    if (!song) return null;
+    const own = window.MASQ_MUSE_TRACKS ? window.MASQ_MUSE_TRACKS[song] : null;
+    const album = MUSE_ALBUM_OF[song];
+    const prefix = own || (album && window.MASQ_MUSE_ALBUMS ? window.MASQ_MUSE_ALBUMS[album] : null);
     return prefix ? prefix + ALBUM_SIZE : null;
   }
 
@@ -252,34 +250,9 @@
     return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
 
-  // ---- the secret category ----
-  // Muse isn't in the picker until someone finds it: tapping the ampersand in
-  // the credits line under Arnav Podichetty unlocks it, and the unlock outlives
-  // the tab. Only the flag is stored — the catalog ships with the app either
-  // way, so this hides the category rather than guarding anything.
-  const MUSE_KEY = 'masq.muse';
   const MUSE_CATEGORY = 'Muse';
-  // Alphabetical, the order every category list renders in. Muse sits between
-  // Movie/TV Show Genres and Music Genres: 'Mus' beats 'Mov', and 'Muse' beats
-  // 'Music'.
   const ROLE_CATEGORIES = ['Biomes', 'Cuisines', 'Locations', 'Movie/TV Show Genres', 'Muse', 'Music Genres'];
   const OPEN_ROLE_CATEGORIES = ROLE_CATEGORIES.filter(c => c !== MUSE_CATEGORY);
-
-  function loadMuseUnlocked() {
-    try {
-      return window.localStorage.getItem(MUSE_KEY) === '1';
-    } catch (err) {
-      return false;
-    }
-  }
-
-  function saveMuseUnlocked() {
-    try {
-      window.localStorage.setItem(MUSE_KEY, '1');
-    } catch (err) {
-      // Private mode / quota — it stays unlocked for this session.
-    }
-  }
 
   // ---- roster ----
   // The table usually plays with the same people, so the names outlast the tab.
@@ -630,12 +603,8 @@
       // commented out to match. Restore both sides together.
       // Alphabetical: these arrays are also the order the category tiles and the
       // word lists render in.
-      // Muse joins `categories` only once it's been found. Selection starts on
-      // the open five either way: unlocking selects it there and then, but a
-      // later reload leaves what's picked up to the host.
-      museUnlocked: loadMuseUnlocked(),
-      museJustUnlocked: false,
-      categories: loadMuseUnlocked() ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
+      museUnlocked: false,
+      categories: OPEN_ROLE_CATEGORIES,
       wordCategories: ['Animals', 'Food', 'Movies/TV', 'Objects'],
       selCategories: OPEN_ROLE_CATEGORIES,
       roundJesterIndices: null,
@@ -1013,11 +982,6 @@
       // Cuisines round: the role is a dish, pictured by its photograph. Same
       // landscape frame as an animal, cropped centrally — see ART_SHAPES.
       const apRoleDish = isCuisineRound && apRoleVisible ? dishFor(apRoleShown) : null;
-      // Muse round: the role is a song, pictured by the album it's on — so every
-      // player on the same album sees the same sleeve. That gives nothing away,
-      // since the album is the word they were all just told. A disguised jester
-      // holds a song off a *different* record, so their sleeve is the wrong one,
-      // which is the whole trick.
       const apRoleMuseCover = isMuseRound && apRoleVisible ? museCoverFor(apRoleShown) : null;
       const apArt = apWordPoster || apRolePoster || apRoleAlbum || apRoleAnimal || apRoleDish || apRoleMuseCover;
       // A genre round with Show Word on stacks a word block and a role block
@@ -1127,21 +1091,9 @@
         isModalCustomEdit: st.modal === 'customEdit',
         closeModal: () => this.setState({ modal: null }),
         museUnlocked: st.museUnlocked,
-        museJustUnlocked: st.museJustUnlocked,
-        museAlbumCount: museAlbumNames.length,
-        museSongCount: museAlbumNames.reduce((sum, album) => sum + museCatalog[album].length, 0),
-        // The ampersand in the credits. Finding it puts Muse in the picker and
-        // ticks it on, so the round after the discovery can actually be one —
-        // tapping it again just replays the note.
         unlockMuse: () => {
-          if (st.museUnlocked) { this.setState({ museJustUnlocked: true }); return; }
-          saveMuseUnlocked();
-          this.setState(prev => ({
-            museUnlocked: true,
-            museJustUnlocked: true,
-            categories: ROLE_CATEGORIES,
-            selCategories: prev.selCategories.includes(MUSE_CATEGORY) ? prev.selCategories : [...prev.selCategories, MUSE_CATEGORY],
-          }));
+          if (st.museUnlocked) return;
+          this.setState({ museUnlocked: true, categories: ROLE_CATEGORIES });
         },
         openPlayers: () => this.setState({ modal: 'players' }),
         openCategories: () => this.setState({ modal: 'categories' }),
@@ -1151,9 +1103,7 @@
         openSettings: () => this.setState({ modal: 'settings' }),
         openGameSettings: () => this.setState({ modal: 'gameSettings' }),
         openWordList: () => this.setState({ modal: 'wordList', wordListExpanded: [] }),
-        // Clears the unlock note, so it reads as a reaction to the tap rather
-        // than something that was always sitting there.
-        openCredits: () => this.setState({ modal: 'credits', museJustUnlocked: false }),
+        openCredits: () => this.setState({ modal: 'credits' }),
         // Reachable from Settings and from the Categories picker; close returns
         // to whichever you came in through.
         openCustom: () => this.setState(prev => ({ modal: 'custom', customFrom: prev.modal === 'categories' ? 'categories' : 'settings', customDeleteId: null })),
@@ -1265,8 +1215,6 @@
           // { cat: 'Historical Eras', words: historicalEraNames },
           { cat: 'Locations', words: locationNames },
           { cat: 'Movie/TV Show Genres', words: movieTvGenreNames },
-          // Only once it's been found — an unfound category listed here would
-          // give the secret away.
           ...(st.museUnlocked ? [{ cat: MUSE_CATEGORY, words: museAlbumNames }] : []),
           { cat: 'Music Genres', words: musicGenreNames },
           { cat: 'Animals', words: wordOnlyCatalog.Animals },
@@ -2163,16 +2111,10 @@
 
     creditsModal(v) {
       const company = [
-        // `secret: true` hangs the Muse unlock off this row's ampersand. It has
-        // to look like the two below it — no cursor, no colour, nothing to tell
-        // anyone it does something.
         { border: 'var(--m-accent)', name: 'Arnav Podichetty', role: 'Creator & Code', secret: true },
         { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
         { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
       ];
-      // Splits 'Creator & Code' around its ampersand so only that character
-      // carries the tap. Padding gives it a finger-sized target without moving
-      // the text.
       const roleLine = (c) => {
         if (!c.secret) return c.role;
         const [before, after] = c.role.split('&');
@@ -2204,12 +2146,6 @@
             h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-brand);") }, c.name),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--m-label); margin-top:4px;") }, roleLine(c))
           ))
-        ),
-        v.museJustUnlocked && h('div', { style: css('margin-top:12px; padding:14px; border-radius:12px; background:rgba(139,92,246,.14); border:1px solid rgba(139,92,246,.35); text-align:center; animation:masq-rise .3s ease both;') },
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:17px; color:#c4b5fd;") }, 'Muse'),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); margin-top:5px; line-height:1.45;") },
-            `Secret category unlocked — ${v.museAlbumCount} albums, ${v.museSongCount} songs. The word is the album, your role is a track off it.`),
-          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-top:8px;") }, 'Now in Categories')
         ),
         label('Artwork'),
         h('div', { style: css('display:flex; flex-direction:column; gap:8px;') },
