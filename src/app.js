@@ -327,6 +327,9 @@
     showWord: false,
     jestersKnow: false,
     jesterGetsRole: false,
+    // On to start with: a Word Mode jester is otherwise guessing at a hundred
+    // words, which is the complaint this setting exists to answer.
+    jesterHints: true,
     darkMode: true,
     jesterMode: false,
   };
@@ -396,6 +399,7 @@
       showWord: asBool(saved.showWord, DEFAULT_SETTINGS.showWord),
       jestersKnow: asBool(saved.jestersKnow, DEFAULT_SETTINGS.jestersKnow),
       jesterGetsRole: asBool(saved.jesterGetsRole, DEFAULT_SETTINGS.jesterGetsRole),
+      jesterHints: asBool(saved.jesterHints, DEFAULT_SETTINGS.jesterHints),
       darkMode: asBool(saved.darkMode, DEFAULT_SETTINGS.darkMode),
       jesterMode: asBool(saved.jesterMode, DEFAULT_SETTINGS.jesterMode),
     };
@@ -767,6 +771,9 @@
       roundRoleMap: {},
       roundJesterRoleMap: {},
       roundJesterWordMap: {},
+      // One hint for the round, shared by every jester in it — see
+      // wordHintCatalog in src/data.js for why it isn't one each.
+      roundJesterHint: null,
       secondsLeft: null,
       timeUp: false,
       timerPaused: false,
@@ -991,7 +998,7 @@
       const lineColors = st.jesterMode
         ? ['#7b2ff7', '#db2777', '#16a34a', '#d97706', '#7c3aed', '#be185d']
         : ['#7a1620', '#14254a', '#2e5bb0', '#6e141c', '#4a3010', '#7a1620'];
-      const { biomeCatalog, cuisineCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, fakeCuisineRoleCatalog, movieTvCatalog, fakeMovieTvRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, museCatalog, fakeMuseRoleCatalog, wordOnlyCatalog } = window.MASQ_LOCATIONS_DATA;
+      const { biomeCatalog, cuisineCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, fakeCuisineRoleCatalog, movieTvCatalog, fakeMovieTvRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, museCatalog, fakeMuseRoleCatalog, wordOnlyCatalog, wordHintCatalog } = window.MASQ_LOCATIONS_DATA;
       const biomeNames = Object.keys(biomeCatalog);
       const cuisineNames = Object.keys(cuisineCatalog);
       const locationNames = Object.keys(locationCatalog);
@@ -1062,6 +1069,9 @@
       // carries would give them away.
       const wordLocked = st.gameMode === 'words' || st.jesterGetsRole;
       const showWord = st.gameMode === 'words' ? true : (st.jesterGetsRole ? false : st.showWord);
+      // Same shape as wordLocked: a hint is a Word Mode idea, and it can only
+      // reach a jester who hasn't been handed a fake word to believe in.
+      const hintsAvailable = st.gameMode === 'words' && !st.jesterGetsRole;
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
       // Round state is keyed by this id, never by name: two players called
@@ -1206,6 +1216,10 @@
           ? players.filter(p => p.jester && p.id !== (ap ? ap.id : null)).map(p => p.name).join(', ')
           : null,
         apShowAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1,
+        // Dealt at the top of the round, so every jester reads the same one and
+        // re-opening the card can't roll for a better clue.
+        apJesterHint: apIsUndisguisedJester ? (st.roundJesterHint || null) : null,
+        apShowHint: apIsUndisguisedJester && !!st.roundJesterHint,
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
@@ -1420,7 +1434,7 @@
         }),
         // A disguised jester doesn't know they're one, so the summary drops that
         // claim.
-        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null].filter(Boolean).join(' · ') || 'Default',
+        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null, (st.jesterHints && st.gameMode === 'words' && !st.jesterGetsRole) ? 'Jester Hints' : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
           const p = players[i];
@@ -1559,6 +1573,24 @@
         jesterGetsRoleToggleOpacity: '1',
         jesterGetsRoleTogglePointerEvents: 'auto',
         toggleJesterGetsRole: () => this.setState({ jesterGetsRole: !st.jesterGetsRole }),
+        // Only the word categories carry hints, and only a jester who knows
+        // they're the jester can be handed one — so the row dims outside Word
+        // Mode and while the jester is disguised, the same treatment Jesters
+        // Know Each Other gets for the same reason.
+        jesterHints: st.jesterHints && hintsAvailable,
+        jesterHintsDesc: st.gameMode !== 'words'
+          ? 'Word Mode only — a role is already a clue of its own'
+          : st.jesterGetsRole
+            ? 'Unavailable while the Jester gets a fake word — a disguised jester doesn’t know they need a clue'
+            : 'The Jester gets one word of a clue, drawn from three',
+        jesterHintsBg: (st.jesterHints && hintsAvailable) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        jesterHintsThumb: (st.jesterHints && hintsAvailable) ? 'translateX(22px)' : 'translateX(2px)',
+        jesterHintsToggleOpacity: hintsAvailable ? '1' : '.55',
+        jesterHintsTogglePointerEvents: hintsAvailable ? 'auto' : 'none',
+        toggleJesterHints: () => {
+          if (!hintsAvailable) return;
+          this.setState({ jesterHints: !st.jesterHints });
+        },
         timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
         timeLimitUnit: st.timeLimit === 0 ? 'No limit' : st.timeLimit === 1 ? 'minute' : 'minutes',
         timeLimitRow: st.timeLimit === 0 ? 'No limit' : st.timeLimit + ' min',
@@ -1736,7 +1768,19 @@
               }, {});
             }
           }
-          nextRound = { ...nextRound, roundJesterWordMap };
+          // A hint only means anything to a jester who knows they are one: a
+          // disguised jester is holding a fake word and believes it, so handing
+          // them a clue would tell them what the disguise exists to hide. Word
+          // categories only — the role catalogs already give their jester a
+          // fake role to work with.
+          // Keyed by category then word: six words are in both Food and
+          // Animals, and a flat lookup would deal the food's hints to an
+          // Animals round.
+          const hints = (wordHintCatalog[nextRound.roundCategory] || {})[nextRound.roundWord] || null;
+          const roundJesterHint = st.jesterHints && !useJesterWord && hints && hints.length
+            ? hints[Math.floor(Math.random() * hints.length)]
+            : null;
+          nextRound = { ...nextRound, roundJesterWordMap, roundJesterHint };
           // Ahead of the render, so the fetches are in flight while players are
           // still passing the phone around.
           this.__preloadRoundArt(nextRound, st.gameMode);
@@ -2042,7 +2086,7 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showWordThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
+          h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
             h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
             h('div', { style: css('flex:1;') },
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
@@ -2050,6 +2094,16 @@
             ),
             h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterGetsRoleBg}; transition:background .25s; flex:none;`) },
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterGetsRoleThumb}; transition:transform .25s;`) })
+            )
+          ),
+          h('div', { ...press(v.toggleJesterHints, 'Jester hints', { role: 'switch', 'aria-checked': String(v.jesterHints) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterHintsToggleOpacity}; pointer-events:${v.jesterHintsTogglePointerEvents};`) },
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-crimson); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
+            h('div', { style: css('flex:1;') },
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jester Hints'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jesterHintsDesc)
+            ),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterHintsBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterHintsThumb}; transition:transform .25s;`) })
             )
           )
         )
@@ -2253,7 +2307,7 @@
           ),
           h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);"), className: 'j-title' }, 'MASQ'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.9.3')
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.10.0')
           )
         )
       );
@@ -2481,6 +2535,12 @@
                 v.apShowAllies && h('div', { style: css('margin-top:12px; padding:8px 12px; background:rgba(178,32,47,.15); border:1px solid rgba(178,32,47,.4); border-radius:8px; text-align:center;') },
                   h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#b3202f; margin-bottom:3px;") }, 'Your Fellow Jesters'),
                   h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:#7a1620;") }, v.apJesterAllies)
+                ),
+                // Gold rather than the allies block's crimson: it's the one
+                // thing on this card that helps rather than condemns.
+                v.apShowHint && h('div', { style: css('margin-top:12px; padding:8px 12px; background:rgba(200,162,76,.18); border:1px solid rgba(200,162,76,.45); border-radius:8px; text-align:center;') },
+                  h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#8a6d28; margin-bottom:3px;") }, 'Your Only Clue'),
+                  h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:#6b5318; text-wrap:balance;") }, v.apJesterHint)
                 )
               ),
               v.apIsDisguisedJester && h(React.Fragment, null,

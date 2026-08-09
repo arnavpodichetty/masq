@@ -19,6 +19,45 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.10.0 — 2026-08-09
+
+The Word Mode jester gets something to work with.
+
+**Added**
+- **Jester Hints.** A Word Mode jester was told the category and nothing else,
+  which left them guessing at two hundred words — so with this on they're dealt
+  one of the round word's three hints. `Pizza` might come up as `Cheesy`, `Baked`
+  or `Party`; `Clam Chowder` as `Creamy`, `Warm` or `Comfort`. It
+  prints on the jester's card under their role, in gold rather than the crimson the
+  fellow-jesters block uses — it's the one thing on that card that helps rather
+  than condemns.
+- **606 hints across the Food catalog**, three for each of its 202 words, from a
+  vocabulary of 76: `Crunchy`, `Saucy`, `Steamed`, `Fudgy`, `Wobbly`, `Sizzling`,
+  `Brunch`, `Comfort`, `Party` and the rest. Three per word so the same word
+  doesn't play the same way twice, and so a lucky draw and an unlucky one both
+  exist.
+- **The Food category was rebuilt around them** — 100 words to 202. Twelve went
+  (`Bao`, `Barbecue`, `Club Sandwich`, `Deviled Eggs`, `Goulash`, `Jelly`,
+  `Maple Syrup`, `Paella`, `Pie`, `Pierogi`, `Risotto`, `Steak`) and 114 arrived,
+  from `Banh Mi` and `Xiao Long Bao` to `Cotton Candy` and `Sloppy Joe`. Drinks
+  are in it now: `Boba Milk Tea`, `Espresso`, `Matcha`, `Soda`.
+- **The hint catalog is keyed by category, then by word.** Six words live in both
+  Food and Animals — `Chicken`, `Crab`, `Duck`, `Lobster`, `Shrimp`, `Turkey` —
+  and a flat map would hand an Animals round the food's hints, telling the jester
+  their chicken was `Roasted` for `Dinner`.
+- The hint is drawn once for the round and shared by every jester in it, not
+  dealt one each — two jesters comparing notes would otherwise be holding two
+  thirds of the answer between them.
+
+**Changed**
+- The option is on by default, since being unable to win as the jester is the
+  complaint it exists to answer. It dims in Role Mode, where a role is already a
+  clue of its own, and while **Jester Gets Word** is on, because a disguised
+  jester believes their fake word — handing them a clue would tell them the one
+  thing the disguise exists to hide.
+- A word with no hints deals no hint. Animals, Objects, Movies/TV and every
+  custom category play exactly as they did until their hints are written.
+
 ## 1.9.3 — 2026-08-08
 
 **Changed**
