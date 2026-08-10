@@ -1,7 +1,7 @@
 // Regenerates src/artwork/albums.js — the "Artist (Song)" -> album art map
 // app.js reads. The generated file is committed, so the site ships no API key
 // and makes no calls to Deezer at play time. Re-run when the music catalogs in
-// src/data.js change.
+// src/data_roles.js change.
 //
 //   node tools/fetch-albums.js [--verbose]
 //
@@ -14,7 +14,7 @@ const path = require('path');
 const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
-const DATA = path.join(REPO, 'src', 'data.js');
+const DATA = path.join(REPO, 'src', 'data_roles.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'albums.js');
 const API = 'https://api.deezer.com';
 
@@ -55,11 +55,11 @@ const OVERRIDES = {
 // ---------------------------------------------------------------- entry lists
 
 // The "Artist (Song)" entries used as roles in Music Genres rounds, real and
-// fake alike. data.js assigns onto window, so give it a window.
+// fake alike. data_roles.js assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
+  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
 
   const entries = new Set();
@@ -73,14 +73,14 @@ function loadEntries() {
 function loadMuseCatalog() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
+  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
   const catalog = sandbox.window.MASQ_LOCATIONS_DATA.museCatalog;
   if (!catalog) throw new Error(`museCatalog not found in ${DATA}`);
   return catalog;
 }
 
 // Song titles hold parentheses of their own, so split on the last group — the
-// one data.js added.
+// one data_roles.js added.
 function split(entry) {
   const m = /^(.+?)\s*\(([^()]+)\)$/.exec(entry);
   return m ? { artist: m[1], track: m[2] } : null;

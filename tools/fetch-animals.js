@@ -1,7 +1,7 @@
 // Regenerates src/artwork/animals.js — the animal -> photo map app.js reads for
 // Biomes rounds. The generated file is committed, so the site ships no API key
 // and makes no calls to Wikipedia at play time. Re-run when the biome catalogs
-// in src/data.js change.
+// in src/data_roles.js change.
 //
 //   node tools/fetch-animals.js [--verbose]
 //
@@ -15,7 +15,7 @@ const path = require('path');
 const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
-const DATA = path.join(REPO, 'src', 'data.js');
+const DATA = path.join(REPO, 'src', 'data_roles.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'animals.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
@@ -118,12 +118,12 @@ const CREDIT_OVERRIDES = {
 
 // ---------------------------------------------------------------- entry lists
 
-// The creatures used as roles in Biomes rounds, real and fake alike. data.js is
+// The creatures used as roles in Biomes rounds, real and fake alike. data_roles.js is
 // a browser file that assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
+  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
 
   const entries = new Set();

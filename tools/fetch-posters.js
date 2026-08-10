@@ -1,6 +1,6 @@
 // Regenerates src/artwork/posters.js — the title -> TMDB poster path map app.js
 // reads. The generated file is committed, so the site ships no API key and makes
-// no TMDB calls at play time. Re-run when the title lists in src/data.js change.
+// no TMDB calls at play time. Re-run when the title lists in src/data_roles.js change.
 //
 //   TMDB_API_KEY=xxxx node tools/fetch-posters.js [--verbose]
 
@@ -9,7 +9,8 @@ const path = require('path');
 const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
-const DATA = path.join(REPO, 'src', 'data.js');
+const DATA = path.join(REPO, 'src', 'data_roles.js');
+const WORDS = path.join(REPO, 'src', 'data_words.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'posters.js');
 const API = 'https://api.themoviedb.org/3';
 
@@ -105,17 +106,21 @@ const OVERRIDES = {
 // /search/movie on a series quietly resolves it to an unrelated film of the same
 // name, and resolve() drops person results, so multi is safe for films too.
 //
-// data.js assigns onto window, so give it a window.
+// Both data files assign onto window, so give them one — and both are needed
+// here: the genre catalog is in data_roles.js and the Movies/TV word list, which
+// shares its posters, is in data_words.js.
 function loadTitles() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
+  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
+  vm.runInContext(fs.readFileSync(WORDS, 'utf8'), sandbox, { filename: 'data_words.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
+  const w = sandbox.window.MASQ_WORDS;
 
   const screen = new Set();
   for (const list of Object.values(d.movieTvCatalog)) list.forEach(t => screen.add(t));
   for (const list of Object.values(d.fakeMovieTvRoleCatalog)) list.forEach(t => screen.add(t));
-  for (const t of d.wordOnlyCatalog['Movies/TV'] || []) screen.add(t);
+  for (const t of w.wordOnlyCatalog['Movies/TV'] || []) screen.add(t);
   if (!screen.size) throw new Error(`Title lists not found in ${DATA}`);
 
   return [...screen].map(title => ({ title, endpoint: '/search/multi' }));

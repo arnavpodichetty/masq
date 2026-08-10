@@ -57,7 +57,9 @@ src/
 │   │                  window.MASQ_DISHES and window.MASQ_DISH_CREDITS
 │   └── posters.js     poster map, exposed on window.MASQ_POSTERS
 ├── app.js             all game state, logic, and rendering
-└── data.js            word/role catalogs, on window.MASQ_LOCATIONS_DATA
+├── data_roles.js      role catalogs, on window.MASQ_LOCATIONS_DATA
+└── data_words.js      Word Mode's word lists and jester hints, on
+                       window.MASQ_WORDS
 tools/
 ├── fetch-albums.js    Node script, regenerates src/artwork/albums.js from Deezer
 ├── fetch-animals.js   Node script, regenerates src/artwork/animals.js from Wikipedia
@@ -71,9 +73,9 @@ masq.png               screenshot, used by this README and as the link-preview i
 README.md
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js` and `src/artwork/dishes.js`, then `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data_roles.js` and `src/data_words.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js` and `src/artwork/dishes.js`, then `src/app.js`.
 
-The four artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js` and `fetch-cuisines.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two dishes resolve to the same photograph, which would show both players the same card.
+The four artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data_roles.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js` and `fetch-cuisines.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two dishes resolve to the same photograph, which would show both players the same card.
 
 ## Credits
 

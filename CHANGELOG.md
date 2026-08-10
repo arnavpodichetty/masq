@@ -45,6 +45,18 @@ The Word Mode jester gets something to work with.
   Food and Animals — `Chicken`, `Crab`, `Duck`, `Lobster`, `Shrimp`, `Turkey` —
   and a flat map would hand an Animals round the food's hints, telling the jester
   their chicken was `Roasted` for `Dinner`.
+- **`src/data_words.js`**, holding the word-only catalogs and the hints, on
+  `window.MASQ_WORDS`. They had outgrown the data file — Food alone is 202 words
+  and 606 hints — and they belong to nothing else in it: a word-only category has
+  no roles, so none of the fake-role machinery there applies to it, and the hints
+  are keyed by the very categories the word lists define.
+
+**Changed**
+- **`src/data.js` is now `src/data_roles.js`**, keeping the role catalogs and
+  dropping from 730 lines to 413. The pair names itself: roles in one file, words
+  in the other. All four fetchers read the renamed file, and `fetch-posters.js`
+  now loads both — the genre catalog is in one and the Movies/TV word list that
+  shares its posters is in the other.
 - The hint is drawn once for the round and shared by every jester in it, not
   dealt one each — two jesters comparing notes would otherwise be holding two
   thirds of the answer between them.

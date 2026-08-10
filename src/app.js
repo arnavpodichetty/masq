@@ -1,4 +1,5 @@
-// Masq — plain React (no build step). Loaded after React/ReactDOM UMD and data.js.
+// Masq — plain React (no build step). Loaded after React/ReactDOM UMD and the
+// two data files.
 (function () {
   const h = React.createElement;
 
@@ -759,7 +760,7 @@
       // in-memory only: a reload or a roster change starts it over.
       jesterWeights: {},
       // 'Historical Eras' is parked until its catalog is reworked — commented
-      // out in src/data.js and at every use below. Restore both sides together.
+      // out in src/data_roles.js and at every use below. Restore both sides together.
       // Alphabetical: also the order the tiles and word lists render in.
       museUnlocked: INITIAL_MUSE_UNLOCKED,
       categories: INITIAL_MUSE_UNLOCKED ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
@@ -772,7 +773,7 @@
       roundJesterRoleMap: {},
       roundJesterWordMap: {},
       // One hint for the round, shared by every jester in it — see
-      // wordHintCatalog in src/data.js for why it isn't one each.
+      // wordHintCatalog in src/data_words.js for why it isn't one each.
       roundJesterHint: null,
       secondsLeft: null,
       timeUp: false,
@@ -998,7 +999,9 @@
       const lineColors = st.jesterMode
         ? ['#7b2ff7', '#db2777', '#16a34a', '#d97706', '#7c3aed', '#be185d']
         : ['#7a1620', '#14254a', '#2e5bb0', '#6e141c', '#4a3010', '#7a1620'];
-      const { biomeCatalog, cuisineCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, fakeCuisineRoleCatalog, movieTvCatalog, fakeMovieTvRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, museCatalog, fakeMuseRoleCatalog, wordOnlyCatalog, wordHintCatalog } = window.MASQ_LOCATIONS_DATA;
+      const { biomeCatalog, cuisineCatalog, locationCatalog, fakeLocationRoleCatalog, fakeBiomeRoleCatalog, fakeCuisineRoleCatalog, movieTvCatalog, fakeMovieTvRoleCatalog, musicGenreCatalog, fakeMusicGenreRoleCatalog, museCatalog, fakeMuseRoleCatalog } = window.MASQ_LOCATIONS_DATA;
+      // Word Mode's own file: the word-only catalogs and their jester hints.
+      const { wordOnlyCatalog, wordHintCatalog } = window.MASQ_WORDS;
       const biomeNames = Object.keys(biomeCatalog);
       const cuisineNames = Object.keys(cuisineCatalog);
       const locationNames = Object.keys(locationCatalog);

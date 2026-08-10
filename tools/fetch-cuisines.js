@@ -1,7 +1,7 @@
 // Regenerates src/artwork/dishes.js — the dish -> photo map app.js reads for
 // Cuisines rounds. The generated file is committed, so the site ships no API key
 // and makes no calls to Wikipedia at play time. Re-run when the cuisine catalogs
-// in src/data.js change.
+// in src/data_roles.js change.
 //
 //   node tools/fetch-cuisines.js [--verbose]
 //
@@ -15,7 +15,7 @@ const path = require('path');
 const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
-const DATA = path.join(REPO, 'src', 'data.js');
+const DATA = path.join(REPO, 'src', 'data_roles.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'dishes.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
@@ -95,11 +95,11 @@ const CREDIT_OVERRIDES = {
 // The dishes used as roles in Cuisines rounds, real and fake alike. Every fake
 // is a real dish from another cuisine, so the fake list adds no titles — it's
 // unioned in anyway, so a fake that stops matching can't slip through
-// picture-less. data.js assigns onto window, so give it a window.
+// picture-less. data_roles.js assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data.js' });
+  vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
 
   const entries = new Set();
