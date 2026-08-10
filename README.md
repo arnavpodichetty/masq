@@ -49,12 +49,14 @@ Plain React 18 + ReactDOM, loaded via CDN `<script>` tags — no bundler, packag
 
 ```
 src/
-├── artwork/           the four generated artwork maps
+├── artwork/           the five generated artwork maps
 │   ├── albums.js      album art map, exposed on window.MASQ_ALBUMS
 │   ├── animals.js     animal photo map and photo credits, on
 │   │                  window.MASQ_ANIMALS and window.MASQ_ANIMAL_CREDITS
 │   ├── dishes.js      dish photo map and photo credits, on
 │   │                  window.MASQ_DISHES and window.MASQ_DISH_CREDITS
+│   ├── objects.js     object photo map and photo credits, on
+│   │                  window.MASQ_OBJECTS and window.MASQ_OBJECT_CREDITS
 │   └── posters.js     poster map, exposed on window.MASQ_POSTERS
 ├── app.js             all game state, logic, and rendering
 ├── data_roles.js      role catalogs, on window.MASQ_LOCATIONS_DATA
@@ -64,6 +66,7 @@ tools/
 ├── fetch-albums.js    Node script, regenerates src/artwork/albums.js from Deezer
 ├── fetch-animals.js   Node script, regenerates src/artwork/animals.js from Wikipedia
 ├── fetch-cuisines.js  Node script, regenerates src/artwork/dishes.js from Wikipedia
+├── fetch-objects.js   Node script, regenerates src/artwork/objects.js from Wikipedia
 └── fetch-posters.js   Node script, regenerates src/artwork/posters.js from TMDB
 CHANGELOG.md           what changed in each version
 favicon.svg            tab icon (the comedy mask)
@@ -73,9 +76,11 @@ masq.png               screenshot, used by this README and as the link-preview i
 README.md
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data_roles.js` and `src/data_words.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js` and `src/artwork/dishes.js`, then `src/app.js`.
+`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data_roles.js` and `src/data_words.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js`, `src/artwork/dishes.js` and `src/artwork/objects.js`, then `src/app.js`.
 
-The four artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data_roles.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js` and `fetch-cuisines.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two dishes resolve to the same photograph, which would show both players the same card.
+The five artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data_roles.js` or a word list in `src/data_words.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js`, `fetch-cuisines.js` and `fetch-objects.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two *roles* resolve to the same photograph, which would show two players the same card in one round.
+
+Three of those maps serve both modes at once: an animal is a Biomes role and an Animals word, a dish is a Cuisines role and a Food word, and the picture is the same either way, so each map is the union of the two lists. Objects are Word Mode only.
 
 ## Credits
 
@@ -83,7 +88,7 @@ Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya
 
 Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Album art comes from [Deezer](https://www.deezer.com/), which likewise does not endorse or certify it.
 
-Animal and dish photographs are the lead images of [Wikipedia](https://en.wikipedia.org/) articles, hosted by [Wikimedia Commons](https://commons.wikimedia.org/). Each is under its own free licence — mostly Creative Commons, the rest public domain, and one under the Korean government's KOGL Type 1 — and most of those licences ask that the photographer be credited by name. So every one of them is named in the game itself, under **Settings → Credits**, and in `src/artwork/animals.js` and `src/artwork/dishes.js` next to the photo they took.
+Animal, dish and object photographs are the lead images of [Wikipedia](https://en.wikipedia.org/) articles, hosted by [Wikimedia Commons](https://commons.wikimedia.org/). Each is under its own free licence — mostly Creative Commons, the rest public domain, and one under the Korean government's KOGL Type 1 — and most of those licences ask that the photographer be credited by name. So every one of them is named in the game itself, under **Settings → Credits**, and in `src/artwork/animals.js`, `src/artwork/dishes.js` and `src/artwork/objects.js` next to the photo they took.
 
 ## License
 

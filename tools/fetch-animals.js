@@ -1,7 +1,8 @@
 // Regenerates src/artwork/animals.js — the animal -> photo map app.js reads for
-// Biomes rounds. The generated file is committed, so the site ships no API key
-// and makes no calls to Wikipedia at play time. Re-run when the biome catalogs
-// in src/data_roles.js change.
+// Biomes rounds and for Word Mode's Animals category. The generated file is
+// committed, so the site ships no API key and makes no calls to Wikipedia at
+// play time. Re-run when the biome catalogs in src/data_roles.js or the Animals
+// word list in src/data_words.js change.
 //
 //   node tools/fetch-animals.js [--verbose]
 //
@@ -16,6 +17,7 @@ const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data_roles.js');
+const WORDS = path.join(REPO, 'src', 'data_words.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'animals.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
@@ -46,23 +48,54 @@ const THUMB_PX = 400;
 // The trailing comment says why each is pinned. Sorted by entry.
 const OVERRIDES = {
   'Anglerfish': 'Humpback anglerfish',            // the article leads with an order-wide collage
+  // the article's axolotl is a wild-type, mottled and dark; the one everyone
+  // pictures — and the one the jester hint calls "Pink" — is the leucistic form
+  'Axolotl': 'file:Leucistic Axolotl front 2010-02-24.JPG',
+  // "Baboon" leads with a GFDL-1.2-only photo, and the chacma's is a rear view
+  'Baboon': 'Hamadryas baboon',
+  'Bear': 'Brown bear',                           // "Bear" leads with a Free Art Licence photo
+  'Beetle': 'Hercules beetle',                    // the order's article leads with a grid of four
   'Black Bear': 'American black bear',            // "Black bear" alone is a disambiguation page
   'Blind Fish': 'Mexican tetra',                  // the blind cave form everyone pictures
+  'Buffalo': 'African buffalo',                   // "Buffalo" alone is a disambiguation page
   'Catfish': 'Wels catfish',                      // the order's article leads with a grid of thirty
   'Cricket': 'Cricket (insect)',                  // not the sport
   'Deer': 'White-tailed deer',                    // the family's article leads with five species at once
   'Deep Sea Jellyfish': 'Atolla wyvillei',        // the crown jellyfish of the deep sea
+  'Duck': 'Mallard',                              // the family's lead is a bufflehead, not the duck anyone draws
+  // the order's lead photo is a dark shape in murky water. Not the moray, which
+  // is already the Coral Reef role — two names, one photograph
+  'Eel': 'European conger',
   'Elephant': 'African bush elephant',            // "Elephant" leads with a GFDL-1.2-only photo
   'Fangtooth Fish': 'Fangtooth',                  // filed without the "Fish"
   'Giraffe': 'Northern giraffe',                  // "Giraffe" leads with a GFDL-1.2-only photo
   'Gray Owl': 'Great grey owl',                   // not Grey Owl, the writer
+  'Hawk': 'Red-shouldered hawk',                  // "Hawk" leads with a bird photographed from behind
+  'Hummingbird': "Anna's hummingbird",            // the family's article leads with a two-panel composite
+  // the article's lead photo is credited to the uploader's father, unnamed and
+  // unnameable; this one is by a photographer who signs his work
+  'Guinea Pig': 'file:Cobaya (Cavia porcellus), Tierpark Hellabrunn, Múnich, Alemania, 2012-06-17, DD 01.JPG',
   'Gulper Eel': 'Pelican eel',                    // "Gulper eel" is a list of several fish
+  // the superfamily's article leads with a collage of five, credited to five
+  // photographers; one card, one lemur, so this is the one everyone means
+  'Lemur': 'file:Ring tailed lemur portrait.jpg',
+  'Lobster': 'American lobster',                  // "Lobster" leads with a dark shape on the sea floor
   'Lynx': 'Eurasian lynx',                        // the genus article leads with a collage of heads
   'Meadowlark': 'Western meadowlark',             // the genus article carries no lead image at all
+  'Mole': 'Mole (animal)',                        // "Mole" alone is a disambiguation page
+  'Mosquito': 'Anopheles',                        // "Mosquito" leads with a GFDL-1.2-only photo
+  'Ostrich': 'Common ostrich',                    // "Ostrich" leads with a male-and-female composite
   'Poison Dart Frog': 'Dyeing poison dart frog',  // the family's lead photo is twice as tall as it is wide
+  'Pufferfish': 'Guineafowl puffer',              // the family's article leads with a 19th-century engraving
+  'Python': 'Ball python',                        // "Python" alone is a disambiguation page
   'River Dolphin': 'Amazon river dolphin',        // the group article leads with a range map
+  'Robin': 'American robin',                      // "Robin" alone is a disambiguation page
+  // "Rooster" redirects to Chicken, whose photo is a cockerel and a hen
+  // together — which is the right picture for Chicken and no use for this
+  'Rooster': 'file:Rooster portrait, France.jpg',
   'Salmon': 'Sockeye salmon',                     // "Salmon" leads with a 3:1 strip of a fish
   'Seal': 'Harbor seal',                          // "Seal" alone is a disambiguation page
+  'Shrimp': 'Caridea',                            // "Shrimp" leads with a pink close-up of nothing legible
   'Sparrow': 'House sparrow',                     // "Sparrow" alone is a disambiguation page
   'Squirrel': 'Eastern gray squirrel',            // the family's article leads with a montage of eight
   // the article leads with one fossil bone, 3:1; this is the whole skeleton
@@ -70,6 +103,7 @@ const OVERRIDES = {
   'Starfish': 'Common starfish',                  // the class article leads with a montage
   'Toucan': 'Toco toucan',                        // the family's article leads with a montage of six
   'Troglodyte Beetle': 'Leptodirus',              // the first cave beetle ever described
+  'Turkey': 'Wild turkey',                        // "Turkey" is the country
   'Volcanic Mouse': 'Neotomodon',                 // the Mexican volcano mouse
   // the article's CDC photo is credited to a lab and three people; this to one
   'Water Moccasin': 'file:Florida Water Moccasin 056.jpg',
@@ -106,9 +140,13 @@ const CREDIT_OVERRIDES = {
   // the same chain, but both halves are one man cropping his own photograph
   'Lepus americanus 5459 cropped.jpg': 'Walter Siegmund',
   // the author line is a link to his own site; the name is on his user page.
-  // Both of these are his — the skunk's Artist field is the bare link again.
+  // All three of these are his — the other two fields are the bare link again.
   'Harpia harpyja 001 800.jpg': 'Tom Friedel (birdphotos.com)',
   'Striped Skunk.jpg': 'Tom Friedel (birdphotos.com)',
+  'American Bird Grasshopper.jpg': 'Tom Friedel (birdphotos.com)',
+  // a sentence about the camera with the name buried in it. tidyCredit knows
+  // "taken by" and "made by", not "realized by", and one verb is not a rule
+  'Anas platyrhynchos male female quadrat.jpg': 'Richard Bartz',
   // the author line records how the archive came by it, not who took it
   "SaltwaterCrocodile('Maximo').jpg": 'Molly Ebersold, St. Augustine Alligator Farm',
   // a four-photo collage credited to "his respective owners", i.e. nobody;
@@ -118,18 +156,29 @@ const CREDIT_OVERRIDES = {
 
 // ---------------------------------------------------------------- entry lists
 
-// The creatures used as roles in Biomes rounds, real and fake alike. data_roles.js is
-// a browser file that assigns onto window, so give it a window.
+// Every creature the game can put on a card: the roles in Biomes rounds, real
+// and fake alike, plus the Animals word list — where the animal is the secret
+// word rather than a role, but wants the same photograph. Both files are browser
+// files that assign onto window, so give them a window.
+//
+// Unioned rather than kept apart, since a name means the same creature either
+// way: two thirds of the word list are already biome roles, and asking for their
+// photos twice would only invite the two lists to drift apart.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
+  vm.runInContext(fs.readFileSync(WORDS, 'utf8'), sandbox, { filename: 'data_words.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
+  const w = sandbox.window.MASQ_WORDS;
 
   const entries = new Set();
   for (const list of Object.values(d.biomeCatalog)) list.forEach(e => entries.add(e));
   for (const list of Object.values(d.fakeBiomeRoleCatalog)) list.forEach(e => entries.add(e));
   if (!entries.size) throw new Error(`Biome catalogs not found in ${DATA}`);
+  const words = (w.wordOnlyCatalog || {})['Animals'] || [];
+  if (!words.length) throw new Error(`Animals word list not found in ${WORDS}`);
+  words.forEach(e => entries.add(e));
   return [...entries].sort();
 }
 
@@ -254,8 +303,24 @@ const TIDY = [
   [/\s*\[\d+\]/g, ''],
   // Where the picture was posted is not who took it.
   [/\s+on\s+(?:flickr|instagram|500px|deviantart)\b\s*$/i, ''],
-  // "Camazine at English Wikipedia" -> "Camazine", by either spelling.
-  [/\s+at\s+(?:the\s+)?(?:english(?:-language)?\s+)?wikipedia\b/gi, ''],
+  // Commons' own boilerplate for a pre-{{Information}} upload with no author
+  // field: it says it doesn't know, then names the account it inferred from the
+  // licence tag. That account is the only name there is.
+  [/^no machine-readable author provided\.\s*(.+?)\s+assumed\s*\(based on copyright claims\)\.?$/i, '$1'],
+  // "The original uploader was X at Y Wikipedia" is provenance, not a name; so
+  // is the move to Commons, which names whoever pressed the button
+  [/^(?:the\s+)?original\s+uploader\s+was\s+/i, ''],
+  [/\.?\s*uploaded\s+to\s+commons\s+by\s+.*$/i, ''],
+  // a bracket holding contact details is never a name, in either shape
+  [/\s*\[[^\]]*\bmail\s*:[^\]]*\]\s*$/i, ''],
+  // "This file was donated to Wikimedia Commons as part of a project by the
+  // Metropolitan Museum of Art. See the…" — a sentence about the donation, with
+  // the one name in it worth keeping buried in the middle
+  [/^this file was donated to wikimedia commons as part of a project by (?:the\s+)?(.+?)\.\s.*$/i, '$1'],
+  // an accession or catalogue number is filing, not authorship
+  [/[.,]?\s*\b(?:image|photo|accession|catalog(?:ue)?)\s+(?:number|no\.?|id)\s*:?\s*\S+\.?\s*$/i, ''],
+  // "Camazine at English Wikipedia" -> "Camazine", in any language's.
+  [/\s+at\s+(?:the\s+)?(?:[A-Za-z]+(?:-language)?\s+)?wikipedia\b/gi, ''],
   [/\s+at\s+[a-z]{2,3}\.wikipedia\b/gi, ''],
   // A wiki username spells a space as an underscore.
   [/_/g, ' '],
@@ -267,6 +332,9 @@ const TIDY = [
   [/\s*\(\s*\)\s*/g, ' '],
   [/\s+/g, ' '],
   [/^[\s,;:·-]+|[\s,;:·-]+$/g, ''],
+  // Commons answers "author unknown" by filling two fields with the same words,
+  // and both come through. Said once is an answer; said twice is a stutter.
+  [/^(.+?)\s+\1$/i, '$1'],
 ];
 
 // "X from Y" is either a name then a place ("Steve Sayles from Rankin Inlet") or
@@ -367,9 +435,9 @@ function write(rows) {
   ));
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-animals.js — do not edit by hand.',
-    '// Maps a Biomes-catalog animal to its Wikipedia lead photo, as a finished',
-    '// URL — unlike the album art, there is no size to append. Each trailing',
-    '// comment is the article the photo came from.',
+    '// Maps an animal — a Biomes role, or a word from the Animals category — to',
+    '// its Wikipedia lead photo, as a finished URL; unlike the album art, there',
+    '// is no size to append. Each trailing comment is the article it came from.',
     '(function () {',
     '  window.MASQ_ANIMALS = {',
     ...urls,
@@ -388,7 +456,7 @@ function write(rows) {
 
 (async () => {
   const entries = loadEntries();
-  console.log(`Resolving photos for ${entries.length} biome animals…`);
+  console.log(`Resolving photos for ${entries.length} animals…`);
 
   // Every title this run might want, in as few round trips as possible: the pin
   // if there is one, otherwise the entry both ways up.

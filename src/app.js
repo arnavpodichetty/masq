@@ -65,6 +65,12 @@
     return (entry && window.MASQ_DISHES ? window.MASQ_DISHES[entry] : null) || null;
   }
 
+  // Object photos from src/artwork/objects.js (tools/fetch-objects.js). Word
+  // Mode only — no role catalog names an everyday object.
+  function objectFor(entry) {
+    return (entry && window.MASQ_OBJECTS ? window.MASQ_OBJECTS[entry] : null) || null;
+  }
+
   // The photographers, for the Credits screen — most of these photos are
   // Creative Commons, which asks that whoever took them is named. Built once,
   // and empty rather than broken if the artwork file failed to load. No author
@@ -75,6 +81,7 @@
   }));
   const PHOTO_CREDITS = toCredits(window.MASQ_ANIMAL_CREDITS);
   const DISH_CREDITS = toCredits(window.MASQ_DISH_CREDITS);
+  const OBJECT_CREDITS = toCredits(window.MASQ_OBJECT_CREDITS);
 
   // Each medium keeps its own shape: a poster stands 2:3, a sleeve is square, a
   // wildlife photo is 4:3 landscape. Cropped to fill, so the wrong frame cuts
@@ -269,9 +276,7 @@
 
   // ---- crossed-out words ----
   // A crossing is a decision about the table, not the session, so these outlast
-  // the tab. Checked for shape only, never against the catalogs: a crossing
-  // whose word or category has since been renamed simply never matches, which
-  // is what it did before it was saved.
+  // the tab.
   const DISABLED_KEY = 'masq.disabledWords';
 
   function loadDisabledWords() {
@@ -298,6 +303,48 @@
     } catch (err) {
       // Private mode / quota — the crossings still hold for this session.
     }
+  }
+
+  // Every word a crossing could legitimately point at, as a set per category.
+  // Null when the data files didn't load, which is the difference between "this
+  // word is gone" and "we can't see the catalogs from here".
+  function knownWordsByCategory(customs) {
+    const roles = window.MASQ_LOCATIONS_DATA;
+    const words = window.MASQ_WORDS;
+    if (!roles || !words || !words.wordOnlyCatalog) return null;
+    const index = {
+      Biomes: Object.keys(roles.biomeCatalog || {}),
+      Cuisines: Object.keys(roles.cuisineCatalog || {}),
+      Locations: Object.keys(roles.locationCatalog || {}),
+      'Movie/TV Show Genres': Object.keys(roles.movieTvCatalog || {}),
+      'Music Genres': Object.keys(roles.musicGenreCatalog || {}),
+      [MUSE_CATEGORY]: Object.keys(roles.museCatalog || {}),
+    };
+    Object.keys(words.wordOnlyCatalog).forEach((cat) => { index[cat] = words.wordOnlyCatalog[cat] || []; });
+    (customs || []).forEach((c) => { index[c.name] = (c.entries || []).map(e => e.word); });
+    const out = {};
+    Object.keys(index).forEach((cat) => { out[cat] = new Set(index[cat]); });
+    return out;
+  }
+
+  // A word list changes between releases — words get dropped, categories get
+  // renamed — and a crossing pointing at a word that no longer exists is inert
+  // but permanent, sitting in localStorage on that device for good. So the map
+  // is swept on the way in and the strays are dropped.
+  //
+  // A sweep, never a reset: with no catalogs to check against there is nothing
+  // to call stray, so the map is handed back untouched rather than thrown away
+  // on the strength of a script that failed to load.
+  function pruneDisabledWords(map, known) {
+    if (!known) return map;
+    const out = {};
+    Object.keys(map).forEach((cat) => {
+      const valid = known[cat];
+      if (!valid) return;
+      const kept = map[cat].filter(w => valid.has(w));
+      if (kept.length) out[cat] = kept;
+    });
+    return out;
   }
 
   // ---- lobby settings ----
@@ -420,6 +467,17 @@
   // can be checked against them.
   const INITIAL_CUSTOM = loadCustomCategories();
   const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED);
+
+  // Swept here rather than on first edit: a crossing for a word this release
+  // dropped would otherwise wait for someone to open that category's word list,
+  // which they may never do. Written back only when the sweep found something,
+  // so an untouched device isn't given a pointless write on every load.
+  const INITIAL_DISABLED = (() => {
+    const saved = loadDisabledWords();
+    const swept = pruneDisabledWords(saved, knownWordsByCategory(INITIAL_CUSTOM));
+    if (JSON.stringify(swept) !== JSON.stringify(saved)) saveDisabledWords(swept);
+    return swept;
+  })();
 
   // ---- roster ----
   // The table usually plays with the same people, so the names outlast the tab.
@@ -759,8 +817,6 @@
       // The progressive cycle itself, unlike the setting that turns it on, is
       // in-memory only: a reload or a roster change starts it over.
       jesterWeights: {},
-      // 'Historical Eras' is parked until its catalog is reworked — commented
-      // out in src/data_roles.js and at every use below. Restore both sides together.
       // Alphabetical: also the order the tiles and word lists render in.
       museUnlocked: INITIAL_MUSE_UNLOCKED,
       categories: INITIAL_MUSE_UNLOCKED ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
@@ -783,7 +839,7 @@
       // guessing it, with the category's words on hand to pick from.
       resultsWordShown: false,
       resultsPoolOpen: false,
-      disabledWords: loadDisabledWords(),
+      disabledWords: INITIAL_DISABLED,
       customCategories: INITIAL_CUSTOM,
       customDraft: null,
       customError: '',
@@ -920,11 +976,16 @@
         Object.values(round.roundRoleMap || {}).forEach(r => add(roleArt, r));
         Object.values(round.roundJesterRoleMap || {}).forEach(r => add(roleArt, r));
       }
-      // Movies/TV pictures the word itself; a disguised jester gets their fake
-      // word's poster instead.
-      if (cat === 'Movies/TV') {
-        add(posterFor, round.roundWord);
-        Object.values(round.roundJesterWordMap || {}).forEach(w => add(posterFor, w));
+      // Three word-only categories picture the word itself; a disguised jester
+      // gets their fake word's picture instead.
+      const wordArt = cat === 'Movies/TV' ? posterFor
+        : cat === 'Food' ? dishFor
+          : cat === 'Animals' ? animalFor
+            : cat === 'Objects' ? objectFor
+              : null;
+      if (wordArt) {
+        add(wordArt, round.roundWord);
+        Object.values(round.roundJesterWordMap || {}).forEach(w => add(wordArt, w));
       }
       urls.forEach((url) => { const img = new window.Image(); img.src = url; });
     }
@@ -1005,8 +1066,6 @@
       const biomeNames = Object.keys(biomeCatalog);
       const cuisineNames = Object.keys(cuisineCatalog);
       const locationNames = Object.keys(locationCatalog);
-      // Parked with the Historical Eras catalogs:
-      // const historicalEraNames = Object.keys(historicalErasCatalog);
       const movieTvGenreNames = Object.keys(movieTvCatalog);
       const musicGenreNames = Object.keys(musicGenreCatalog);
       const museAlbumNames = Object.keys(museCatalog);
@@ -1031,7 +1090,6 @@
         if (customByName[category]) return customByName[category].entries.map(e => e.word);
         if (category === 'Biomes') return biomeNames;
         if (category === 'Cuisines') return cuisineNames;
-        // if (category === 'Historical Eras') return historicalEraNames;
         if (category === 'Movie/TV Show Genres') return movieTvGenreNames;
         if (category === MUSE_CATEGORY) return museAlbumNames;
         if (category === 'Music Genres') return musicGenreNames;
@@ -1099,7 +1157,6 @@
       const roundJesterWordMap = st.roundJesterWordMap || {};
       const isBiomeRound = roundCategory === 'Biomes';
       const isCuisineRound = roundCategory === 'Cuisines';
-      const isHistoricalRound = roundCategory === 'Historical Eras';
       const isMovieTvRound = roundCategory === 'Movie/TV Show Genres';
       const isMusicRound = roundCategory === 'Music Genres';
       const isMuseRound = roundCategory === MUSE_CATEGORY;
@@ -1138,6 +1195,12 @@
       const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
       // Movies/TV round: the word is a film or series. Hidden with the word.
       const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
+      // Food and Animals rounds picture the word the same way, off the same two
+      // maps the Cuisines and Biomes roles read — a dish is a dish and a wolf is
+      // a wolf, whether the round makes it a role or the answer.
+      const apWordDish = isFoodRound && showWord ? dishFor(apWordShown) : null;
+      const apWordAnimal = isAnimalsRound && showWord ? animalFor(apWordShown) : null;
+      const apWordObject = isObjectsRound && showWord ? objectFor(apWordShown) : null;
       // Word Mode deals roles but never prints them, so their artwork stays off
       // too — a picture of a role nobody can read still gives it away.
       const apRoleVisible = st.gameMode !== 'words';
@@ -1154,12 +1217,16 @@
       // landscape frame as an animal, cropped centrally — see ART_SHAPES.
       const apRoleDish = isCuisineRound && apRoleVisible ? dishFor(apRoleShown) : null;
       const apRoleMuseCover = isMuseRound && apRoleVisible ? museCoverFor(apRoleShown) : null;
-      const apArt = apWordPoster || apRolePoster || apRoleAlbum || apRoleAnimal || apRoleDish || apRoleMuseCover;
+      const apArt = apWordPoster || apWordDish || apWordAnimal || apWordObject
+        || apRolePoster || apRoleAlbum || apRoleAnimal || apRoleDish || apRoleMuseCover;
       // Show Word stacks a word block and a role block under the artwork, and
       // either can wrap — at full size that clips against the card's
-      // overflow:hidden.
+      // overflow:hidden. A word-only round prints no role, so nothing stacks
+      // and its artwork stays full size.
       const apArtCompact = !!(apRolePoster || apRoleAlbum || apRoleAnimal || apRoleDish || apRoleMuseCover) && showWord;
-      const apArtShape = ART_SHAPES[apRoleDish ? 'plate' : (apRoleAnimal ? 'photo' : ((apRoleAlbum || apRoleMuseCover) ? 'cover' : 'poster'))];
+      const apArtShape = ART_SHAPES[(apRoleDish || apWordDish || apWordObject) ? 'plate'
+        : ((apRoleAnimal || apWordAnimal) ? 'photo'
+          : ((apRoleAlbum || apRoleMuseCover) ? 'cover' : 'poster'))];
       const [apArtW, apArtH] = apArtShape[apArtCompact ? 'compact' : 'full'];
       const closeOverlay = () => {
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
@@ -1198,14 +1265,14 @@
         apComedy: ap ? ap.comedy : true, apTragedy: ap ? ap.tragedy : false,
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apRoleShown,
-        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isCuisineRound ? '#a85a2b' : (isHistoricalRound ? '#b5893c' : (isMovieTvRound ? '#2f8f7a' : (isMuseRound ? '#8b5cf6' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)')))))),
+        apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isCuisineRound ? '#a85a2b' : (isMovieTvRound ? '#2f8f7a' : (isMuseRound ? '#8b5cf6' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)'))))),
         // Same reason as apWordSize: artwork leaves less room, and "Artist
         // (Song)" runs longer than a film title. Cuisines carry no artwork but
         // still sit below the default, for "Schwarzwalder Kirschtorte".
         apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (apRoleAlbum ? '16px' : ((apRoleAnimal || apRoleDish) ? '18px' : (isBiomeRound ? '22px' : (isCuisineRound ? '20px' : (isMuseRound ? (apRoleMuseCover ? '15px' : '17px') : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))))))),
         apWord: apWordShown,
         apArt, apArtW, apArtH, apArtFocus: apArtShape.focus,
-        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isCuisineRound ? 'Cuisine' : (isHistoricalRound ? 'Era' : (isMovieTvRound ? 'Genre' : (isMuseRound ? 'Album' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : 'Location')))))))))),
+        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isCuisineRound ? 'Cuisine' : (isMovieTvRound ? 'Genre' : (isMuseRound ? 'Album' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : 'Location'))))))))),
         // Artwork eats most of the card, so long titles shrink to stay inside it
         // rather than clipping against overflow:hidden.
         apWordSize: apArt ? '17px' : (isBiomeRound ? '20px' : '22px'),
@@ -1226,7 +1293,16 @@
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
-        resultsPoster: isMoviesWordRound ? posterFor(st.roundWord) : null,
+        // The answer's own picture, for the categories that have one. Shaped
+        // like the card's, two thirds the size — a poster stands, a plate and
+        // an animal lie down.
+        resultsArt: isMoviesWordRound ? posterFor(st.roundWord)
+          : (isFoodRound ? dishFor(st.roundWord)
+            : (isAnimalsRound ? animalFor(st.roundWord)
+              : (isObjectsRound ? objectFor(st.roundWord) : null))),
+        resultsArtW: isMoviesWordRound ? '84px' : '112px',
+        resultsArtH: isMoviesWordRound ? '126px' : '84px',
+        resultsArtFocus: isAnimalsRound ? '50% 25%' : '50% 50%',
         // Covered until someone taps it, so the jester can guess first. The
         // poster is part of the answer, so it waits too.
         roundWordShown: st.resultsWordShown,
@@ -1253,6 +1329,7 @@
         isModalCredits: st.modal === 'credits',
         photoCredits: PHOTO_CREDITS,
         dishCredits: DISH_CREDITS,
+        objectCredits: OBJECT_CREDITS,
         isModalPlayers: st.modal === 'players',
         isModalCustom: st.modal === 'custom',
         isModalCustomEdit: st.modal === 'customEdit',
@@ -1383,7 +1460,6 @@
         wordListGroups: [
           { cat: 'Biomes', words: biomeNames },
           { cat: 'Cuisines', words: cuisineNames },
-          // { cat: 'Historical Eras', words: historicalEraNames },
           { cat: 'Locations', words: locationNames },
           { cat: 'Movie/TV Show Genres', words: movieTvGenreNames },
           ...(st.museUnlocked ? [{ cat: MUSE_CATEGORY, words: museAlbumNames }] : []),
@@ -1741,8 +1817,6 @@
             nextRound = buildRound('Biomes', pickFrom('Biomes'), biomeCatalog, fakeBiomeRoleCatalog);
           } else if (chosenCategory === 'Cuisines') {
             nextRound = buildRound('Cuisines', pickFrom('Cuisines'), cuisineCatalog, fakeCuisineRoleCatalog);
-          // } else if (chosenCategory === 'Historical Eras') {
-          //   nextRound = buildRound('Historical Eras', pickFrom('Historical Eras'), historicalErasCatalog, fakeHistoricalErasRoleCatalog);
           } else if (chosenCategory === 'Movie/TV Show Genres') {
             nextRound = buildRound('Movie/TV Show Genres', pickFrom('Movie/TV Show Genres'), movieTvCatalog, fakeMovieTvRoleCatalog);
           } else if (chosenCategory === MUSE_CATEGORY) {
@@ -2310,7 +2384,7 @@
           ),
           h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);"), className: 'j-title' }, 'MASQ'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.10.0')
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.11.0')
           )
         )
       );
@@ -2340,7 +2414,7 @@
       const sources = [
         { name: 'TMDB', of: 'Movie & TV posters', note: 'This product uses the TMDB API but is not endorsed or certified by TMDB.' },
         { name: 'Deezer', of: 'Album art', note: 'Not endorsed or certified by Deezer.' },
-        { name: 'Wikimedia Commons', of: 'Animal & dish photographs', note: 'Each under its own free licence, listed below.' },
+        { name: 'Wikimedia Commons', of: 'Animal, dish & object photographs', note: 'Each under its own free licence, listed below.' },
       ];
       const label = (text) => h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin:22px 0 10px;") }, text);
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
@@ -2365,7 +2439,7 @@
         // The photographers, one line each. Each set is boxed and scrolled on
         // its own, so hundreds of names don't bury the three people who made
         // the game, and each name sits in the list it belongs to.
-        ...[['Animal photographs', v.photoCredits], ['Dish photographs', v.dishCredits]]
+        ...[['Animal photographs', v.photoCredits], ['Dish photographs', v.dishCredits], ['Object photographs', v.objectCredits]]
           .filter(([, rows]) => rows.length > 0)
           .map(([heading, rows]) => h(React.Fragment, { key: heading },
             label(`${heading} (${rows.length})`),
@@ -2668,18 +2742,18 @@
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;") }, v.gameCategory)
             ),
             // Covered until tapped: the jester gets their guess in before the
-            // answer is on screen. The poster is withheld with it.
+            // answer is on screen. The picture is withheld with it.
             h('div', {
               ...(v.roundWordShown ? {} : press(v.revealRoundWord, 'Reveal the round word')),
               className: v.roundWordShown ? '' : 'masq-btn',
               style: css(`flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(178,32,47,.18); border:1px solid rgba(178,32,47,.45);${v.roundWordShown ? '' : ' cursor:pointer;'}`),
             },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#e3a6ac;") }, 'ROUND WORD'),
-              v.roundWordShown && v.resultsPoster && h('img', {
-                key: v.resultsPoster,
-                src: v.resultsPoster, alt: '', draggable: false,
+              v.roundWordShown && v.resultsArt && h('img', {
+                key: v.resultsArt,
+                src: v.resultsArt, alt: '', draggable: false,
                 onError: (e) => { e.target.style.display = 'none'; },
-                style: css('display:block; width:84px; height:126px; object-fit:cover; margin:8px auto 0; border-radius:6px; border:1px solid rgba(178,32,47,.4);'),
+                style: css(`display:block; width:${v.resultsArtW}; height:${v.resultsArtH}; object-fit:cover; object-position:${v.resultsArtFocus}; margin:8px auto 0; border-radius:6px; border:1px solid rgba(178,32,47,.4);`),
               }),
               v.roundWordShown
                 ? h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#f4c9cd; margin-top:5px;") }, v.roundWordDisplay)

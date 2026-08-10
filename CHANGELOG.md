@@ -19,6 +19,81 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.11.0 — 2026-08-10
+
+Word Mode gets pictures, and the other two word categories get their hints.
+
+**Added**
+- **Every Word Mode round now shows a picture of the answer.** Food, Animals and
+  Objects put the photo on the card above the word, the way Movies/TV has always
+  shown a poster, and the results screen shows it too once the round word is
+  uncovered. A disguised jester gets their fake word's picture, never the real
+  one — the same rule the poster has always followed.
+- **`src/artwork/objects.js`**, 262 object photographs, and
+  **`tools/fetch-objects.js`** to regenerate it. Objects needed a bigger table of
+  hand-pinned answers than any catalog before it, because everyday words are
+  taken: `Ring`, `Bolt`, `Tablet`, `Monitor` and a dozen more are disambiguation
+  pages, and `Microwave`, `Radio`, `Sponge`, `Vacuum` and `Chalk` all resolve to
+  the idea rather than the thing — radio masts, a sea sponge, a 19th-century
+  vacuum pump, a chalk cliff.
+- **786 hints across the Objects catalog** and **444 across Animals**, three for
+  each word. Objects draws on a vocabulary of 103 — `Ceramic`, `Bristly`,
+  `Squishy`, `Boxy`, `Stargazing`, `Laundry` — and Animals on 191, which is the
+  widest of the three: `Tuxedoed`, `Cackling`, `Breaching`, `Wallowing`.
+- **Animals grew from 100 words to 148** and **Objects from 100 to 262.** Eight
+  animals went (`Alpaca`, `Bison`, `Elk`, `Gazelle`, `Panther`, `Rat`, `Toad`,
+  `Tortoise`) and 56 arrived, from `Axolotl` and `Narwhal` to `Cockroach` and
+  `Woodpecker`. Objects lost only `Mouse`, to `Computer Mouse`, and gained 163 —
+  `Chandelier`, `Sewing Machine`, `Fire Extinguisher`, `Yo-yo`, `Zipper`.
+
+**Changed**
+- **The animal and dish photo maps now serve both modes.** An animal is a Biomes
+  role and an Animals word; a dish is a Cuisines role and a Food word; the
+  photograph is the same either way. So each map is the union of the two lists —
+  animals 176 to 260, dishes 240 to 407 — rather than two maps drifting apart.
+- **929 photographs are now credited by name** on the Credits screen, in three
+  lists rather than two.
+- **`fetch-cuisines.js` only refuses on two *roles* sharing a photograph.** That
+  check exists because a Cuisines round deals several dishes at once and two
+  identical cards spoil it; a Food word is the whole round on its own. Which is
+  just as well, since the two lists sometimes name one dish twice — `Creme
+  Brulee` and `Crème Brûlée`, `Mac and Cheese` and `Macaroni and Cheese` — and
+  there is only one photograph of it.
+- All three Wikipedia fetchers learned the same four credit-tidying rules, since
+  the same boilerplate turns up in all three catalogs: Commons' "no
+  machine-readable author provided, X assumed", "the original uploader was X at
+  Y Wikipedia", a bracket holding an email, and the doubled `Unknown author
+  Unknown author` that comes of two fields answering the same way.
+
+**Fixed**
+- **Crossed-out words are swept against the catalogs on load.** A crossing for a
+  word a release has since dropped was inert but permanent, sitting in
+  `localStorage` on that device for good — the eight animals and one object this
+  release retired would have haunted every table that had crossed them out. Only
+  ever a sweep: with no catalogs to check against, nothing is called stray.
+- Photographs that pictured the idea rather than the thing: `Popcorn` was
+  unpopped kernels, `Rice` a paddy field, `Turkey` the country's flag, `Ribs` a
+  rib cage, `Hot Chocolate` the British soul band, and `Chicken`, `Duck`, `Crab`,
+  `Lobster`, `Shrimp` and `Salmon` were all the living animal. Fruit that was
+  still on the tree — `Avocado`, `Cantaloupe`, `Pear`, `Pineapple`, `Olives`,
+  `Lemon`, `Lime` — is now fruit on a plate.
+- Photographs that were a collage, a diagram or a painting rather than a
+  photograph: `Beetle`, `Hummingbird`, `Ostrich`, `Lemur` and `Kimchi` led with
+  montages; `Bell`, `Earrings`, `Sewing Machine` and `Speaker` with labelled
+  diagrams; `Blanket`, `Coat` and `Bandage` with paintings, one of them a Greek
+  vase. `Rooster` and `Chicken` shared one photograph of both birds together.
+- Photographs under licences the game doesn't ship: eight were GFDL-1.2-only —
+  the leads for `Apple`, `Broccoli`, `Salad`, `Baboon`, `Mosquito`, `Sandals`,
+  `Vase` and `Green Beans` — one was Free Art Licence (`Bear`) and one
+  Copyrighted-free-use (`Oatmeal`).
+
+**Removed**
+- **The parked Historical Eras catalogs**, and the branches that read them. The
+  category has been commented out of `data_roles.js`, the word pool, the picker
+  and the round builder for some time, but `isHistoricalRound` was still live and
+  still feeding a colour and a card label that no round could reach. Git has the
+  drafted catalog if it comes back.
+
 ## 1.10.0 — 2026-08-09
 
 The Word Mode jester gets something to work with.

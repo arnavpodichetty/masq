@@ -349,50 +349,6 @@
     'Soul / Motown': ["Alicia Keys (If I Ain't Got You)", 'Ella Fitzgerald (Dream a Little Dream of Me)', 'Kirk Franklin (Stomp)'],
   };
 
-  // Historical Eras is parked: drafted, but not yet fit to play, so it ships
-  // commented out and off window.MASQ_LOCATIONS_DATA below. app.js drops the
-  // category to match — restore both sides together.
-
-  // var historicalErasCatalog = {
-  //   'Age of Exploration': ['Caravel Captain', 'Conquistador', 'Indigenous Interpreter', 'Missionary Priest', 'New World Cartographer', 'Scurvy-Stricken Sailor', 'Ship\'s Navigator', 'Spice Trade Merchant'],
-  //   'American Revolution': ['British Redcoat', 'Colonial Town Crier', 'Continental Army Surgeon', 'Founding Father', 'Loyalist Tory', 'Minuteman Militiaman', 'Pamphlet Printer', 'Tea Party Raider'],
-  //   'Ancient China (Dynastic Era)': ['Confucian Scholar-Official', 'Court Eunuch', 'Dynastic Emperor', 'Great Wall Laborer', 'Gunpowder Alchemist', 'Imperial Calligrapher', 'Silk Road Merchant', 'Terracotta Army Sculptor'],
-  //   'Ancient Egypt': ['Hieroglyph Scribe', 'Mummification Embalmer', 'Nile Flood Surveyor', 'Pharaoh', 'Priest of Ra', 'Pyramid Stonecutter', 'Royal Vizier', 'Tomb Robber'],
-  //   'Ancient Greece': ['Athenian Philosopher', 'Homeric Bard', 'Marble Temple Sculptor', 'Olympic Wrestler', 'Oracle of Delphi', 'Spartan Hoplite', 'Tragedy Playwright', 'Trireme Rower'],
-  //   'Ancient Rome': ['Aqueduct Engineer', 'Chariot Racer', 'Colosseum Gladiator', 'Forum Senator', 'Legion Centurion', 'Praetorian Guard', 'Toga-Clad Emperor', 'Vestal Virgin'],
-  //   'Aztec Empire': ['Chinampa Garden Farmer', 'Eagle Warrior', 'Featherwork Artisan', 'Jaguar Warrior', 'Pochteca Long-Distance Trader', 'Sacrificial Captive', 'Sacrificial Temple Priest', 'Tlatoani Ruler'],
-  //   'Cold War Era': ['Berlin Wall Guard', 'CIA Agent', 'Duck-and-Cover Schoolteacher', 'Fallout Shelter Builder', 'Iron Curtain Defector', 'KGB Spy', 'Missile Silo Officer', 'Propaganda Radio Broadcaster'],
-  //   'Feudal Japan': ['Daimyo Lord', 'Geisha', 'Katana Swordsmith', 'Masterless Ronin', 'Ninja Assassin', 'Samurai', 'Shogun', 'Zen Temple Monk'],
-  //   'Great Depression': ['Boxcar-Hopping Hobo', 'Breadline Regular', 'Dance Marathon Contestant', 'Dust Bowl Farmer', 'Hooverville Resident', 'Soup Kitchen Volunteer', 'Wiped-Out Stockbroker', 'WPA Road Crew Worker'],
-  //   'Industrial Revolution': ['Chimney Sweep Boy', 'Coal Miner', 'Factory Foreman', 'Luddite Machine-Breaker', 'Mill Owner', 'Steam Engine Mechanic', 'Steam Locomotive Engineer', 'Textile Mill Child Laborer'],
-  //   'Medieval Europe': ['Armored Knight', 'Cathedral Stonemason', 'Court Jester', 'Crusader', 'Feudal King', 'Manor Serf', 'Manuscript-Illuminating Monk', 'Plague Doctor'],
-  //   'Prehistoric/Stone Age': ['Bone Flute Carver', 'Cave Painter', 'Clan Elder', 'Fire Keeper', 'Flint Toolmaker', 'Mammoth Hunter', 'Root and Berry Forager', 'Tribal Shaman'],
-  //   'Renaissance': ['Flying Machine Inventor', 'Forbidden Anatomist', 'Fresco Painter', 'Heretical Astronomer', 'Humanist Scholar', 'Medici Banker', 'Patron of the Arts', 'Printing Press Operator'],
-  //   'Viking Age': ['Berserker', 'Jarl Chieftain', 'Longship Raider', 'Longship Shipwright', 'Rune Carver', 'Shield Maiden', 'Skald Storyteller', 'Völva Seer'],
-  //   'Wild West': ['Bounty Hunter', 'Cattle Drive Cowboy', 'Frontier Sheriff', 'Gold Rush Prospector', 'Pony Express Rider', 'Saloon Keeper', 'Stagecoach Driver', 'Train-Robbing Outlaw'],
-  //   'World War II': ['Air Raid Warden', 'Bomber Crew Gunner', 'D-Day Paratrooper', 'Enigma Codebreaker', 'French Resistance Fighter', 'Radar Operator', 'Riveting Factory Worker', 'Spitfire Pilot'],
-  // };
-
-  // var fakeHistoricalErasRoleCatalog = {
-  //   'Age of Exploration': ['Enigma Codebreaker', 'Fresco Painter', 'Pharaoh'],
-  //   'American Revolution': ['Cattle Drive Cowboy', 'Great Wall Laborer', 'Oracle of Delphi'],
-  //   'Ancient China (Dynastic Era)': ['Gold Rush Prospector', 'Hieroglyph Scribe', 'Zen Temple Monk'],
-  //   'Ancient Egypt': ['Crusader', 'Terracotta Army Sculptor', 'Wiped-Out Stockbroker'],
-  //   'Ancient Greece': ['Longship Raider', 'Radar Operator', 'Vestal Virgin'],
-  //   'Ancient Rome': ['Katana Swordsmith', 'KGB Spy', 'Spartan Hoplite'],
-  //   'Aztec Empire': ['Bounty Hunter', 'Conquistador', 'Priest of Ra'],
-  //   'Cold War Era': ['Court Jester', 'Enigma Codebreaker', 'Spitfire Pilot'],
-  //   'Feudal Japan': ['Armored Knight', 'Confucian Scholar-Official', 'Riveting Factory Worker'],
-  //   'Great Depression': ['Coal Miner', 'Riveting Factory Worker', 'Vestal Virgin'],
-  //   'Industrial Revolution': ['Gold Rush Prospector', 'Hooverville Resident', 'Ninja Assassin'],
-  //   'Medieval Europe': ['Jaguar Warrior', 'Samurai', 'Steam Locomotive Engineer'],
-  //   'Prehistoric/Stone Age': ['Pyramid Stonecutter', 'Völva Seer', 'Wiped-Out Stockbroker'],
-  //   'Renaissance': ['Cathedral Stonemason', 'Cave Painter', 'New World Cartographer'],
-  //   'Viking Age': ['Crusader', 'Legion Centurion', 'Pony Express Rider'],
-  //   'Wild West': ['Boxcar-Hopping Hobo', 'Court Eunuch', 'Steam Locomotive Engineer'],
-  //   'World War II': ['Berlin Wall Guard', 'Court Jester', 'Dust Bowl Farmer'],
-  // };
-
   window.MASQ_LOCATIONS_DATA = {
     'biomeCatalog': biomeCatalog,
     'cuisineCatalog': cuisineCatalog,
@@ -406,7 +362,5 @@
     'fakeMovieTvRoleCatalog': fakeMovieTvRoleCatalog,
     'fakeMuseRoleCatalog': fakeMuseRoleCatalog,
     'fakeMusicGenreRoleCatalog': fakeMusicGenreRoleCatalog,
-    // 'historicalErasCatalog': historicalErasCatalog,
-    // 'fakeHistoricalErasRoleCatalog': fakeHistoricalErasRoleCatalog,
   };
 })();

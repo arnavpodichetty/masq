@@ -1,7 +1,8 @@
 // Regenerates src/artwork/dishes.js — the dish -> photo map app.js reads for
-// Cuisines rounds. The generated file is committed, so the site ships no API key
-// and makes no calls to Wikipedia at play time. Re-run when the cuisine catalogs
-// in src/data_roles.js change.
+// Cuisines rounds and for Word Mode's Food category. The generated file is
+// committed, so the site ships no API key and makes no calls to Wikipedia at
+// play time. Re-run when the cuisine catalogs in src/data_roles.js or the Food
+// word list in src/data_words.js change.
 //
 //   node tools/fetch-cuisines.js [--verbose]
 //
@@ -16,6 +17,7 @@ const vm = require('vm');
 
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data_roles.js');
+const WORDS = path.join(REPO, 'src', 'data_words.js');
 const OUT = path.join(REPO, 'src', 'artwork', 'dishes.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
@@ -39,28 +41,119 @@ const THUMB_PX = 400;
 //
 // The catalog spells dishes without accents, matching musicGenreCatalog, which
 // costs nothing: Wikipedia redirects Spatzle to Spätzle on its own. Only the
-// cases below need saying out loud. Four things go wrong:
+// cases below need saying out loud. Five things go wrong:
 //
 //   the name means something else     Gyro -> the gyroscope
 //   filed under another spelling      Fir Fir is written Fit-fit
 //   the article is about the method   Rouladen -> Roulade, sweet ones included
 //   the lead photo isn't free enough  GFDL-1.2-only, so pinned to a CC0 one
+//   the name is the animal, not the   Chicken, Duck, Turkey, Crab, Lobster and
+//   meat, or the plant, not the food  Shrimp are all filed as the creature
+//
+// That last one is the Food word list's doing, and it is most of what follows:
+// a cuisine role is a dish by name (Bibimbap, Tlayuda), while a Food word is
+// whatever people call it at the table, and the everyday word is usually taken
+// — by a bird, a country, a comic strip, a dance, or a rib cage.
 //
 // The trailing comment says why each is pinned. Sorted by entry.
 const OVERRIDES = {
+  'Apple': 'Honeycrisp',             // "Apple" leads with a GFDL-1.2-only photo
+  // "Avocado" leads with the tree; this is the fruit, whole and halved
+  'Avocado': 'file:Avocado Hass - single and halved.jpg',
+  'Beef': 'Steak',                   // "Beef" leads with a raw joint of it
+  'Biscuit': 'Biscuit (bread)',      // the American one, per the hints beside it
+  'Blueberries': 'file:Blueberries-In-Pack.jpg',  // "Blueberry" is the bush
+  // "Broccoli" leads with a GFDL-1.2-only photo; this one is public domain
+  'Broccoli': 'file:Basket of broccoli in Singapore market.jpg',
+  'Brownie': 'Chocolate brownie',    // "Brownie" alone is a disambiguation page
+  'Burger': 'Hamburger',             // filed under the older name
+  // "Cantaloupe" leads with one still on the vine
+  'Cantaloupe': 'file:Cucumis melo var. reticulatus (photo by Scott Bauer).jpg',
   'Causa': 'Causa limeña',           // "Causa" alone is a genus of sea snails
+  'Cereal': 'Breakfast cereal',      // "Cereal" is the grass it's milled from
   'Cha Ca': 'Chả cá Lã Vọng',        // filed under the full Hanoi restaurant name
+  'Chai': 'Masala chai',             // "Chai" alone is a disambiguation page
+  'Chicken': 'Roast chicken',        // "Chicken" is the bird, alive
+  'Chicken Wings': 'Buffalo wing',   // "Chicken wings" alone is a disambiguation page
+  'Chili': 'Chili con carne',        // "Chili" alone is a disambiguation page
+  'Coconut': 'Coconut water',        // "Coconut" leads with a botanical plate of the palm
   // the article's own lead photo is GFDL-1.2-only; this one is CC0
   'Corn Dog': 'file:Corn dog 001.jpg',
+  'Crab': 'Crab meat',               // "Crab" is the crustacean
+  'Crackers': 'Cracker (food)',      // "Crackers" alone is a disambiguation page
+  'Cucumber': 'file:Board, knife and cucumbers.JPG',  // "Cucumber" is the vine
   'Dosa': 'Dosa (food)',             // "Dosa" alone is a disambiguation page
+  'Duck': 'Duck as food',            // "Duck" is the bird
   'Fir Fir': 'Fit-fit',              // the spelling the article uses
+  'Flan': 'Crème caramel',           // "Flan" alone is a disambiguation page
+  // the article's own lead photo is GFDL-1.2-only; this one is CC BY
+  'Green Beans': 'file:Green beans 169clue.jpg',
   'Gyro': 'Gyro (food)',             // not the gyroscope
   'Horiatiki Salad': 'Greek salad',  // the English title for the same salad
+  'Hot Chocolate': 'Hot chocolate',  // capitalised, it's the British soul band
+  'Kimchi': 'Baechu-kimchi',         // "Kimchi" leads with a six-panel collage
+  // "Kiwi" is the bird; "Kiwifruit" leads with a botanical plate of cultivars
+  'Kiwi': 'file:Kiwi (Actinidia chinensis) 1 Luc Viatour.jpg',
   'Kocho': 'Kocho (food)',           // "Kocho" alone is a Japanese given name
+  // "Lamb" is the animal, and "Lamb and mutton" leads with raw meat credited
+  // to a paragraph of licence terms with no name in it
+  'Lamb': 'file:Kleftiko - Brunswick Centre - London 2026-06-04.jpg',
+  'Lemon': 'file:Lemon-Whole-Split.jpg',  // "Lemon" leads with one on the tree
+  // "Lime" alone is a disambiguation page and the fruit article is one on the
+  // tree; this is the same shot as the lemon above, by the same photographer
+  'Lime': 'file:Lime-Whole-Split.jpg',
+  'Lobster': 'Lobster thermidor',    // "Lobster" is the crustacean
   'Mandu': 'Mandu (food)',           // "Mandu" alone is a disambiguation page
+  'Mochi': 'Daifuku',                // "Mochi" leads with two unfilled white blocks
+  // "Muffin" leads with a supermarket tray of them, shot through the plastic
+  'Muffin': 'file:(301-365) Muffin (6100678703).jpg',
+  'Mushrooms': 'Edible mushroom',    // "Mushroom" leads with a stump of wild ones
+  'Oatmeal': 'Porridge',             // "Oatmeal" leads with a Copyrighted-free-use photo
+  'Olives': 'file:Grüne Oliven.jpg',  // "Olive" leads with an olive tree
+  'Orange': 'Orange (fruit)',        // "Orange" alone is a disambiguation page
+  // "Panini" alone is the sticker company; the sandwich's photo names no author
+  'Panini': 'file:Panini (Mozzarella, Pesto & Tomato) - Dyke Road Park Cafe.jpg',
   'Pastel': 'Pastel (Brazilian food)',  // "Pastel" alone is the art medium
+  'Peach': 'file:White-Peaches-Bunch.jpg',  // "Peach" leads with a botanical plate
+  // "Peanuts" is the comic strip; "Peanut" leads with a botanical illustration
+  'Peanuts': 'file:Roasted Peanuts with shell.jpg',
+  'Pear': 'file:Assortment of pears.jpg',  // "Pear" leads with pears on the tree
+  // nothing is filed under Pesto Pasta, and "Pesto" is a bowl of the sauce
+  'Pesto Pasta': 'file:Pasta with pesto.jpg',
+  // the article's photo names no author at all, so there is nobody to credit
+  'Philly Cheesesteak': 'file:Cheesesteak (19386149993).jpg',
+  // "Pickles" alone is a disambiguation page, and "Pickled cucumber" leads with
+  // a close-up too tight to read as anything
+  'Pickles': 'file:Glasses of pickled cucumbers.jpg',
+  // "Pineapple" leads with the plant it grows out of
+  'Pineapple': 'file:Ananas comosus Victoria P1190459.jpg',
+  'Poke': 'Poke (dish)',             // "Poke" alone is a disambiguation page
+  // "Popcorn" leads with a field of unpopped kernels
+  'Popcorn': 'file:Bowl of Popcorn (Unsplash).jpg',
+  'Popsicle': 'Ice pop',             // Popsicle is a trademark; the article is generic
+  'Pork': 'Roast pork',              // "Pork" leads with a raw slab of belly
+  'Pudding': 'Chocolate pudding',    // "Pudding" leads with an unturned blancmange mould
+  // "Raspberry" is the cane the fruit grows on
+  'Raspberries': 'file:Raspberries-1426859 960 720.jpg',
+  'Ribs': 'Pork ribs',               // "Ribs" is the rib cage
+  'Rice': 'Cooked rice',             // "Rice" is the crop, still in the paddy
   'Rouladen': 'Rinderroulade',       // "Roulade" is any rolled dish, sweet included
+  // "Salad" leads with a GFDL-1.2-only photo; this one is CC BY
+  'Salad': 'file:Mixed Green Salad (15977106804).jpg',
+  'Salmon': 'Salmon as food',        // "Salmon" is the fish, in a river
+  'Salsa': 'Salsa (sauce)',          // "Salsa" alone is the dance
+  'Sausage': 'Bratwurst',            // "Sausage" leads with a whole charcuterie board
   'Shiro': 'Shiro (food)',           // "Shiro" alone is a disambiguation page
+  'Shrimp': 'Shrimp and prawn as food',  // "Shrimp" is the crustacean
+  // "Spaghetti" leads with a bundle of it dry, which is not what anyone eats
+  'Spaghetti': 'file:Espaguetis carbonara.jpg',
+  'Tea': 'Black tea',                // "Tea" leads with the dry leaf, not a cup
+  'Toast': 'Toast (food)',           // "Toast" alone is a disambiguation page
+  // both "Tuna" and "Tuna as food" lead with the same NOAA drawing of the fish
+  'Tuna': 'file:Seared Ahi Tuna Steak.jpg',
+  'Turkey': 'Turkey as food',        // "Turkey" is the country
+  // "Watermelon" leads with an unripe one lying in the leaf litter
+  'Watermelon': 'file:Divided Water Melon.jpg',
 };
 
 const FILE_PIN = 'file:';
@@ -88,25 +181,45 @@ const CREDIT_OVERRIDES = {
   // the Fir Fir / Himbasha pair, punctuated differently by the same uploader —
   // one dish should not read as a different photographer
   'Taita and shiro.jpg': 'Temesgen Woldezion (edited by Merhawie Woldezion)',
+  // a 2005 upload predating {{Information}}: both names are in the caption
+  // prose, in the same photographer-then-editor relationship as the line above
+  'Cheese platter.jpg': 'Dorina Andress (edited by Neutrality)',
+  // the name with the thank-you note that follows it on Flickr stripped off
+  'Mixed Green Salad (15977106804).jpg': 'Prayitno',
+  // 2005 uploads whose author is in the caption prose, not a readable field
+  'Korean Gimchi01.jpg': 'Johannes Barre',
+  // a Flickr display name wrapped in its own decoration — "|| UggBoy♥UggGirl ||
+  // PHOTO || WORLD || TRAVEL ||". The handle is the only name there is
+  "After The St. Patrick's Parade Late Lunch @ Lemon, Dawson Street, Dublin, Rep. Of Ireland A Fine Tradition! (6992614913).jpg": 'UggBoy♥UggGirl',
 };
 
 // ---------------------------------------------------------------- entry lists
 
-// The dishes used as roles in Cuisines rounds, real and fake alike. Every fake
-// is a real dish from another cuisine, so the fake list adds no titles — it's
-// unioned in anyway, so a fake that stops matching can't slip through
-// picture-less. data_roles.js assigns onto window, so give it a window.
+// Everything edible the game can put on a card: the dishes used as roles in
+// Cuisines rounds, real and fake alike, plus the Food word list — where the dish
+// is the secret word rather than a role, and wants the same photograph. Every
+// fake is a real dish from another cuisine, so the fake list adds no titles;
+// it's unioned in anyway, so a fake that stops matching can't slip through
+// picture-less. Both files assign onto window, so give them a window.
+//
+// The Food list is a plainer vocabulary than the cuisine catalogs — Pizza and
+// Toast rather than Pastel and Fir Fir — which is why so many of the OVERRIDES
+// above disambiguate an everyday English word from what Wikipedia files it as.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(DATA, 'utf8'), sandbox, { filename: 'data_roles.js' });
+  vm.runInContext(fs.readFileSync(WORDS, 'utf8'), sandbox, { filename: 'data_words.js' });
   const d = sandbox.window.MASQ_LOCATIONS_DATA;
+  const w = sandbox.window.MASQ_WORDS;
 
-  const entries = new Set();
-  for (const list of Object.values(d.cuisineCatalog)) list.forEach(e => entries.add(e));
-  for (const list of Object.values(d.fakeCuisineRoleCatalog)) list.forEach(e => entries.add(e));
-  if (!entries.size) throw new Error(`Cuisine catalogs not found in ${DATA}`);
-  return [...entries].sort();
+  const roles = new Set();
+  for (const list of Object.values(d.cuisineCatalog)) list.forEach(e => roles.add(e));
+  for (const list of Object.values(d.fakeCuisineRoleCatalog)) list.forEach(e => roles.add(e));
+  if (!roles.size) throw new Error(`Cuisine catalogs not found in ${DATA}`);
+  const words = (w.wordOnlyCatalog || {})['Food'] || [];
+  if (!words.length) throw new Error(`Food word list not found in ${WORDS}`);
+  return { entries: [...new Set([...roles, ...words])].sort(), roles };
 }
 
 // ----------------------------------------------------------------- mediawiki
@@ -213,7 +326,24 @@ const TIDY = [
   [/\s*\((?:photographer|photograph|photo)\)\s*$/i, ''],
   [/\s*\[\d+\]/g, ''],
   [/\s+on\s+(?:flickr|instagram|500px|deviantart)\b\s*$/i, ''],
-  [/\s+at\s+(?:the\s+)?(?:english(?:-language)?\s+)?wikipedia\b/gi, ''],
+  // Commons' own boilerplate for a pre-{{Information}} upload with no author
+  // field: it says it doesn't know, then names the account it inferred from the
+  // licence tag. That account is the only name there is.
+  [/^no machine-readable author provided\.\s*(.+?)\s+assumed\s*\(based on copyright claims\)\.?$/i, '$1'],
+  // "The original uploader was X at Y Wikipedia" is provenance, not a name; so
+  // is the move to Commons, which names whoever pressed the button
+  [/^(?:the\s+)?original\s+uploader\s+was\s+/i, ''],
+  [/\.?\s*uploaded\s+to\s+commons\s+by\s+.*$/i, ''],
+  // a bracket holding contact details is never a name, in either shape
+  [/\s*\[[^\]]*\bmail\s*:[^\]]*\]\s*$/i, ''],
+  // "This file was donated to Wikimedia Commons as part of a project by the
+  // Metropolitan Museum of Art. See the…" — a sentence about the donation, with
+  // the one name in it worth keeping buried in the middle
+  [/^this file was donated to wikimedia commons as part of a project by (?:the\s+)?(.+?)\.\s.*$/i, '$1'],
+  // an accession or catalogue number is filing, not authorship
+  [/[.,]?\s*\b(?:image|photo|accession|catalog(?:ue)?)\s+(?:number|no\.?|id)\s*:?\s*\S+\.?\s*$/i, ''],
+  // any language's Wikipedia, not only English
+  [/\s+at\s+(?:the\s+)?(?:[A-Za-z]+(?:-language)?\s+)?wikipedia\b/gi, ''],
   [/\s+at\s+[a-z]{2,3}\.wikipedia\b/gi, ''],
   [/_/g, ' '],
   [/\s+([.,;:])/g, '$1'],
@@ -222,6 +352,9 @@ const TIDY = [
   [/\s*\(\s*\)\s*/g, ' '],
   [/\s+/g, ' '],
   [/^[\s,;:·-]+|[\s,;:·-]+$/g, ''],
+  // Commons answers "author unknown" by filling two fields with the same words,
+  // and both come through. Said once is an answer; said twice is a stutter.
+  [/^(.+?)\s+\1$/i, '$1'],
 ];
 
 // "X from Y" is either a name then a place, or a place then a name. So the
@@ -327,9 +460,9 @@ function write(rows) {
   ));
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-cuisines.js — do not edit by hand.',
-    '// Maps a Cuisines-catalog dish to its Wikipedia lead photo, as a finished',
-    '// URL — unlike the album art, there is no size to append. Each trailing',
-    '// comment is the article the photo came from.',
+    '// Maps a dish — a Cuisines role, or a word from the Food category — to its',
+    '// Wikipedia lead photo, as a finished URL; unlike the album art, there is',
+    '// no size to append. Each trailing comment is the article it came from.',
     '(function () {',
     '  window.MASQ_DISHES = {',
     ...urls,
@@ -347,8 +480,8 @@ function write(rows) {
 }
 
 (async () => {
-  const entries = loadEntries();
-  console.log(`Resolving photos for ${entries.length} cuisine dishes…`);
+  const { entries, roles } = loadEntries();
+  console.log(`Resolving photos for ${entries.length} dishes…`);
 
   // Every title this run might want, asked for in as few round trips as
   // possible: the pin if there is one, otherwise the entry both ways up.
@@ -419,15 +552,21 @@ function write(rows) {
     return;
   }
 
-  // Two dishes sharing one photo is the failure this catalog invites and the
-  // animal one didn't: two cards carrying the same picture spoils the round for
-  // whoever holds either. Pin one somewhere more specific, or replace it.
+  // Two roles sharing one photo is the failure this catalog invites and the
+  // animal one didn't: a Cuisines round deals several dishes at once, and two
+  // cards carrying the same picture spoils it for whoever holds either. Pin one
+  // somewhere more specific, or replace it.
+  //
+  // Roles only. A Food word is the whole round on its own, so it can share a
+  // photo with a role harmlessly — which is just as well, since the two lists
+  // sometimes name one dish twice (Creme Brulee and Crème Brûlée, Mac and
+  // Cheese and Macaroni and Cheese) and there is only one photograph of it.
   const byUrl = new Map();
-  rows.forEach(r => byUrl.set(r.url, [...(byUrl.get(r.url) || []), r.entry]));
+  rows.filter(r => roles.has(r.entry)).forEach(r => byUrl.set(r.url, [...(byUrl.get(r.url) || []), r.entry]));
   const shared = [...byUrl.entries()].filter(([, list]) => list.length > 1);
 
   if (shared.length) {
-    console.error(`\nTwo dishes resolved to the same photo — pin or replace one of each pair:\n${
+    console.error(`\nTwo roles resolved to the same photo — pin or replace one of each pair:\n${
       shared.map(([url, list]) => `  ${list.join(' + ')}  ->  ${url}`).join('\n')}`);
     console.error('\nNothing written.');
     process.exitCode = 1;
