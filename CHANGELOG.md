@@ -19,6 +19,33 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.11.1 — 2026-08-10
+
+Two names put right.
+
+**Changed**
+- **The Food category is now Food/Drinks.** It has poured drinks since the
+  catalog was rebuilt — `Boba Milk Tea`, `Espresso`, `Matcha`, `Soda`, `Iced
+  Tea`, `Lemonade`, `Hot Chocolate`, `Milkshake`, `Smoothie` — and the name was
+  the last thing still pretending otherwise. The card label above the word reads
+  **Food / Drink**, alongside the **Movie / TV** it already sat next to.
+- **`src/artwork/dishes.js` is now `src/artwork/food.js`**, on `window.MASQ_FOOD`
+  and `window.MASQ_FOOD_CREDITS`, with `dishFor` becoming `foodFor`. The map
+  stopped being about dishes the moment it began carrying the word list — `Toast`
+  and `Milk` are not dishes — and every other artwork file is already named for
+  the category it serves. The Credits screen says **Food photographs** to match.
+  Releases below this one keep the old name, because that is what the file was
+  called at the time.
+
+**Fixed**
+- **A renamed category no longer takes the table's settings with it.** Both the
+  saved lobby and the crossed-out word list key off the category name, so on its
+  own the rename would have emptied the picker back to the opening categories
+  and — with the sweep added in 1.11.0 — deleted every word ever crossed out of
+  Food. Old names are now mapped to current ones on the way in, and the map is
+  kept rather than cleared out later: a device that hasn't been opened in a year
+  still has the old name written in it.
+
 ## 1.11.0 — 2026-08-10
 
 Word Mode gets pictures, and the other two word categories get their hints.
@@ -47,16 +74,16 @@ Word Mode gets pictures, and the other two word categories get their hints.
   `Chandelier`, `Sewing Machine`, `Fire Extinguisher`, `Yo-yo`, `Zipper`.
 
 **Changed**
-- **The animal and dish photo maps now serve both modes.** An animal is a Biomes
-  role and an Animals word; a dish is a Cuisines role and a Food word; the
+- **The animal and food photo maps now serve both modes.** An animal is a Biomes
+  role and an Animals word; a food is a Cuisines role and a Food word; the
   photograph is the same either way. So each map is the union of the two lists —
-  animals 176 to 260, dishes 240 to 407 — rather than two maps drifting apart.
+  animals 176 to 260, food 240 to 407 — rather than two maps drifting apart.
 - **929 photographs are now credited by name** on the Credits screen, in three
   lists rather than two.
 - **`fetch-cuisines.js` only refuses on two *roles* sharing a photograph.** That
-  check exists because a Cuisines round deals several dishes at once and two
+  check exists because a Cuisines round deals several foods at once and two
   identical cards spoil it; a Food word is the whole round on its own. Which is
-  just as well, since the two lists sometimes name one dish twice — `Creme
+  just as well, since the two lists sometimes name one food twice — `Creme
   Brulee` and `Crème Brûlée`, `Mac and Cheese` and `Macaroni and Cheese` — and
   there is only one photograph of it.
 - All three Wikipedia fetchers learned the same four credit-tidying rules, since

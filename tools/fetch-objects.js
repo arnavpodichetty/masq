@@ -200,7 +200,7 @@ const CREDIT_OVERRIDES = {
 // ---------------------------------------------------------------- entry lists
 
 // The Objects word list, and nothing else — no role catalog names an everyday
-// object, so unlike animals and dishes this map has one source. data_words.js is
+// object, so unlike animals and food this map has one source. data_words.js is
 // a browser file that assigns onto window, so give it a window.
 function loadEntries() {
   const sandbox = { window: {} };

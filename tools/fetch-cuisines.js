@@ -1,4 +1,4 @@
-// Regenerates src/artwork/dishes.js — the dish -> photo map app.js reads for
+// Regenerates src/artwork/food.js — the food -> photo map app.js reads for
 // Cuisines rounds and for Word Mode's Food category. The generated file is
 // committed, so the site ships no API key and makes no calls to Wikipedia at
 // play time. Re-run when the cuisine catalogs in src/data_roles.js or the Food
@@ -8,7 +8,7 @@
 //
 // fetch-animals.js pointed at food: same batching, same lead images, same rule
 // that a photo needing a credit must have a name. What differs is what goes
-// wrong — a dish has several names spelled several ways, and its article is as
+// wrong — a food has several names spelled several ways, and its article is as
 // often about the technique or the whole cuisine as about the plate.
 
 const fs = require('fs');
@@ -18,7 +18,7 @@ const vm = require('vm');
 const REPO = path.join(__dirname, '..');
 const DATA = path.join(REPO, 'src', 'data_roles.js');
 const WORDS = path.join(REPO, 'src', 'data_words.js');
-const OUT = path.join(REPO, 'src', 'artwork', 'dishes.js');
+const OUT = path.join(REPO, 'src', 'artwork', 'food.js');
 const WIKI = 'https://en.wikipedia.org/w/api.php';
 const COMMONS = 'https://commons.wikimedia.org/w/api.php';
 
@@ -39,7 +39,7 @@ const THUMB_PX = 400;
 // title, or 'file:Some File.jpg' to name a Commons image outright. Prefer a
 // page, for the same reason the animal fetcher does — a pinned file is frozen.
 //
-// The catalog spells dishes without accents, matching musicGenreCatalog, which
+// The catalog spells foods without accents, matching musicGenreCatalog, which
 // costs nothing: Wikipedia redirects Spatzle to Spätzle on its own. Only the
 // cases below need saying out loud. Five things go wrong:
 //
@@ -51,7 +51,7 @@ const THUMB_PX = 400;
 //   meat, or the plant, not the food  Shrimp are all filed as the creature
 //
 // That last one is the Food word list's doing, and it is most of what follows:
-// a cuisine role is a dish by name (Bibimbap, Tlayuda), while a Food word is
+// a cuisine role is a food by name (Bibimbap, Tlayuda), while a Food word is
 // whatever people call it at the table, and the everyday word is usually taken
 // — by a bird, a country, a comic strip, a dance, or a rib cage.
 //
@@ -145,8 +145,9 @@ const OVERRIDES = {
   'Sausage': 'Bratwurst',            // "Sausage" leads with a whole charcuterie board
   'Shiro': 'Shiro (food)',           // "Shiro" alone is a disambiguation page
   'Shrimp': 'Shrimp and prawn as food',  // "Shrimp" is the crustacean
-  // "Spaghetti" leads with a bundle of it dry, which is not what anyone eats
-  'Spaghetti': 'file:Espaguetis carbonara.jpg',
+  // "Spaghetti" leads with a bundle of it dry, which is not what anyone eats.
+  // Plain, not carbonara — that photograph is already the Carbonara role's
+  'Spaghetti': 'file:Spaghetti di Gragnano e colatura di alici.jpg',
   'Tea': 'Black tea',                // "Tea" leads with the dry leaf, not a cup
   'Toast': 'Toast (food)',           // "Toast" alone is a disambiguation page
   // both "Tuna" and "Tuna as food" lead with the same NOAA drawing of the fish
@@ -179,7 +180,7 @@ const CREDIT_OVERRIDES = {
   // by account in the author field, in full in the attribution line
   'Tlayuda12-05oaxaca013x.jpg': "Bobak Ha'Eri",
   // the Fir Fir / Himbasha pair, punctuated differently by the same uploader —
-  // one dish should not read as a different photographer
+  // one food should not read as a different photographer
   'Taita and shiro.jpg': 'Temesgen Woldezion (edited by Merhawie Woldezion)',
   // a 2005 upload predating {{Information}}: both names are in the caption
   // prose, in the same photographer-then-editor relationship as the line above
@@ -195,10 +196,10 @@ const CREDIT_OVERRIDES = {
 
 // ---------------------------------------------------------------- entry lists
 
-// Everything edible the game can put on a card: the dishes used as roles in
-// Cuisines rounds, real and fake alike, plus the Food word list — where the dish
+// Everything edible the game can put on a card: the foods used as roles in
+// Cuisines rounds, real and fake alike, plus the Food word list — where the food
 // is the secret word rather than a role, and wants the same photograph. Every
-// fake is a real dish from another cuisine, so the fake list adds no titles;
+// fake is a real food from another cuisine, so the fake list adds no titles;
 // it's unioned in anyway, so a fake that stops matching can't slip through
 // picture-less. Both files assign onto window, so give them a window.
 //
@@ -217,8 +218,8 @@ function loadEntries() {
   for (const list of Object.values(d.cuisineCatalog)) list.forEach(e => roles.add(e));
   for (const list of Object.values(d.fakeCuisineRoleCatalog)) list.forEach(e => roles.add(e));
   if (!roles.size) throw new Error(`Cuisine catalogs not found in ${DATA}`);
-  const words = (w.wordOnlyCatalog || {})['Food'] || [];
-  if (!words.length) throw new Error(`Food word list not found in ${WORDS}`);
+  const words = (w.wordOnlyCatalog || {})['Food/Drinks'] || [];
+  if (!words.length) throw new Error(`Food/Drinks word list not found in ${WORDS}`);
   return { entries: [...new Set([...roles, ...words])].sort(), roles };
 }
 
@@ -276,8 +277,8 @@ const usable = (p) => !!(p && !p.missing && p.thumbnail
 // Asking both ways costs nothing in a batch.
 const sentenceCase = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 
-// Wikidata descriptions are reliably food-shaped for a dish — "Brazilian
-// snack", "Vietnamese noodle dish" — so an article not describing itself that
+// Wikidata descriptions are reliably food-shaped for one — "Brazilian snack",
+// "Vietnamese noodle dish" — so an article not describing itself that
 // way is usually about something else. Loose on purpose: this only flags
 // entries for a human to check, never rejects one. The trap is the article that
 // resolves cleanly, carries a handsome photo, and is a Japanese given name.
@@ -453,25 +454,25 @@ function write(rows) {
   const urls = rows.map(({ entry, url, page }) => (
     `    ${JSON.stringify(entry)}: ${JSON.stringify(url)},  // ${page}`
   ));
-  // [dish, photographer, licence] — a triple rather than an object, since the
+  // [food, photographer, licence] — a triple rather than an object, since the
   // Credits screen prints all three and wants nothing else.
   const credits = rows.map(({ entry, credit }) => (
     `    [${JSON.stringify(entry)}, ${JSON.stringify(credit.artist)}, ${JSON.stringify(credit.license)}],`
   ));
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-cuisines.js — do not edit by hand.',
-    '// Maps a dish — a Cuisines role, or a word from the Food category — to its',
+    '// Maps a food — a Cuisines role, or a word from the Food category — to its',
     '// Wikipedia lead photo, as a finished URL; unlike the album art, there is',
     '// no size to append. Each trailing comment is the article it came from.',
     '(function () {',
-    '  window.MASQ_DISHES = {',
+    '  window.MASQ_FOOD = {',
     ...urls,
     '  };',
     '',
     '  // Photographer and licence for each photo above — what most of those',
     '  // licences ask in return. Read by the Credits screen. An empty name is a',
     '  // public-domain photo with no author on record, so there is nobody owed.',
-    '  window.MASQ_DISH_CREDITS = [',
+    '  window.MASQ_FOOD_CREDITS = [',
     ...credits,
     '  ];',
     '})();',
@@ -481,7 +482,7 @@ function write(rows) {
 
 (async () => {
   const { entries, roles } = loadEntries();
-  console.log(`Resolving photos for ${entries.length} dishes…`);
+  console.log(`Resolving photos for ${entries.length} foods…`);
 
   // Every title this run might want, asked for in as few round trips as
   // possible: the pin if there is one, otherwise the entry both ways up.
@@ -553,13 +554,13 @@ function write(rows) {
   }
 
   // Two roles sharing one photo is the failure this catalog invites and the
-  // animal one didn't: a Cuisines round deals several dishes at once, and two
+  // animal one didn't: a Cuisines round deals several foods at once, and two
   // cards carrying the same picture spoils it for whoever holds either. Pin one
   // somewhere more specific, or replace it.
   //
   // Roles only. A Food word is the whole round on its own, so it can share a
   // photo with a role harmlessly — which is just as well, since the two lists
-  // sometimes name one dish twice (Creme Brulee and Crème Brûlée, Mac and
+  // sometimes name one food twice (Creme Brulee and Crème Brûlée, Mac and
   // Cheese and Macaroni and Cheese) and there is only one photograph of it.
   const byUrl = new Map();
   rows.filter(r => roles.has(r.entry)).forEach(r => byUrl.set(r.url, [...(byUrl.get(r.url) || []), r.entry]));
@@ -574,11 +575,11 @@ function write(rows) {
   }
 
   write(rows);
-  console.log(`\nWrote ${rows.length}/${entries.length} dishes to ${OUT}`);
+  console.log(`\nWrote ${rows.length}/${entries.length} foods to ${OUT}`);
 
   // Worth a look, in the order a wrong picture is easiest to miss: an article
   // that doesn't describe food is probably the wrong one, and a name we didn't
-  // ask for may be the wrong dish.
+  // ask for may be the wrong food.
   const odd = rows.filter(r => !r.pinned && !CULINARY.test(r.description));
   const strayed = rows.filter(r => !r.pinned
     && r.page.toLowerCase().replace(/[^a-z]/g, '') !== r.entry.toLowerCase().replace(/[^a-z]/g, ''));

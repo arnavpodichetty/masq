@@ -23,7 +23,7 @@
       'Sloth', 'Snail', 'Snake', 'Sparrow', 'Spider', 'Squid', 'Squirrel', 'Starfish', 'Stingray', 'Stork',
       'Swan', 'Swordfish', 'Termite', 'Tiger', 'Toucan', 'Turkey', 'Turtle', 'Vulture', 'Walrus', 'Warthog',
       'Wasp', 'Whale', 'Wildebeest', 'Wolf', 'Wombat', 'Woodpecker', 'Worm', 'Zebra'],
-    'Food': [
+    'Food/Drinks': [
       'Almonds', 'Apple', 'Apple Pie', 'Avocado', 'Bacon', 'Bagel', 'Baguette', 'Baked Potato', 'Banana',
       'Banana Bread', 'Banh Mi', 'Beef', 'Beef Stew', 'Biryani', 'Biscuit', 'BLT', 'Blueberries',
       'Boba Milk Tea', 'Bread', 'Broccoli', 'Brownie', 'Burger', 'Burrito', 'Calzone', 'Cantaloupe',
@@ -133,10 +133,10 @@
   // drawn at random and printed on their card. One hint per round, not one per
   // jester: two jesters comparing notes would otherwise hold the whole answer.
   //
-  // Keyed by category first, then by word. Six words live in both Food and
-  // Animals — Chicken, Crab, Duck, Lobster, Shrimp, Turkey — and a flat map
-  // would hand an Animals round the food's hints, telling a jester the chicken
-  // was 'Roasted' for 'Dinner'.
+  // Keyed by category first, then by word. Seven words live in both Food/Drinks
+  // and Animals — Chicken, Crab, Duck, Lobster, Salmon, Shrimp, Turkey — and a
+  // flat map would hand an Animals round the food's hints, telling a jester the
+  // chicken was 'Roasted' for 'Dinner'.
   //
   // Everything but Movies/TV, where a title is its own clue. A word with no
   // hints deals no hint, which is what Movies/TV and every custom category do.
@@ -291,7 +291,7 @@
       'Worm': ['Slimy', 'Wriggling', 'Garden'],
       'Zebra': ['Striped', 'Galloping', 'Savanna'],
     },
-    'Food': {
+    'Food/Drinks': {
       'Almonds': ['Crunchy', 'Small', 'Snack'],
       'Apple': ['Crunchy', 'Raw', 'Snack'],
       'Apple Pie': ['Sweet', 'Baked', 'Dessert'],
