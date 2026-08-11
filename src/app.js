@@ -1657,7 +1657,7 @@
         },
         jesterGetsRole: st.jesterGetsRole,
         jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
-        jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a similar but fake word instead of being told they’re the Jester' : 'The Jester is handed a normal-looking fake role instead of being told they’re the Jester',
+        jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a fake word instead of being told they’re the Jester' : 'The Jester is handed a fake role instead of being told they’re the Jester',
         jesterGetsRoleBg: st.jesterGetsRole ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         jesterGetsRoleThumb: st.jesterGetsRole ? 'translateX(22px)' : 'translateX(2px)',
         jesterGetsRoleToggleOpacity: '1',
@@ -1672,7 +1672,7 @@
           ? 'Word Mode only — a role is already a clue of its own'
           : st.jesterGetsRole
             ? 'Unavailable while the Jester gets a fake word — a disguised jester doesn’t know they need a clue'
-            : 'The Jester gets one word of a clue, drawn from three',
+            : 'The Jester gets a clue as to what the real word is',
         jesterHintsBg: (st.jesterHints && hintsAvailable) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         jesterHintsThumb: (st.jesterHints && hintsAvailable) ? 'translateX(22px)' : 'translateX(2px)',
         jesterHintsToggleOpacity: hintsAvailable ? '1' : '.55',
@@ -2154,14 +2154,14 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showCatThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { ...press(v.toggleJestersKnow, 'Jesters know each other', { role: 'switch', 'aria-checked': String(v.jestersKnow) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jestersKnowToggleOpacity}; pointer-events:${v.jestersKnowTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-crimson); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
+          h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jesters Know Each Other'),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jestersKnowDesc)
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jesterGetsRoleDesc)
             ),
-            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jestersKnowBg}; transition:background .25s; flex:none;`) },
-              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jestersKnowThumb}; transition:transform .25s;`) })
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterGetsRoleBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterGetsRoleThumb}; transition:transform .25s;`) })
             )
           ),
           h('div', { ...press(v.toggleShowWord, 'Show word', { role: 'switch', 'aria-checked': String(v.showWord) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.showWordToggleOpacity}; pointer-events:${v.showWordTogglePointerEvents};`) },
@@ -2174,14 +2174,14 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showWordThumb}; transition:transform .25s;`) })
             )
           ),
-          h('div', { ...press(v.toggleJesterGetsRole, 'Jester gets a fake role', { role: 'switch', 'aria-checked': String(v.jesterGetsRole) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jesterGetsRoleToggleOpacity}; pointer-events:${v.jesterGetsRoleTogglePointerEvents};`) },
-            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-gold); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_18 } }),
+          h('div', { ...press(v.toggleJestersKnow, 'Jesters know each other', { role: 'switch', 'aria-checked': String(v.jestersKnow) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); border-bottom:1px solid var(--m-border-soft); cursor:pointer; opacity:${v.jestersKnowToggleOpacity}; pointer-events:${v.jestersKnowTogglePointerEvents};`) },
+            h('div', { style: css('flex:none; width:38px; height:38px; border-radius:10px; background:var(--m-icon-crimson); display:flex; align-items:center; justify-content:center;'), dangerouslySetInnerHTML: { __html: ICON_JESTERS_18 } }),
             h('div', { style: css('flex:1;') },
-              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, v.jesterGetsRoleLabel),
-              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jesterGetsRoleDesc)
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Jesters Know Each Other'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.jestersKnowDesc)
             ),
-            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jesterGetsRoleBg}; transition:background .25s; flex:none;`) },
-              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jesterGetsRoleThumb}; transition:transform .25s;`) })
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.jestersKnowBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.jestersKnowThumb}; transition:transform .25s;`) })
             )
           ),
           h('div', { ...press(v.toggleJesterHints, 'Jester hints', { role: 'switch', 'aria-checked': String(v.jesterHints) }), style: css(`display:flex; align-items:center; gap:14px; padding:16px; background:var(--m-lift-soft); cursor:pointer; opacity:${v.jesterHintsToggleOpacity}; pointer-events:${v.jesterHintsTogglePointerEvents};`) },
