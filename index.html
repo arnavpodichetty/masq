@@ -5,21 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#190e24">
 <meta name="color-scheme" content="dark">
-<meta name="google-site-verification" content="ZzPS-QBY98mwcWo_fLMz3XGUjMeYkrY6MTzJAPZVeE4" />
-<title>Masq — Social Deduction Party Game</title>
-<meta name="description" content="Masq is a free pass-and-play social deduction party game for one phone. Everyone gets the secret word and a matching role — except the Jester, who has to bluff.">
+<title>Masq — Free Online Social Deduction Party Game</title>
+<meta name="description" content="Free social deduction party game you play on one phone — no app, no signup. Everyone gets the secret word and a role, except the Jester, who has to bluff.">
+
+<link rel="canonical" href="https://masq.games/">
 
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 
+<meta name="robots" content="index, follow, max-image-preview:large">
+
 <meta property="og:type" content="website">
-<meta property="og:title" content="Masq — Social Deduction Party Game">
+<meta property="og:site_name" content="Masq">
+<meta property="og:title" content="Masq — Free Online Social Deduction Party Game">
 <meta property="og:description" content="A free pass-and-play party game for one phone. Everyone gets the secret word and a matching role — except the Jester, who has to bluff.">
 <meta property="og:url" content="https://masq.games/">
 <meta property="og:image" content="https://masq.games/masq.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Masq — Social Deduction Party Game">
+<meta property="og:image:width" content="534">
+<meta property="og:image:height" content="1000">
+<meta property="og:image:alt" content="A Masq player card on a phone, showing the secret word and the role beneath it.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Masq — Free Online Social Deduction Party Game">
 <meta name="twitter:description" content="A free pass-and-play party game for one phone. Everyone gets the secret word and a matching role — except the Jester, who has to bluff.">
 <meta name="twitter:image" content="https://masq.games/masq.png">
+<meta name="twitter:image:alt" content="A Masq player card on a phone, showing the secret word and the role beneath it.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Masq",
+  "url": "https://masq.games/",
+  "description": "Masq is a free pass-and-play social deduction party game for one phone. Everyone gets the secret word and a matching role — except the Jester, who has to bluff their way through questioning without getting caught.",
+  "image": "https://masq.games/masq.png",
+  "genre": ["Party game", "Social deduction", "Word game"],
+  "gamePlatform": "Web browser",
+  "playMode": "MultiPlayer",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -30,6 +57,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: #0e0810; }
   #root { height: 100%; }
+  .noscript-copy { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem; color: #e8dcc8; font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.6; }
+  .noscript-copy h1, .noscript-copy h2 { font-family: 'Cinzel', Georgia, serif; color: #f0e6c9; line-height: 1.25; }
   a { color: #e6cb7e; }
   a:hover { color: #f4d78c; }
   @keyframes masq-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
@@ -41,8 +70,6 @@
   @keyframes masq-backdrop { from { opacity:0 } to { opacity:1 } }
   .masq-btn { transition: transform .12s ease, opacity .12s ease; }
   .masq-btn:active { transform: scale(.95); opacity:.82; }
-  /* Controls are divs given button/switch roles in src/app.js — focus has to be
-     visible on the dark stage. */
   [role="button"]:focus-visible, [role="switch"]:focus-visible,
   input:focus-visible, textarea:focus-visible {
     outline: 2px solid #e6cb7e;
@@ -150,7 +177,39 @@
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root">
+  <div class="noscript-copy">
+    <h1>Masq — a social deduction party game for one phone</h1>
+    <p>Masq is a free pass-and-play party game. Everyone at the table gets the
+      same secret word and a role to match — everyone except the Jester, who
+      gets neither and has to bluff their way through the questioning without
+      being found out. No app, no install, no accounts: it runs in a browser
+      and you pass the phone around.</p>
+    <h2>How to play</h2>
+    <ol>
+      <li>Add your players and pick a category.</li>
+      <li>Pass the phone around. Each player sees their word and role in
+        private, then hands it on.</li>
+      <li>Question each other, argue it out, and vote on who the Jester is.</li>
+    </ol>
+    <h2>Categories</h2>
+    <p>Play with roles — Locations, Biomes, Cuisines, Movie/TV Show Genres,
+      Music Genres — or in Word Mode, where the answer is a single word from
+      Animals, Food/Drinks, Movies/TV or Objects. Most rounds show a picture of
+      the answer: a film poster, an album sleeve, a photograph of the animal or
+      the dish. You can add your own categories too.</p>
+    <h2>Do I need to download anything?</h2>
+    <p>No. Masq runs in a web browser on any phone, tablet or laptop — there is
+      no app to install, no account to make and nothing to pay. Open the page
+      and start a round. If you like hidden-role and bluffing games, it plays
+      the way those do, but it needs one device instead of one each.</p>
+    <h2>How many people can play?</h2>
+    <p>It works with a small group around a table and scales up from there. You
+      choose how many Jesters are in play, or let the game pick a random number
+      each round, and you can set a timer for the discussion.</p>
+    <p><a href="https://masq.games/">Play Masq at masq.games</a></p>
+  </div>
+</div>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
 <script src="./src/data_roles.js"></script>
