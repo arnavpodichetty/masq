@@ -1,27 +1,8 @@
 # Changelog
 
-Masq was never tagged — the in-app version string read `1.0` from the first
-commit onward, through every feature below. These releases are reconstructed
-from git history, grouped by what a player would have noticed changing. Dates
-are the commit dates the work actually landed on.
-
-Numbering follows the shape of the work. A minor bump is kept for the releases
-that change what's in the box — a new category, a new mode, a set of artwork, or
-a rewrite of something already there. Everything else is a patch, which is where
-most of the game was actually built: the fixes, the wording, the settings that
-finally stayed put.
-
-The 1.0 line is drawn where the game stopped being a work in progress: the
-accessibility pass and the jester reveal screen. Everything before it was 0.x,
-whatever the label said at the time.
-
-Where an entry names a count — 39 locations, 471 titles, 140 songs — it's the
-count as of that release, read back out of the catalogs at that commit rather
-than remembered.
-
 ## 1.11.4 — 2026-08-11
 
-Findable, for the first time.
+The page can be read by a search engine.
 
 **Added**
 - **The page now says something without JavaScript.** The whole game is drawn by
@@ -57,7 +38,7 @@ Findable, for the first time.
 
 ## 1.11.3 — 2026-08-11
 
-Masq has its own address.
+The game moves to masq.games.
 
 **Added**
 - **The game lives at [masq.games](https://masq.games).** `www.masq.games`
@@ -82,7 +63,7 @@ Masq has its own address.
 
 ## 1.11.2 — 2026-08-11
 
-The options screens, tidied.
+A longer timer, and the options put in order.
 
 **Changed**
 - **The time limit reaches 15 minutes**, up from 10, and both arrows now walk the
@@ -110,7 +91,7 @@ The options screens, tidied.
 
 ## 1.11.1 — 2026-08-10
 
-Two names put right.
+Food becomes Food/Drinks.
 
 **Changed**
 - **The Food category is now Food/Drinks.** It has poured drinks since the
@@ -137,7 +118,7 @@ Two names put right.
 
 ## 1.11.0 — 2026-08-10
 
-Word Mode gets pictures, and the other two word categories get their hints.
+Word Mode gets pictures, and two more categories get hints.
 
 **Added**
 - **Every Word Mode round now shows a picture of the answer.** Food, Animals and
@@ -212,7 +193,7 @@ Word Mode gets pictures, and the other two word categories get their hints.
 
 ## 1.10.0 — 2026-08-09
 
-The Word Mode jester gets something to work with.
+Jester Hints, so a Word Mode jester has something to work with.
 
 **Added**
 - **Jester Hints.** A Word Mode jester was told the category and nothing else,
@@ -263,6 +244,8 @@ The Word Mode jester gets something to work with.
 
 ## 1.9.3 — 2026-08-08
 
+No animal appears in two biomes.
+
 **Changed**
 - **No animal appears in two biomes.** Nine of them did — `Rattlesnake` sat in
   Desert, Prairie and Chaparral at once, `Rat` in Cave System, House and the
@@ -288,6 +271,8 @@ The Word Mode jester gets something to work with.
 
 ## 1.9.2 — 2026-08-08
 
+The Jesters row in the lobby reads as a count again.
+
 **Changed**
 - The Jesters row in the lobby reads as a count again. It had been naming the
   selection mode alongside it — `1 Jester · Progressive` — which spent the row on
@@ -295,6 +280,8 @@ The Word Mode jester gets something to work with.
   shows, because that one changes what the number means.
 
 ## 1.9.1 — 2026-08-08
+
+A comment pass over the whole source.
 
 **Changed**
 - A comment pass over the whole source — `src/app.js`, `src/data.js`,
@@ -355,6 +342,8 @@ The table you set up is still standing when you come back to it.
 
 ## 1.8.2 — 2026-08-08
 
+Photographer credits read like names again.
+
 **Fixed**
 - **The photographer credits read like names again.** Commons' author field is a
   free-text box, and the tidier in `fetch-animals.js` and `fetch-cuisines.js` was
@@ -376,6 +365,8 @@ The table you set up is still standing when you come back to it.
   attribution line beside it holds the name he asks for.
 
 ## 1.8.1 — 2026-08-08
+
+B-Sides, and songs in track order.
 
 **Added**
 - **B-Sides**, a Muse album that was never an album — 27 tracks that shipped on
@@ -402,7 +393,7 @@ The table you set up is still standing when you come back to it.
 
 ## 1.8.0 — 2026-08-07
 
-A category that isn't in the picker until someone finds it.
+Muse, a category that stays hidden until someone finds it.
 
 **Added**
 - **Muse**, a secret role category. The word is a studio album and your role is a
@@ -433,6 +424,8 @@ A category that isn't in the picker until someone finds it.
   cards label the word `Album` rather than `Genre`.
 
 ## 1.7.0 — 2026-08-07
+
+The lobby icons redrawn as one set.
 
 **Changed**
 - **The lobby icons were redrawn as one set**, on a shared 24×24 grid at a
@@ -480,13 +473,15 @@ The jester gets one last chance to steal the round.
 
 ## 1.5.1 — 2026-08-07
 
+Two buttons reworded.
+
 **Changed**
 - The results button reads `PLAY AGAIN` instead of `ENCORE · PLAY AGAIN`.
 - `BEGIN THE TRIAL` lost its trailing arrow.
 
 ## 1.5.0 — 2026-08-07
 
-A new category, pictured.
+Cuisines, with a photograph of the dish.
 
 **Added**
 - **Cuisines**, a new role category for either mode — the secret word is a
@@ -514,6 +509,8 @@ A new category, pictured.
 
 ## 1.4.2 — 2026-08-07
 
+The player list is saved.
+
 **Added**
 - **The player list is saved** to `localStorage` under `masq.players`, so the
   same group is waiting when you reopen the game instead of `Player 1` through
@@ -530,6 +527,8 @@ A new category, pictured.
 
 ## 1.4.1 — 2026-08-07
 
+Card artwork no longer lands late.
+
 **Fixed**
 - **Card artwork no longer lands late.** Every image a round can show is now
   fetched the moment the round is dealt, instead of when a player opens their
@@ -540,7 +539,7 @@ A new category, pictured.
 
 ## 1.4.0 — 2026-08-07
 
-The screen and music catalogs got a pass.
+The screen and music catalogs reworked.
 
 **Changed**
 - **Movie/TV Show Genres reworked** — 39 genres, 467 titles. `Alien Invasion`
@@ -569,6 +568,8 @@ The screen and music catalogs got a pass.
 
 ## 1.3.2 — 2026-08-07
 
+The results screen lists the company.
+
 **Added**
 - **The results screen lists the rest of the company** — every non-jester and
   the role they held, under the jester reveal. It reads off the same map the
@@ -579,7 +580,7 @@ The screen and music catalogs got a pass.
 
 ## 1.3.1 — 2026-08-07
 
-Housekeeping and one setting in a better place.
+Categories sort alphabetically everywhere they appear.
 
 **Changed**
 - Category order is alphabetical everywhere it shows: Biomes, Locations,
@@ -601,6 +602,8 @@ Housekeeping and one setting in a better place.
 
 ## 1.3.0 — 2026-08-07
 
+Animal photographs on Biomes cards.
+
 **Added**
 - **Animal photographs on Biomes cards**, from Wikipedia lead images — the
   picture an encyclopedia chose to stand for the animal, already cropped and
@@ -619,6 +622,8 @@ Housekeeping and one setting in a better place.
 
 ## 1.2.1 — 2026-08-06
 
+The stage renders in Safari again.
+
 **Fixed**
 - The stage renders in Safari again: the background gradient, and the top and
   bottom chrome coloring around it, which had been picking up the browser's own
@@ -629,6 +634,8 @@ Housekeeping and one setting in a better place.
   when the file was first written.
 
 ## 1.2.0 — 2026-08-06
+
+Album art on Music Genres cards.
 
 **Added**
 - **Album art on Music Genres cards**, from Deezer — the sleeve for the record
@@ -643,7 +650,7 @@ Housekeeping and one setting in a better place.
 
 ## 1.1.0 — 2026-08-05
 
-Artwork. The first cards that can carry a picture do.
+The first cards that can carry a picture do.
 
 **Added**
 - **Movie and TV posters on Movies and Movie/TV Show Genres cards**, from TMDB.
@@ -661,6 +668,8 @@ Artwork. The first cards that can carry a picture do.
 - Page title, description and social tags filled in.
 
 ## 1.0.2 — 2026-08-05
+
+A jester reveal screen of its own.
 
 **Added**
 - A dedicated jester reveal screen, and a way back off it. Tapping the wrong
@@ -689,6 +698,8 @@ Artwork. The first cards that can carry a picture do.
 - A run of further bugs across the reveal and voting flow.
 
 ## 1.0.1 — 2026-08-05
+
+Progressive jester odds.
 
 **Added**
 - **Progressive jester odds** — an option to weight selection toward players who
@@ -731,6 +742,8 @@ The game stopped being a draft.
 
 ## 0.9.1 — 2026-08-04
 
+Timer pause, and a shuffle that is actually even.
+
 **Added**
 - Timer pause and resume.
 
@@ -749,6 +762,8 @@ The game stopped being a draft.
   role the player was never shown.
 
 ## 0.9.0 — 2026-08-04
+
+Custom Categories.
 
 **Added**
 - **Custom Categories** — build your own word/role lists from Settings, saved to
@@ -769,6 +784,8 @@ The game stopped being a draft.
 
 ## 0.8.2 — 2026-08-04
 
+The last of the old name scrubbed out.
+
 **Changed**
 - The last of the old name scrubbed from the code — CSS class prefixes and
   animation names went from `impfall-*` to `masq-*`.
@@ -776,6 +793,8 @@ The game stopped being a draft.
   rewritten around the credits section.
 
 ## 0.8.1 — 2026-08-03
+
+Both new catalogs revised within a day of landing.
 
 **Changed**
 - Both catalogs revised within a day of landing: Music Genres to 25 genres and
@@ -785,7 +804,7 @@ The game stopped being a draft.
 
 ## 0.8.0 — 2026-08-02 → 2026-08-03
 
-Two catalogs, one of them new.
+Music Genres.
 
 **Added**
 - **Music Genres** — 23 genres, 10 tracks each. The word is the genre and your
@@ -799,6 +818,8 @@ Two catalogs, one of them new.
   that only ever existed to hold four good films went away.
 
 ## 0.7.3 — 2026-08-02
+
+Words can be crossed out of a category.
 
 **Added**
 - **Crossing out words in Settings**, so anything you'd rather not see never
@@ -816,10 +837,14 @@ Two catalogs, one of them new.
 
 ## 0.7.2 — 2026-07-30
 
+A preview image for a shared link.
+
 **Added**
 - A preview image for the README and the shared link.
 
 ## 0.7.1 — 2026-07-29
+
+Jester Mode becomes the easter egg.
 
 **Changed**
 - **Jester Mode became the easter egg.** Its Settings toggle was removed, and the
@@ -830,6 +855,8 @@ Two catalogs, one of them new.
 
 ## 0.7.0 — 2026-07-28
 
+Jester Mode.
+
 **Added**
 - **Jester Mode** — a chaotic neon-carnival take on the whole stage, and the
   first thing to prove the app could be themed at all. Every colour the interface
@@ -838,6 +865,8 @@ Two catalogs, one of them new.
   call-to-action gradient and its glow, the selected-tile treatment, the toggles.
 
 ## 0.6.1 — 2026-07-28
+
+A real Settings screen, How to Play, and Credits.
 
 **Added**
 - **A real Settings screen**, rebuilt around what had accumulated in it: Game
@@ -851,6 +880,8 @@ Two catalogs, one of them new.
 
 ## 0.6.0 — 2026-07-28
 
+Roles and words overhauled across the board.
+
 **Changed**
 - **Roles and words overhauled across the board**, and the data file restructured
   around it — 227 lines rewritten against 247 removed, roughly half of every
@@ -860,6 +891,8 @@ Two catalogs, one of them new.
   eight things a player can actually describe.
 
 ## 0.5.3 — 2026-07-24
+
+All Words, and the word list reworked alongside the roster.
 
 **Added**
 - **All Words**, reachable from Settings: every category listed with its word
@@ -872,6 +905,8 @@ Two catalogs, one of them new.
   screens that had grown by accretion rather than design.
 
 ## 0.5.2 — 2026-07-23
+
+A timer chime, and a sensible default roster.
 
 **Added**
 - Timer sound effect, as a Settings toggle — a chime when the clock runs out, for
@@ -888,6 +923,8 @@ Two catalogs, one of them new.
 
 ## 0.5.1 — 2026-07-23
 
+impfall becomes Masq.
+
 **Changed**
 - **impfall → Masq**, and `MASQUERADE` → `MASQ` in the app itself. Data files
   renamed to match.
@@ -895,8 +932,7 @@ Two catalogs, one of them new.
 
 ## 0.5.0 — 2026-07-23
 
-Both role catalogs rewritten, not added — Biomes shipped with the first build
-and Historical Eras arrived the same evening.
+Historical Eras and Biomes rewritten.
 
 **Changed**
 - **Historical Eras rewritten**, from 21 eras to 17, and every role in them made
@@ -915,6 +951,8 @@ and Historical Eras arrived the same evening.
   under each section brought to one measure.
 
 ## 0.4.1 — 2026-07-09
+
+A starting player, and a jester count that can be zero.
 
 **Added**
 - **A starting player**, drawn at random each round and named on the way into the
@@ -944,6 +982,8 @@ The rewrite that made the rest possible.
 
 ## 0.3.2 — 2026-07-08
 
+Movies as a word category.
+
 **Added**
 - **Movies as a word category** — 204 titles, twice the size of the three word
   lists it joined, bringing Word Mode to four categories and 504 words.
@@ -954,12 +994,16 @@ The rewrite that made the rest possible.
 
 ## 0.3.1 — 2026-07-08
 
+A round timer.
+
 **Added**
 - **A round timer**, set from the lobby, counting down through the trial. When it
   runs out the screen says so outright — "Time to Vote!", over a dimmed stage —
   rather than letting a table argue past a clock nobody was watching.
 
 ## 0.3.0 — 2026-07-08
+
+Word Mode.
 
 **Added**
 - **Word Mode** — everyone gets the same secret word, no roles — with three word
@@ -970,6 +1014,8 @@ The rewrite that made the rest possible.
   their own and left to work out that nobody else has it.
 
 ## 0.2.1 — 2026-07-08
+
+Published to GitHub Pages.
 
 **Added**
 - **Published to GitHub Pages**, and given a title to be published under.
@@ -986,6 +1032,8 @@ The rewrite that made the rest possible.
 
 ## 0.2.0 — 2026-07-07
 
+Historical Eras and Movie Genres.
+
 **Added**
 - **Historical Eras** — 21 eras, 8 roles each.
 - **Movie Genres** — 12 genres, 8 films each. The word is the genre and your role
@@ -995,10 +1043,14 @@ The rewrite that made the rest possible.
 
 ## 0.1.1 — 2026-07-07
 
+The first fixes, hours after the first build.
+
 **Fixed**
 - The first round of fixes on the first build, hours after it existed.
 
 ## 0.1.0 — 2026-07-07
+
+The first playable build.
 
 **Added**
 - **First playable build**: pass-the-phone social deduction, one phone, a secret

@@ -83,6 +83,54 @@
   const FOOD_CREDITS = toCredits(window.MASQ_FOOD_CREDITS);
   const OBJECT_CREDITS = toCredits(window.MASQ_OBJECT_CREDITS);
 
+  // CHANGELOG.md, rendered in Settings. It is fetched when the screen is opened
+  // rather than shipped in a script tag: 53KB on every load, for a page most
+  // players never open, would cost more than the feature is worth.
+  //
+  // These two parsers read the small dialect the changelog actually uses — '## '
+  // headings, a bold line naming a section, '- ' items whose wrapped lines are
+  // indented under them, and paragraphs — and nothing else. A general Markdown
+  // library would be larger than the file it is here to read.
+  function inlineMarkdown(text) {
+    const nodes = [];
+    const re = /\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)|\*([^*\n]+)\*/g;
+    let last = 0, m, key = 0;
+    while ((m = re.exec(text))) {
+      if (m.index > last) nodes.push(text.slice(last, m.index));
+      if (m[1] !== undefined) nodes.push(h('strong', { key: key++, style: css('color:var(--m-text); font-weight:600;') }, m[1]));
+      else if (m[2] !== undefined) nodes.push(h('code', { key: key++, style: css("font-family:'Archivo',monospace; font-size:.86em; padding:1px 5px; border-radius:5px; background:var(--m-lift); color:var(--m-brand);") }, m[2]));
+      else if (m[3] !== undefined) nodes.push(h('a', { key: key++, href: m[4], target: '_blank', rel: 'noopener noreferrer' }, m[3]));
+      else nodes.push(h('em', { key: key++ }, m[5]));
+      last = re.lastIndex;
+    }
+    if (last < text.length) nodes.push(text.slice(last));
+    return nodes;
+  }
+
+  function parseChangelog(md) {
+    const lines = md.split(/\r?\n/);
+    const blocks = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // The file's own '# Changelog' title is dropped — the screen has one.
+      if (line.trim() === '' || /^# /.test(line)) continue;
+      if (/^## /.test(line)) { blocks.push({ type: 'version', text: line.slice(3).trim() }); continue; }
+      if (/^\*\*(.+)\*\*$/.test(line.trim())) { blocks.push({ type: 'label', text: line.trim().replace(/^\*\*|\*\*$/g, '') }); continue; }
+      if (/^- /.test(line)) {
+        let text = line.slice(2);
+        while (i + 1 < lines.length && /^\s+\S/.test(lines[i + 1])) text += ' ' + lines[++i].trim();
+        blocks.push({ type: 'item', text });
+        continue;
+      }
+      let text = line.trim();
+      while (i + 1 < lines.length && lines[i + 1].trim() !== '' && !/^(#|-\s|\*\*)/.test(lines[i + 1].trim())) {
+        text += ' ' + lines[++i].trim();
+      }
+      blocks.push({ type: 'note', text });
+    }
+    return blocks;
+  }
+
   // Each medium keeps its own shape: a poster stands 2:3, a sleeve is square, a
   // wildlife photo is 4:3 landscape. Cropped to fill, so the wrong frame cuts
   // the subject out of its own picture.
@@ -398,6 +446,10 @@
   // this and then back to 0, so it's the wrap point as well as the ceiling —
   // both the stepper and the bounds check below read it from here.
   const TIME_LIMIT_MAX = 15;
+
+  // Printed at the foot of Settings and beside What's New, and matching the top
+  // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
+  const APP_VERSION = '1.11.4';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -827,6 +879,9 @@
       playerList: INITIAL_PLAYERS.map(p => p.name),
       playerKeys: INITIAL_PLAYERS.map(p => p.id),
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
+      // Fetched the first time Settings → What's New is opened, then kept for
+      // the rest of the session. Not saved: it lives in the file, not the table.
+      changelog: null, changelogStatus: 'idle',
       // Mode, categories, jesters, clock, options and theme, restored as the
       // table left them. Fields and opening values are in DEFAULT_SETTINGS.
       ...INITIAL_SETTINGS,
@@ -956,6 +1011,19 @@
       el.style.maxHeight = 'none';
       const scale = Math.min(vw / BASE_W, vh / BASE_H, MAX_SCALE);
       el.style.transform = 'scale(' + scale + ')';
+    }
+
+    // Fetched once per session and kept. Opened from a file:// page the request
+    // fails on origin rules rather than on anything being wrong, so the error
+    // state offers the copy on GitHub instead of claiming the file is missing.
+    __loadChangelog() {
+      const status = this.state.changelogStatus;
+      if (status === 'loading' || status === 'ready') return;
+      this.setState({ changelogStatus: 'loading' });
+      fetch('./CHANGELOG.md')
+        .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.text(); })
+        .then((text) => this.setState({ changelog: parseChangelog(text), changelogStatus: 'ready' }))
+        .catch(() => this.setState({ changelogStatus: 'error' }));
     }
 
     __clearTimer() {
@@ -1343,6 +1411,7 @@
         isModalGameSettings: st.modal === 'gameSettings',
         isModalWordList: st.modal === 'wordList',
         isModalCredits: st.modal === 'credits',
+        isModalChangelog: st.modal === 'changelog',
         photoCredits: PHOTO_CREDITS,
         foodCredits: FOOD_CREDITS,
         objectCredits: OBJECT_CREDITS,
@@ -1365,6 +1434,11 @@
         openGameSettings: () => this.setState({ modal: 'gameSettings' }),
         openWordList: () => this.setState({ modal: 'wordList', wordListExpanded: [] }),
         openCredits: () => this.setState({ modal: 'credits' }),
+        openChangelog: () => { this.setState({ modal: 'changelog' }); this.__loadChangelog(); },
+        retryChangelog: () => { this.setState({ changelogStatus: 'idle' }, () => this.__loadChangelog()); },
+        changelog: st.changelog,
+        changelogStatus: st.changelogStatus,
+        appVersion: APP_VERSION,
         // Reachable from Settings and from the Categories picker; close returns
         // to whichever you came in through.
         openCustom: () => this.setState(prev => ({ modal: 'custom', customFrom: prev.modal === 'categories' ? 'categories' : 'settings', customDeleteId: null })),
@@ -2402,16 +2476,68 @@
               h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.lightModeThumb}; transition:transform .25s;`) })
             )
           ),
+          h('div', { ...press(v.openChangelog), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, "What's New"),
+            h('div', { style: css('display:flex; align-items:center; gap:9px;') },
+              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim);") }, v.appVersion),
+              h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
+            )
+          ),
           h('div', { ...press(v.openCredits), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Credits'),
             h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
           ),
           h('div', { style: css('padding:14px 16px; background:var(--m-lift); border-radius:12px; text-align:center;') },
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:16px; color:var(--m-brand);"), className: 'j-title' }, 'MASQ'),
-            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION 1.11.4')
+            h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim); margin-top:4px; letter-spacing:.06em;") }, 'VERSION ' + APP_VERSION)
           )
         )
       );
+    }
+
+    changelogModal(v) {
+      const shell = (body) => h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
+        h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, "What's New"),
+          h('div', { ...press(v.openSettings, 'Back to settings'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+        ),
+        body
+      );
+      const message = (text, action) => h('div', { style: css('padding:30px 4px; text-align:center;') },
+        h('div', { style: css("font-family:'EB Garamond',serif; font-size:15px; color:var(--m-muted); line-height:1.5;") }, text),
+        action || null
+      );
+
+      if (v.changelogStatus === 'error') {
+        return shell(message('The changelog couldn\'t be loaded — it\'s read from the file next to the game, which a page opened straight off disk isn\'t allowed to do.',
+          h('div', { style: css('display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:16px;') },
+            h('div', { ...press(v.retryChangelog, 'Try loading the changelog again'), className: 'masq-btn', style: css("display:inline-block; padding:9px 20px; border-radius:10px; background:var(--m-lift); border:1px solid var(--m-border-hard); font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:var(--m-text); cursor:pointer;") }, 'Try again'),
+            h('a', { href: 'https://github.com/arnavpodichetty/masq/blob/main/CHANGELOG.md', target: '_blank', rel: 'noopener noreferrer', style: css("font-family:'EB Garamond',serif; font-size:13px;") }, 'Read it on GitHub')
+          )));
+      }
+      if (v.changelogStatus !== 'ready' || !v.changelog) return shell(message('Loading…'));
+
+      // One flat list rather than a block per release: a version heading is just
+      // the rule that starts the next one, so nothing has to be nested to read
+      // as grouped.
+      return shell(h('div', null,
+        v.changelog.map((b, i) => {
+          if (b.type === 'version') {
+            return h('div', { key: i, style: css(`margin:${i ? '26px' : '0'} 0 10px; padding-top:${i ? '18px' : '0'}; border-top:${i ? '1px solid var(--m-border-soft)' : 'none'};`) },
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-brand);") }, b.text));
+          }
+          if (b.type === 'label') {
+            return h('div', { key: i, style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin:16px 0 8px;") }, b.text);
+          }
+          if (b.type === 'item') {
+            return h('div', { key: i, style: css('display:flex; gap:9px; margin-bottom:8px;') },
+              h('div', { style: css('flex:none; color:var(--m-accent); line-height:1.55;') }, '·'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-body); line-height:1.55;") }, inlineMarkdown(b.text))
+            );
+          }
+          return h('div', { key: i, style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); line-height:1.55; margin-bottom:10px;") }, inlineMarkdown(b.text));
+        })
+      ));
     }
 
     creditsModal(v) {
@@ -2525,6 +2651,7 @@
           v.isModalGameSettings && this.gameSettingsModal(v),
           v.isModalSettings && this.settingsModal(v),
           v.isModalWordList && this.wordListModal(v),
+          v.isModalChangelog && this.changelogModal(v),
           v.isModalCredits && this.creditsModal(v),
           v.isModalPlayers && this.playersModal(v),
           v.isModalCustom && this.customModal(v),
