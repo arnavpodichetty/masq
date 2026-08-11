@@ -19,6 +19,34 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.11.2 — 2026-08-11
+
+The options screens, tidied.
+
+**Changed**
+- **The time limit reaches 15 minutes**, up from 10, and both arrows now walk the
+  whole dial: no limit, 1, 2 … 15, and round to no limit again. The ceiling is a
+  single constant rather than a number written separately into the stepper and
+  the bounds check, which is how a maximum ends up disagreeing with itself.
+- **Show Progressive Jester Odds moved out of Settings and into Jesters**, where
+  it reads **Show Odds** and sits directly above the percentages it uncovers. It
+  appears only once Progressive is the selected pick mode: the odds were always a
+  Progressive-only reading, so in Settings it was a switch kept a screen away
+  from the only thing it could change.
+- **Game Options reordered** — Show Category, Jester Gets Role, Show Word,
+  Jesters Know Each Other, Jester Hints.
+- **The Timer Sound Effect row matches the toggles around it.** Its title was the
+  last one still set in EB Garamond 16px while every other title-and-subtitle
+  toggle — Show Category, Random Count, Jester Hints — uses Cinzel 15px, and its
+  subtitle sat a point under theirs.
+
+**Fixed**
+- **The `+` on the time dial did nothing at "No limit."** It resolved `0` back to
+  `0`, so the only way off ∞ was `−`, which jumped straight to 10; `−` then
+  floored at 1 and never came back around. Neither arrow was a dead end after the
+  other had been pressed, which is why it went unnoticed — but each had a corner
+  it couldn't leave. Both now move through every value.
+
 ## 1.11.1 — 2026-08-10
 
 Two names put right.
