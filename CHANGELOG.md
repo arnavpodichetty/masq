@@ -19,6 +19,31 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.11.3 — 2026-08-11
+
+Masq has its own address.
+
+**Added**
+- **The game lives at [masq.games](https://masq.games).** `www.masq.games`
+  redirects to it, and so does the old `arnavpodichetty.github.io/masq/`, so
+  every link ever shared still lands on the game. Served over HTTPS on a Let's
+  Encrypt certificate, with plain HTTP redirected up to it.
+- **A `CNAME` file at the repo root**, holding the domain. DNS only gets a
+  browser as far as GitHub's front door — every Pages site answers on the same
+  four addresses — and this file is what tells GitHub which site a request for
+  `masq.games` is asking for. It's the one file here that isn't part of the
+  game, and deleting it would take the domain down while leaving the site up at
+  its old address.
+
+**Changed**
+- **The share card points at the new domain.** `og:image` and `twitter:image`
+  still named the `github.io` URL, which resolves only by redirect, and a
+  scraper fetching a preview isn't obliged to follow one — the image could
+  simply have failed to appear. An `og:url` now names the canonical address
+  too, so a link shared from anywhere is credited to `masq.games`.
+- **The README lists one place to play.** It had offered the Pages URL and a
+  Vercel mirror; there is one address now, and it's the one on the tin.
+
 ## 1.11.2 — 2026-08-11
 
 The options screens, tidied.
