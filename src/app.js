@@ -394,6 +394,11 @@
   };
   const SETTINGS_FIELDS = Object.keys(DEFAULT_SETTINGS);
 
+  // The top of the time dial, in minutes. The dial runs 0 (no limit) through
+  // this and then back to 0, so it's the wrap point as well as the ceiling —
+  // both the stepper and the bounds check below read it from here.
+  const TIME_LIMIT_MAX = 15;
+
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
   const asCount = (v, min, max, fallback) => (typeof v === 'number' && isFinite(v)
@@ -451,8 +456,8 @@
       jesterRandMax: asCount(saved.jesterRandMax, 0, 99, DEFAULT_SETTINGS.jesterRandMax),
       jesterSelection: asOneOf(saved.jesterSelection, ['random', 'progressive'], DEFAULT_SETTINGS.jesterSelection),
       showJesterOdds: asBool(saved.showJesterOdds, DEFAULT_SETTINGS.showJesterOdds),
-      // 0 is 'no limit', and the dial stops at ten minutes.
-      timeLimit: asCount(saved.timeLimit, 0, 10, DEFAULT_SETTINGS.timeLimit),
+      // 0 is 'no limit', and the dial stops at TIME_LIMIT_MAX minutes.
+      timeLimit: asCount(saved.timeLimit, 0, TIME_LIMIT_MAX, DEFAULT_SETTINGS.timeLimit),
       soundEffects: asBool(saved.soundEffects, DEFAULT_SETTINGS.soundEffects),
       showCategory: asBool(saved.showCategory, DEFAULT_SETTINGS.showCategory),
       showWord: asBool(saved.showWord, DEFAULT_SETTINGS.showWord),
@@ -1684,8 +1689,11 @@
         timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
         timeLimitUnit: st.timeLimit === 0 ? 'No limit' : st.timeLimit === 1 ? 'minute' : 'minutes',
         timeLimitRow: st.timeLimit === 0 ? 'No limit' : st.timeLimit + ' min',
-        incTime: () => this.setState({ timeLimit: st.timeLimit === 0 ? 0 : st.timeLimit >= 10 ? 0 : st.timeLimit + 1 }),
-        decTime: () => this.setState({ timeLimit: st.timeLimit === 0 ? 10 : Math.max(st.timeLimit - 1, 1) }),
+        // One cycle, both ways: no limit, 1, 2 … TIME_LIMIT_MAX, and round to no
+        // limit again. Holding either arrow walks the whole dial rather than
+        // parking at an end, so neither direction is a dead stop.
+        incTime: () => this.setState({ timeLimit: (st.timeLimit + 1) % (TIME_LIMIT_MAX + 1) }),
+        decTime: () => this.setState({ timeLimit: (st.timeLimit + TIME_LIMIT_MAX) % (TIME_LIMIT_MAX + 1) }),
         hasTimeLimit: st.timeLimit > 0,
         timerDisplay: (() => {
           const total = st.secondsLeft != null ? st.secondsLeft : st.timeLimit * 60;
@@ -2066,8 +2074,19 @@
             h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.progressivePickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Recent jesters get picked less often')
           )
         ),
-        // Off by default; Settings → Show Progressive Jester Odds.
+        // Off by default. The switch sits here rather than in Settings: the odds
+        // are a Progressive-only reading, so the toggle means nothing until this
+        // branch is on screen, and a screen away it was hard to connect to.
         v.isProgressiveJester && h('div', { style: css('margin-top:12px; animation:masq-rise .2s ease both;') },
+          h('div', { ...press(v.toggleShowJesterOdds, 'Show progressive jester odds', { role: 'switch', 'aria-checked': String(v.showJesterOdds) }), className: 'masq-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:12px;') },
+            h('div', { style: css('flex:1;') },
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Show Odds'),
+              h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, 'Each player’s chance of drawing the jester next round')
+            ),
+            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showJesterOddsBg}; transition:background .25s; flex:none;`) },
+              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showJesterOddsThumb}; transition:transform .25s;`) })
+            )
+          ),
           v.showJesterOdds && h(React.Fragment, null,
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin-bottom:7px;") }, 'Odds next round'),
             h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;') },
@@ -2104,8 +2123,8 @@
         // rather than in Settings. Dimmed at 'No limit', where nothing expires.
         h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css(`display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin-top:20px; background:var(--m-lift); border-radius:12px; cursor:pointer; opacity:${v.hasTimeLimit ? '1' : '.45'}; transition:opacity .2s;`) },
           h('div', null,
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Timer Sound Effect'),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-muted); margin-top:2px;") }, v.soundEffectsNote)
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Timer Sound Effect'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); margin-top:2px;") }, v.soundEffectsNote)
           ),
           h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.soundEffectsBg}; transition:background .25s; flex:none;`) },
             h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.soundEffectsThumb}; transition:transform .25s;`) })
@@ -2375,12 +2394,6 @@
             h('div', { style: css('display:flex; align-items:center; gap:9px;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-dim);") }, v.customCountLabel),
               h('div', { style: css('color:var(--m-dim2); font-size:18px;') }, '›')
-            )
-          ),
-          h('div', { ...press(v.toggleShowJesterOdds, 'Show progressive jester odds', { role: 'switch', 'aria-checked': String(v.showJesterOdds) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:16px; color:var(--m-body);") }, 'Show Progressive Jester Odds'),
-            h('div', { style: css(`position:relative; width:44px; height:24px; border-radius:12px; background:${v.showJesterOddsBg}; transition:background .25s; flex:none;`) },
-              h('div', { style: css(`position:absolute; top:2px; left:0; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); transform:${v.showJesterOddsThumb}; transition:transform .25s;`) })
             )
           ),
           h('div', { ...press(v.toggleLightMode, 'Light mode', { role: 'switch', 'aria-checked': String(v.lightMode) }), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
