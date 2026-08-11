@@ -19,6 +19,42 @@ Where an entry names a count — 39 locations, 471 titles, 140 songs — it's th
 count as of that release, read back out of the catalogs at that commit rather
 than remembered.
 
+## 1.11.4 — 2026-08-11
+
+Findable, for the first time.
+
+**Added**
+- **The page now says something without JavaScript.** The whole game is drawn by
+  script, so `<body>` was one empty `<div>` — a crawler that doesn't run JS read
+  a title, a description and nothing else, which is nothing to match a search
+  against. Inside that div there is now a heading, what the game is, how a round
+  goes, the categories, and answers to the two questions anyone asks first. It
+  is cleared the instant `createRoot().render()` mounts, so no player sees it;
+  it is the same claim the app makes, not a second pitch written for search
+  engines. Zero indexable words became 282.
+- **`robots.txt` and `sitemap.xml`.** Neither is required for a site of one
+  page — Google can hardly fail to find the root of a domain — but the sitemap
+  gives Search Console something to report against, and `robots.txt` is where
+  crawling gets controlled if there is ever a second page.
+- **A `canonical` link and a `VideoGame` block of JSON-LD.** Three URLs serve
+  this game — the apex, `www`, and the old Pages address — and the canonical
+  says which one earns the credit rather than splitting it three ways.
+- **`max-image-preview:large`**, which lets a result carry a full-size image
+  instead of a thumbnail.
+
+**Changed**
+- **The title and description are written for someone who has never heard of
+  Masq.** "Masq — Social Deduction Party Game" is a good name and a bad search
+  result: nobody types `masq`, because nobody knows it exists. Both now lead
+  with the words people do type — free, party game, one phone, no app.
+- **The X card is `summary`, not `summary_large_image`.** `masq.png` is a
+  534x1000 portrait phone shot and the large card crops to about 2:1, so
+  everyone who shared the game got a band from the middle of the screenshot.
+  The small card crops square, which a portrait image survives. Worth revisiting
+  if a 1200x630 card is ever drawn for it.
+- `og:site_name`, the image's dimensions, and alt text on both preview images,
+  so a scraper can lay the card out without fetching the file first.
+
 ## 1.11.3 — 2026-08-11
 
 Masq has its own address.

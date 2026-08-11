@@ -68,14 +68,19 @@ tools/
 ├── fetch-objects.js   Node script, regenerates src/artwork/objects.js from Wikipedia
 └── fetch-posters.js   Node script, regenerates src/artwork/posters.js from TMDB
 CHANGELOG.md           what changed in each version
+CNAME                  the custom domain, read by GitHub Pages on deploy
 favicon.svg            tab icon (the comedy mask)
 index.html             page shell, fonts, meta, and the CSS for Jester Mode
 LICENSE
 masq.png               screenshot, used by this README and as the link-preview image
 README.md
+robots.txt             crawl permission, and where the sitemap is
+sitemap.xml            the one page, for Search Console
 ```
 
-`index.html` stays at the repo root because both hosts serve the repository root as a static site — moving it would take the live links down. It loads `src/data_roles.js` and `src/data_words.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js`, `src/artwork/food.js` and `src/artwork/objects.js`, then `src/app.js`.
+`index.html` stays at the repo root because GitHub Pages serves the repository root as a static site — moving it would take the live site down. It loads `src/data_roles.js` and `src/data_words.js`, then `src/artwork/posters.js`, `src/artwork/albums.js`, `src/artwork/animals.js`, `src/artwork/food.js` and `src/artwork/objects.js`, then `src/app.js`.
+
+The markup inside `<div id="root">` is not dead code. `createRoot().render()` clears that container, so the moment React mounts it is gone and no player ever sees it — it is there for the crawlers that don't run JavaScript, which would otherwise find a page with a title and no content at all, since the whole game is drawn by script. Deleting it takes the site's indexable text back to nothing. The `.noscript-copy` rule above it exists for the same reason: on a slow connection that copy paints for a moment before the scripts land, and unstyled it would be black text on a near-black page.
 
 The five artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data_roles.js` or a word list in `src/data_words.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js`, `fetch-cuisines.js` and `fetch-objects.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two *roles* resolve to the same photograph, which would show two players the same card in one round.
 
