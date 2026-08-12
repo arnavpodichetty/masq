@@ -295,7 +295,7 @@
   const OPEN_ROLE_CATEGORIES = ROLE_CATEGORIES.filter(c => c !== MUSE_CATEGORY);
   // The word-only categories, in the order their tiles render. A constant
   // rather than state, unlike the role list: nothing ever unlocks into it.
-  const WORD_CATEGORIES = ['Animals', 'Food/Drinks', 'Movies/TV', 'Objects'];
+  const WORD_CATEGORIES = ['Animals', 'Food/Drinks', 'Movies/TV', 'Numbers', 'Objects'];
 
   // Categories that have been renamed, old name to new. A saved lobby and a
   // crossed-out word list both key off the name, so without this a rename drops
@@ -431,7 +431,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.12.4';
+  const APP_VERSION = '1.12.5';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -1177,6 +1177,7 @@
         if (category === 'Animals') return wordOnlyCatalog.Animals;
         if (category === 'Objects') return wordOnlyCatalog.Objects;
         if (category === 'Movies/TV') return wordOnlyCatalog['Movies/TV'];
+        if (category === 'Numbers') return wordOnlyCatalog.Numbers;
         return locationNames;
       };
       // Crossed-out words are skipped; the word list keeps at least one per
@@ -1246,6 +1247,7 @@
       const isAnimalsRound = roundCategory === 'Animals';
       const isObjectsRound = roundCategory === 'Objects';
       const isMoviesWordRound = roundCategory === 'Movies/TV';
+      const isNumbersRound = roundCategory === 'Numbers';
       const isCustomRound = !!customByName[roundCategory];
       const actOnePlayers = players.map(p => {
         const seen = !!st.viewed[p.id];
@@ -1360,7 +1362,7 @@
         apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (apRoleAlbum ? '16px' : ((apRoleAnimal || apRoleFood) ? '18px' : (isBiomeRound ? '22px' : (isCuisineRound ? '20px' : (isMuseRound ? (apRoleMuseCover ? '15px' : '17px') : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))))))),
         apWord: apWordShown,
         apArt, apArtW, apArtH, apArtFocus: apArtShape.focus,
-        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isCuisineRound ? 'Cuisine' : (isMovieTvRound ? 'Genre' : (isMuseRound ? 'Album' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food / Drink' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : 'Location'))))))))),
+        apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isCuisineRound ? 'Cuisine' : (isMovieTvRound ? 'Genre' : (isMuseRound ? 'Album' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food / Drink' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : (isNumbersRound ? 'Number' : 'Location')))))))))),
         // Artwork eats most of the card, so long titles shrink to stay inside it
         // rather than clipping against overflow:hidden.
         apWordSize: apArt ? '17px' : (isBiomeRound ? '20px' : '22px'),
@@ -1397,7 +1399,10 @@
         revealRoundWord: () => this.setState({ resultsWordShown: true }),
         // What the jester picks from: the pool the round was dealt out of,
         // crossed-out words included, sorted for scanning.
-        roundWordPool: [...getWordPool(roundCategory)].sort((a, b) => a.localeCompare(b)),
+        // `numeric` so Numbers reads 1, 2, 10, 100 rather than the 1, 10, 100, 2
+        // a plain string sort gives. It changes nothing for the word categories:
+        // it only takes effect on digits, and none of them lead with any.
+        roundWordPool: [...getWordPool(roundCategory)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
         poolOpen: st.resultsPoolOpen,
         openWordPool: () => this.setState({ resultsPoolOpen: true }),
         closeWordPool: () => this.setState({ resultsPoolOpen: false }),
@@ -1565,6 +1570,7 @@
           { cat: 'Animals', words: wordOnlyCatalog.Animals },
           { cat: 'Food/Drinks', words: wordOnlyCatalog['Food/Drinks'] },
           { cat: 'Movies/TV', words: wordOnlyCatalog['Movies/TV'] },
+          { cat: 'Numbers', words: wordOnlyCatalog.Numbers },
           { cat: 'Objects', words: wordOnlyCatalog.Objects },
         ].map(g => {
           const open = (st.wordListExpanded || []).includes(g.cat);
@@ -1989,6 +1995,8 @@
             nextRound = buildWordOnlyRound('Objects');
           } else if (chosenCategory === 'Movies/TV') {
             nextRound = buildWordOnlyRound('Movies/TV');
+          } else if (chosenCategory === 'Numbers') {
+            nextRound = buildWordOnlyRound('Numbers');
           } else {
             nextRound = buildRound('Locations', pickFrom('Locations'), locationCatalog, fakeLocationRoleCatalog);
           }

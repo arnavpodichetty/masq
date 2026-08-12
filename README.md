@@ -21,7 +21,7 @@ The lobby is saved in `localStorage`, so the table you set up is still standing 
 **Categories**
 
 - Either mode: Biomes, Cuisines, Locations, Movie/TV Show Genres, Music Genres
-- Word Mode only: Animals, Food/Drinks, Movies/TV, Objects
+- Word Mode only: Animals, Food/Drinks, Movies/TV, Numbers, Objects
 - Your own, via Settings → Custom Categories — saved in `localStorage`, so they stay on that device
 
 **A round**

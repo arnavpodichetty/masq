@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.12.5 — 2026-08-12
+
+A category with nothing to picture and nothing to hint at.
+
+**Added**
+- **Numbers, a Word Mode category.** Every integer from 0 to 100, then 200, 500
+  and 1000 — 104 in all. It carries no artwork and no jester hints, and needs
+  neither: the answer is the whole card, and there is no clue to give about 47
+  that isn't the number itself. Written to the same six places in `app.js` every
+  other word category is, so it appears in the picker, in View All Words where
+  its entries can be crossed out, and in the round builder.
+  Meant for Duel Mode above all, where two players hold different words from one
+  category and question each other — numbers give that a scale to argue along,
+  and the three round jumps past 100 keep the top of the range from bunching up.
+
+**Fixed**
+- **The jester's word pool counts rather than spells.** The list a jester picks
+  their guess from is sorted, and sorted as text it read 1, 10, 100, 11, 12, 2 —
+  fine for every category that existed until now, useless for this one. The sort
+  is numeric-aware, which changes nothing elsewhere: it only takes effect on
+  digits, and no other entry in the game leads with one.
+
 ## 1.12.4 — 2026-08-12
 
 Who made this, and how many people are playing it.
@@ -92,6 +114,16 @@ Spiral Static goes back on the record, and the word list says what it's for.
   song falls through to Showbiz's sleeve — the same picture the override was
   already pointing at, which is how it went unnoticed. Nothing changes on
   screen.
+- **How to Play says what the two modes are for.** Recorded late: this shipped
+  in 1.12.2 and went unwritten until 1.12.5. The Setup card now draws *a
+  category* at random rather than the ambiguous "one". Role Mode says the role
+  is unique, that the mode is meant to be played with the word hidden so the
+  questions stay about roles, and that Show Word turns it into something closer
+  to Word Mode. Word Mode names Jester Hints as the one clue a jester can be
+  handed. And a **Duel Mode** card explains the two-player game — a different
+  word each from one category, questions back and forth, first to name the
+  other's word wins — shown only once the mode has been found, since naming it
+  any earlier would give away what the lobby is hiding.
 
 ## 1.12.1 — 2026-08-11
 
