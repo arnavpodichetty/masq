@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.12.3 — 2026-08-12
+
+A name and a face in the search results.
+
+**Added**
+- **`favicon.ico`, `icons/favicon-96.png` and `icons/apple-touch-icon.png`**,
+  all three rendered from `icons/favicon.svg`, which until now was the only
+  icon the site had.
+  A browser tab takes an SVG happily; Google Search is written around the
+  formats of the `.ico` era and looks for `/favicon.ico` at the root whether or
+  not a page points at one — ours answered 404, which is why the result carried
+  a blank globe. The `.ico` holds 16, 32 and 48px, the PNG is 96px, and Apple's
+  is 180px on the app's own dark background rather than the transparency the
+  others keep, since iOS lays a home-screen icon on whatever is behind it.
+- **`WebSite` structured data naming the site Masq.** Search fell back to
+  printing `masq.games` above the result because nothing on the page claimed a
+  name it trusted: `og:site_name` has said Masq since 1.11.4, but it is a hint
+  that loses to the URL, and the `VideoGame` block names the game rather than
+  the site. This is the one signal that settles it, and it only counts on the
+  home page at the root of a domain.
+
+**Changed**
+- **The icons live in `icons/`**, which takes the repo root back down to the
+  files that have to be there. `favicon.ico` is the one left behind, and on
+  purpose: every other icon is found through a `<link>` tag naming it, but that
+  filename is asked for at the root by convention whether a page points at it
+  or not, and a 404 there is the whole reason the result came back blank.
+- The icon files are load-bearing URLs now, so the README says not to rename
+  them: Search stops trusting a favicon that moves around.
+
+Both take days to weeks to show up — Search recrawls a favicon on its own
+schedule, and the domain itself is a day old. The result on screen today is
+also still quoting the title from before 1.11.4, so what is up there now
+predates every part of that release.
+
 ## 1.12.2 — 2026-08-11
 
 Spiral Static goes back on the record, and the word list says what it's for.
