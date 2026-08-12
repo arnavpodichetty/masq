@@ -2274,12 +2274,13 @@
 
     helpModal(v) {
       const cards = [
-        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add players, pick a mode, choose categories. Each round draws one at random.' },
-        { border: '#7a1620', title: 'Role Mode', body: 'Everyone gets a secret role tied to the word. The Jester gets nothing.' },
-        { border: '#14254a', title: 'Word Mode', body: 'Everyone gets the same secret word, no roles. The Jester gets nothing.' },
+        { border: 'var(--m-accent)', title: 'The Setup', body: 'Add players, pick a mode, choose categories. Each round draws a category at random.' },
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so everyone reads their card in private, then take turns asking each other questions. Prove you know the secret without giving it away.' },
-        { border: '#b5893c', title: 'The Unmasking', body: 'When you’re ready or the timer runs out argue it out, name your Jester, then tap to reveal.' },
-        { border: '#2f8f7a', title: 'Make It Yours', body: 'Cross out any words you’d rather not see, or build categories of your own, from Settings.' },
+        { border: '#7a1620', title: 'Role Mode', body: 'Everyone gets a unique role tied to the word. The Jester gets nothing. Meant to be played with the word hidden so questions are more role-focused than word-focused. You can also turn Show Word on and play with that too (similar to Word Mode).' },
+        { border: '#14254a', title: 'Word Mode', body: 'Everyone gets the same secret word, no roles. The Jester gets nothing, though Jester Hints can hand them a single clue about the word to bluff with.' },
+        // Only once the mode has been found. Naming it here otherwise would give
+        // away a secret the lobby is keeping.
+        ...(v.duelUnlocked ? [{ border: '#6b4ea8', title: 'Duel Mode', body: 'Two players, no Jester. You each get a different word from the same category, then take turns asking each other questions. First one to name the other’s word wins.' }] : []),
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
