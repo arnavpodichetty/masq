@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.12.1 — 2026-08-11
+
+Both secrets go back into hiding.
+
+**Changed**
+- **Muse and Duel Mode are found again every time.** Neither unlock is written
+  down any more: it lasts as long as the tab, and a refresh puts both back where
+  they were hidden. This undoes the saved unlock 1.9.0 added for Muse and the
+  one 1.12.0 shipped for Duel — the entries above describe what those releases
+  did, which is why they still say the unlock is remembered. Any flag a previous
+  release saved is simply never read again, so an unlocked device goes back to
+  locked on its next visit.
+
+**Fixed**
+- **The page no longer flashes a wall of text on reload.** The copy inside
+  `<div id="root">` is what a crawler reads, so it has to be in the HTML before
+  the scripts run — which meant it painted for as long as React took to arrive
+  from the CDN, and a hard reload showed it every time. It now waits 1.2s before
+  fading in, and React clears the container long before that on any normal load.
+  Held at zero opacity rather than `display:none` on purpose: hidden text counts
+  for nothing, and this has to stay content a reader would actually get if the
+  scripts never landed.
+
 ## 1.12.0 — 2026-08-11
 
 A mode for two, and this file readable from inside the game.
