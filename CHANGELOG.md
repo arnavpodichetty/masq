@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.12.4 — 2026-08-12
+
+Who made this, and how many people are playing it.
+
+**Added**
+- **Google Analytics on the site.** The tag loads asynchronously, so a slow or
+  blocked request never holds up the game, and nothing in the app reads back
+  from it. It counts arrivals at the page and little else: Masq is one screen
+  that never changes its URL, so moving from setup to the pass-and-play cards to
+  the reveal leaves no trace. Anything finer — how many people who land actually
+  start a round — would need events wired into the screen changes themselves.
+
+**Changed**
+- **The shared preview image is the game as it looks now.** `masq.png` was the
+  setup screen from before Role Mode's description was rewritten, before the
+  category list settled on its current five, and before every settings icon was
+  redrawn — old enough to advertise a version nobody can play. Retaken from the
+  live build at the framing the old one used, then cropped in to the interface,
+  which leaves it 963×1804. `og:image:width` and `og:image:height` say so.
+- **The preview's alt text describes the preview.** `og:image:alt` and
+  `twitter:image:alt` both promised a player card showing the secret word with
+  the role beneath it. The file behind them has been the setup screen the whole
+  time, so the description went to screen readers and to Search attached to a
+  picture that was never there. Both now say what the image shows.
+- **The README credits read like the Credits screen.** That screen has long
+  listed Arnav Podichetty under `Creator & Code`, Richard Chen under
+  `Creator & Concept`, and Esha Bansiya under `Contributions`. The README had
+  flattened the three into a single sentence — two creators and a contributor,
+  with no word on who did what. Each has their own sentence now, and the two
+  creators are the bolded names.
+
 ## 1.12.3 — 2026-08-12
 
 A name and a face in the search results.

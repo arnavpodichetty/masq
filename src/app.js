@@ -431,7 +431,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.12.3';
+  const APP_VERSION = '1.12.4';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);

@@ -105,7 +105,7 @@ Three of those maps serve both modes at once: an animal is a Biomes role and an 
 
 ## Credits
 
-Created by Arnav Podichetty and Richard Chen, with contributions by Esha Bansiya. Inspired by Spyfall and Imposter.
+Masq was created and coded by **Arnav Podichetty**. **Richard Chen** was also a creator and came up with the original concept. Esha Bansiya contributed to the game. Inspired by Spyfall and Imposter.
 
 Movie and TV posters come from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB. Album art comes from [Deezer](https://www.deezer.com/), which likewise does not endorse or certify it.
 
