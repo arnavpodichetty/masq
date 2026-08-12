@@ -73,6 +73,17 @@
 }
 </script>
 
+<!-- Google Analytics (GA4, property "masq"). Loads async, so it never blocks
+     the game from starting; if it fails or is blocked, nothing else notices. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H2SBJ96C0G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-H2SBJ96C0G');
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="preconnect" href="https://unpkg.com" crossorigin="">
