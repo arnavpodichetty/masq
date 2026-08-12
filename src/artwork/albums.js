@@ -385,7 +385,6 @@
     "Recess": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
     "Shine": "https://cdn-images.dzcdn.net/images/cover/dfab07432c4282b10e339dfb7139458c/",
     "Shrinking Universe": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
-    "Spiral Static": "https://cdn-images.dzcdn.net/images/cover/a7374909906fe231d13da696cbec37f7/",
     "The Gallery": "https://cdn-images.dzcdn.net/images/cover/95ccc113f8605fce4c4a7e6312c92cb1/",
     "The Groove": "https://cdn-images.dzcdn.net/images/cover/3a2d055d82de71b1d370d01cf2ca33d9/",
     "Twin": "https://cdn-images.dzcdn.net/images/cover/3a641259f4813eabd476003e3b6c02f3/",

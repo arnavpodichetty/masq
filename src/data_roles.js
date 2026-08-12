@@ -141,7 +141,7 @@
   };
 
   var museCatalog = {
-    'Showbiz': ['Sunburn', 'Muscle Museum', 'Fillip', 'Falling Down', 'Cave', 'Showbiz', 'Unintended', 'Uno', 'Sober', 'Escape', 'Overdue', "Hate This & I'll Love You"],
+    'Showbiz': ['Sunburn', 'Muscle Museum', 'Fillip', 'Falling Down', 'Cave', 'Showbiz', 'Unintended', 'Uno', 'Sober', 'Escape', 'Overdue', "Hate This & I'll Love You", 'Spiral Static'],
     'Origin of Symmetry': ['New Born', 'Bliss', 'Space Dementia', 'Hyper Music', 'Plug In Baby', 'Citizen Erased', 'Micro Cuts', 'Screenager', 'Darkshines', 'Feeling Good', 'Megalomania', 'Futurism'],
     'Absolution': ['Apocalypse Please', 'Time Is Running Out', 'Sing for Absolution', 'Stockholm Syndrome', 'Falling Away with You', 'Hysteria', 'Blackout', 'Butterflies & Hurricanes', 'The Small Print', 'Fury', 'Endlessly', 'Thoughts of a Dying Atheist', 'Ruled by Secrecy'],
     'Black Holes and Revelations': ['Take a Bow', 'Starlight', 'Supermassive Black Hole', 'Map of the Problematique', "Soldier's Poem", 'Invincible', 'Assassin', 'Exo-Politics', 'City of Delusion', 'Hoodoo', 'Knights of Cydonia', 'Glorious'],
@@ -151,7 +151,7 @@
     'Simulation Theory': ['Algorithm', 'The Dark Side', 'Pressure', 'Propaganda', 'Break It to Me', 'Something Human', 'Thought Contagion', 'Get Up and Fight', 'Blockades', 'Dig Down', 'The Void'],
     'Will of the People': ['Will of the People', 'Compliance', 'Liberation', "Won't Stand Down", 'Ghosts (How Can I Move On)', "You Make Me Feel Like It's Halloween", 'Kill or Be Killed', 'Verona', 'Euphoria', 'We Are Fucking Fucked'],
     'The Wow! Signal': ['The Dark Forest', 'Nightshift Superstar', 'Shimmering Scars', 'Cryogen', 'Be With You', 'Hexagons', 'The Sickness In You & I', 'Unravelling', 'Hush', 'Space Debris'],
-    'B-Sides': ['Con-Science', 'Do We Need This?', 'Coma', 'Host', 'Twin', 'Agitated', 'Jimmy Kane', 'Spiral Static', 'Yes Please', 'Ashamed', 'Nishe', 'Forced In', 'Shine', 'Please Please Please Let Me Get What I Want', 'Piano Thing', 'Hyper Chondriac Music', 'The Gallery', 'Map of Your Head', 'Nature_1', 'Shrinking Universe', 'Recess', 'Dead Star', 'In Your World', 'The Groove', 'Eternally Missed', 'Easily', 'Crying Shame'],
+    'B-Sides': ['Con-Science', 'Do We Need This?', 'Coma', 'Host', 'Twin', 'Agitated', 'Jimmy Kane', 'Yes Please', 'Ashamed', 'Nishe', 'Forced In', 'Shine', 'Please Please Please Let Me Get What I Want', 'Piano Thing', 'Hyper Chondriac Music', 'The Gallery', 'Map of Your Head', 'Nature_1', 'Shrinking Universe', 'Recess', 'Dead Star', 'In Your World', 'The Groove', 'Eternally Missed', 'Easily', 'Crying Shame'],
   };
 
   var musicGenreCatalog = {

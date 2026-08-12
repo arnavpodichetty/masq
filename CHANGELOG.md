@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.12.2 — 2026-08-11
+
+Spiral Static goes back on the record, and the word list says what it's for.
+
+**Added**
+- **View All Words explains a crossing.** The screen opened straight onto ten
+  collapsed categories with nothing to say what tapping a word did, and a
+  crossing outlives the tab — it's the one list here that keeps a decision after
+  the phone is put down. A line under the title now says it: open a category,
+  tap a word to cross it out, crossed words are never dealt, and they stay
+  crossed on that device until they're tapped again or the category is reset.
+
+**Changed**
+- **Spiral Static is a Showbiz track, not a B-side.** It was sitting in the
+  B-Sides bucket, which is for songs that only ever came off a single; this one
+  is on the record. It's the thirteenth entry under Showbiz now, and as a decoy
+  it belongs to Showbiz too — the fake roles for each album are the songs on
+  every *other* album, so the move takes it out of the running against B-Sides
+  and puts it in against everything else.
+- **Its sleeve comes from the album rather than a per-song override.**
+  `MASQ_MUSE_TRACKS` exists only for B-sides, each of which needs the single it
+  came off; the entry left behind there was one `fetch-albums.js` would no
+  longer write, since it builds that map from the B-Sides list. Removed, so the
+  song falls through to Showbiz's sleeve — the same picture the override was
+  already pointing at, which is how it went unnoticed. Nothing changes on
+  screen.
+
 ## 1.12.1 — 2026-08-11
 
 Both secrets go back into hiding.

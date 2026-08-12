@@ -431,7 +431,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.12.1';
+  const APP_VERSION = '1.12.2';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -2363,6 +2363,8 @@
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'All Words'),
           h('div', { ...press(v.closeModal, 'Close'), style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
         ),
+        h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); line-height:1.45; margin:-8px 0 16px;") },
+          'Open a category and tap any word to cross it out. Crossed words are never dealt, and stay crossed on this device until you tap them again or hit Reset.'),
         h('div', { style: css('display:flex; flex-direction:column; gap:10px;') },
           v.wordListGroups.map((g, i) => h('div', { key: i },
             h('div', { ...press(g.toggle), className: 'masq-btn', style: css('display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; background:var(--m-lift); border-radius:12px; cursor:pointer;') },
