@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.12.0 — 2026-08-11
+
+A mode for two, and this file readable from inside the game.
+
+**Added**
+- **Duel Mode**, hidden until it's found. Two players, one category, a different
+  word each, and you take turns asking questions until one of you can name what
+  the other is holding. No jester and no roles: a Movie/TV Show Genres duel
+  deals two genres, a Biomes duel two biomes, a Locations duel two locations —
+  the category's own entries, never the roles inside them. Every category is
+  playable, the word-only ones included. The round ends by turning both words
+  over; nothing is scored, because the two of you already know who got there
+  first.
+- **It's unlocked by tapping the creator's name** in the Credits, under its own
+  saved flag — finding Muse doesn't hand over the mode, and finding the mode
+  doesn't hand over Muse. Until then the lobby shows the two tiles it always
+  has. A saved duel is ignored if the mode is ever locked again, rather than
+  leaving the lobby in a mode with no tile to leave it by.
+- **Settings → What's New**, which reads this file inside the game. Fetched when
+  the screen is opened rather than shipped in a script tag: 53KB on every load,
+  for a screen most players never open, costs more than the feature is worth.
+  Opened from a page sitting on disk the fetch isn't permitted at all, so that
+  case says so and offers the copy on GitHub.
+- **`ICON_DUEL`** — two sabres crossed, sparking where they meet, drawn to the
+  same rules as the tiles beside it.
+
+**Changed**
+- **Every jester option is dimmed in a duel** — Jester Gets Role, Jesters Know
+  Each Other, Jester Hints, and Show Word, which a duel forces on because the
+  word is the whole card. There is no jester to disguise, to introduce, or to
+  hand a clue. An option left switched on by a Role Mode round reads as off
+  rather than as a live switch that does nothing, and the lobby summary stops
+  naming it.
+- **One `APP_VERSION` constant** behind the number at the foot of Settings and
+  the one beside What's New, which had been written out separately and could
+  have disagreed on screen.
+
 ## 1.11.4 — 2026-08-11
 
 The page can be read by a search engine.

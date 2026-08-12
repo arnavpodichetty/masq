@@ -40,7 +40,14 @@ The lobby is saved in `localStorage`, so the table you set up is still standing 
 - A fake role/word for the Jester
 - A round timer with an audio cue
 
-Options that conflict with each other are dimmed rather than hidden.
+Options that conflict with each other — or that the current mode has no use for — are dimmed rather than hidden.
+
+**Settings**
+
+- **View All Words** — every catalog, with any word you've crossed out
+- **Custom Categories** — your own, saved on the device
+- **What's New** — `CHANGELOG.md` read inside the game, fetched when you open it
+- **Credits** — the company, the artwork sources, and every photographer by name
 
 ## Tech
 

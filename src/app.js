@@ -331,6 +331,29 @@
   // whether Muse is in the picker.
   const INITIAL_MUSE_UNLOCKED = loadMuseUnlocked();
 
+  // Duel Mode is found the same way, behind the creator's name in Credits, and
+  // kept under its own key. Two flags rather than one: finding the category
+  // shouldn't hand over the mode, or the other way round.
+  const DUEL_KEY = 'masq.duelUnlocked';
+
+  function loadDuelUnlocked() {
+    try {
+      return window.localStorage.getItem(DUEL_KEY) === '1';
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function saveDuelUnlocked() {
+    try {
+      window.localStorage.setItem(DUEL_KEY, '1');
+    } catch (err) {
+      // Private mode / quota — unlocked for this session, found again next time.
+    }
+  }
+
+  const INITIAL_DUEL_UNLOCKED = loadDuelUnlocked();
+
   // ---- crossed-out words ----
   // A crossing is a decision about the table, not the session, so these outlast
   // the tab.
@@ -449,7 +472,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.11.4';
+  const APP_VERSION = '1.12.0';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -470,7 +493,9 @@
       ...custom.map(c => c.name),
     ]);
     // Role Mode can't deal a roleless category — the same cut setRoleMode makes.
-    const roleless = new Set(gameMode === 'words'
+    // Word Mode and Duel both read a category as a list of words, so neither cuts
+    // anything: a Locations round in Duel deals two locations and no roles.
+    const roleless = new Set(gameMode === 'words' || gameMode === 'duel'
       ? []
       : [...WORD_CATEGORIES, ...custom.filter(isWordOnly).map(c => c.name)]);
     const seen = new Set();
@@ -481,7 +506,7 @@
     });
   }
 
-  function loadSettings(customs, museUnlocked) {
+  function loadSettings(customs, museUnlocked, duelUnlocked) {
     let saved = {};
     try {
       const raw = window.localStorage.getItem(SETTINGS_KEY);
@@ -490,7 +515,10 @@
     } catch (err) {
       // Private mode, or something unreadable under the key — take the defaults.
     }
-    const gameMode = asOneOf(saved.gameMode, ['roles', 'words'], DEFAULT_SETTINGS.gameMode);
+    // A saved 'duel' is only honoured if the mode is still unlocked — clearing
+    // the unlock shouldn't leave the lobby sitting in a mode it can't show.
+    const savedMode = asOneOf(saved.gameMode, ['roles', 'words', 'duel'], DEFAULT_SETTINGS.gameMode);
+    const gameMode = savedMode === 'duel' && !duelUnlocked ? DEFAULT_SETTINGS.gameMode : savedMode;
     const picked = usableCategories(
       (Array.isArray(saved.selCategories) ? saved.selCategories : []).map(currentCategoryName),
       customs, museUnlocked, gameMode,
@@ -534,7 +562,7 @@
   // Order matters: the customs have to be known before the saved category picks
   // can be checked against them.
   const INITIAL_CUSTOM = loadCustomCategories();
-  const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED);
+  const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED, INITIAL_DUEL_UNLOCKED);
 
   // Swept here rather than on first edit: a crossing for a word this release
   // dropped would otherwise wait for someone to open that category's word list,
@@ -806,6 +834,9 @@
   const ICON_ROLE_18 = resize(ICON_ROLE_20, 18);
   // Word Mode: the open script everyone but the jester is reading from.
   const ICON_WORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 8 C10 6.4 7.4 5.8 4.6 6.2 L4.6 17.6 C7.4 17.2 10 17.8 12 19.4 C14 17.8 16.6 17.2 19.4 17.6 L19.4 6.2 C16.6 5.8 14 6.4 12 8 Z" stroke="var(--m-brand)" stroke-width="1.7" stroke-linejoin="round"></path><path d="M12 8 L12 19.4" stroke="var(--m-brand)" stroke-width="1.4"></path><path d="M7 10.4 C8.2 10.5 9.2 10.8 10.1 11.3 M17 10.4 C15.8 10.5 14.8 10.8 13.9 11.3" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".65"></path></svg>';
+  // Duel Mode: two sabres crossed, sparking where they meet. Drawn to the same
+  // rules as the two tiles beside it — brand strokes, one accent detail.
+  const ICON_DUEL = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6.4 17.6 L18.8 5.2" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M17.6 17.6 L5.2 5.2" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M5.0 16.2 L7.8 19.0" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M19.0 16.2 L16.2 19.0" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M6.4 17.6 L4.5 19.5" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M17.6 17.6 L19.5 19.5" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M12 8.6 L12 6.9 M15.4 12 L17.1 12 M8.6 12 L6.9 12 M12 15.4 L12 17.1" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".7"></path></svg>';
   // Players: the company — one player forward, the rest of the table behind.
   const ICON_PLAYERS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="5.6" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M2 18.6 C2 16 3.6 14.6 5.6 14.6 C6.2 14.6 6.8 14.7 7.3 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="18.4" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M22 18.6 C22 16 20.4 14.6 18.4 14.6 C17.8 14.6 17.2 14.7 16.7 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="12" cy="8.6" r="3.3" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M6.7 19.4 C6.7 15.8 9.1 13.9 12 13.9 C14.9 13.9 17.3 15.8 17.3 19.4" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   // Categories: a deck of cards to draw the round from, marked with a harlequin
@@ -882,6 +913,8 @@
       // Fetched the first time Settings → What's New is opened, then kept for
       // the rest of the session. Not saved: it lives in the file, not the table.
       changelog: null, changelogStatus: 'idle',
+      // Duel only: the word each of the two players is holding, by player id.
+      roundDuelWords: {},
       // Mode, categories, jesters, clock, options and theme, restored as the
       // table left them. Fields and opening values are in DEFAULT_SETTINGS.
       ...INITIAL_SETTINGS,
@@ -890,6 +923,7 @@
       jesterWeights: {},
       // Alphabetical: also the order the tiles and word lists render in.
       museUnlocked: INITIAL_MUSE_UNLOCKED,
+      duelUnlocked: INITIAL_DUEL_UNLOCKED,
       categories: INITIAL_MUSE_UNLOCKED ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
       wordCategories: WORD_CATEGORIES,
       roundJesterIndices: null,
@@ -1047,7 +1081,7 @@
       const cat = round.roundCategory;
       // Mirrors how renderVals picks apArt: word-only rounds print no roles, so
       // their role artwork stays unfetched.
-      const roleArt = gameMode === 'words' ? null
+      const roleArt = gameMode === 'words' || gameMode === 'duel' ? null
         : cat === 'Movie/TV Show Genres' ? posterFor
           : cat === 'Music Genres' ? albumFor
             : cat === 'Biomes' ? animalFor
@@ -1070,6 +1104,9 @@
       if (wordArt) {
         add(wordArt, round.roundWord);
         Object.values(round.roundJesterWordMap || {}).forEach(w => add(wordArt, w));
+        // A duel deals a word per player and shows both at the end, so both are
+        // wanted, not just the one in roundWord.
+        Object.values(round.roundDuelWords || {}).forEach(w => add(wordArt, w));
       }
       urls.forEach((url) => { const img = new window.Image(); img.src = url; });
     }
@@ -1212,8 +1249,10 @@
       // Derived, not read off state. Word Mode always shows the word; Role Mode
       // hides it while the jester is disguised, since a block everyone but them
       // carries would give them away.
-      const wordLocked = st.gameMode === 'words' || st.jesterGetsRole;
-      const showWord = st.gameMode === 'words' ? true : (st.jesterGetsRole ? false : st.showWord);
+      // Duel behaves like Word Mode here: the word is the whole card, so it is
+      // always shown and the setting has nothing left to decide.
+      const wordLocked = st.gameMode === 'words' || st.gameMode === 'duel' || st.jesterGetsRole;
+      const showWord = st.gameMode === 'words' || st.gameMode === 'duel' ? true : (st.jesterGetsRole ? false : st.showWord);
       // Same shape as wordLocked: a hint is a Word Mode idea, and it can only
       // reach a jester who hasn't been handed a fake word to believe in.
       const hintsAvailable = st.gameMode === 'words' && !st.jesterGetsRole;
@@ -1275,7 +1314,13 @@
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
       // Artwork tracks what this player is shown, never the round's real answer:
       // a disguised jester gets their fake movie's poster.
-      const apWordShown = apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
+      const isDuel = st.gameMode === 'duel';
+      const wordsAsList = st.gameMode === 'words' || isDuel;
+      const duelWords = st.roundDuelWords || {};
+      // In a duel the answer is per player, so the card shows this player's word
+      // and nothing about the other's. Everywhere else the round has one word.
+      const apWordShown = isDuel ? (ap ? (duelWords[ap.id] || null) : null)
+        : apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
       const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
       // Movies/TV round: the word is a film or series. Hidden with the word.
       const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
@@ -1287,7 +1332,7 @@
       const apWordObject = isObjectsRound && showWord ? objectFor(apWordShown) : null;
       // Word Mode deals roles but never prints them, so their artwork stays off
       // too — a picture of a role nobody can read still gives it away.
-      const apRoleVisible = st.gameMode !== 'words';
+      const apRoleVisible = st.gameMode !== 'words' && !isDuel;
       // Movie/TV Show Genres round: the *role* is a title, so the poster belongs
       // to it. 'THE JESTER' and 'PERFORMER' aren't titles and match nothing.
       const apRolePoster = isMovieTvRound && apRoleVisible ? posterFor(apRoleShown) : null;
@@ -1420,6 +1465,12 @@
         isModalCustomEdit: st.modal === 'customEdit',
         closeModal: () => this.setState({ modal: null }),
         museUnlocked: st.museUnlocked,
+        duelUnlocked: st.duelUnlocked,
+        unlockDuel: () => {
+          if (st.duelUnlocked) return;
+          saveDuelUnlocked();
+          this.setState({ duelUnlocked: true });
+        },
         unlockMuse: () => {
           if (st.museUnlocked) return;
           saveMuseUnlocked();
@@ -1603,7 +1654,9 @@
         }),
         // A disguised jester doesn't know they're one, so the summary drops that
         // claim.
-        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, st.jesterGetsRole ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null, (st.jesterHints && st.gameMode === 'words' && !st.jesterGetsRole) ? 'Jester Hints' : null].filter(Boolean).join(' · ') || 'Default',
+        // A duel has no jester, so none of the jester options are listed even if
+        // one is still switched on from a Role Mode round.
+        gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (!isDuel && st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, (!isDuel && st.jesterGetsRole) ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null, (st.jesterHints && st.gameMode === 'words' && !st.jesterGetsRole) ? 'Jester Hints' : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
           const p = players[i];
@@ -1663,8 +1716,8 @@
         categoryItems: st.categories.map(mapCategoryItem),
         wordCategoryItems: st.wordCategories.map(mapCategoryItem),
         // Word-only customs are hidden in Role Mode, like the built-in ones.
-        customCategoryItems: (st.gameMode === 'words' ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
-        hasCustomInPicker: (st.gameMode === 'words' ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
+        customCategoryItems: (wordsAsList ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
+        hasCustomInPicker: (wordsAsList ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
         // Clamped to the cast: removing players can strand a saved count above
         // what the table seats.
@@ -1723,25 +1776,32 @@
         },
         // Dimmed and inert while the jester is disguised.
         jestersKnow: st.jestersKnow && !st.jesterGetsRole,
-        jestersKnowDesc: st.jesterGetsRole
-          ? 'Unavailable while the Jester gets a fake role — a disguised jester doesn’t know they are one'
-          : 'Jesters can see their fellow jesters',
+        jestersKnowDesc: isDuel
+          ? 'Unavailable in a duel — there is no Jester'
+          : st.jesterGetsRole
+            ? 'Unavailable while the Jester gets a fake role — a disguised jester doesn’t know they are one'
+            : 'Jesters can see their fellow jesters',
         jestersKnowBg: (st.jestersKnow && !st.jesterGetsRole) ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
         jestersKnowThumb: (st.jestersKnow && !st.jesterGetsRole) ? 'translateX(22px)' : 'translateX(2px)',
-        jestersKnowToggleOpacity: st.jesterGetsRole ? '.55' : '1',
-        jestersKnowTogglePointerEvents: st.jesterGetsRole ? 'none' : 'auto',
+        jestersKnowToggleOpacity: st.jesterGetsRole || isDuel ? '.55' : '1',
+        jestersKnowTogglePointerEvents: st.jesterGetsRole || isDuel ? 'none' : 'auto',
         toggleJestersKnow: () => {
-          if (st.jesterGetsRole) return;
+          if (st.jesterGetsRole || isDuel) return;
           this.setState({ jestersKnow: !st.jestersKnow });
         },
         jesterGetsRole: st.jesterGetsRole,
         jesterGetsRoleLabel: st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role',
-        jesterGetsRoleDesc: st.gameMode === 'words' ? 'The Jester is handed a fake word instead of being told they’re the Jester' : 'The Jester is handed a fake role instead of being told they’re the Jester',
-        jesterGetsRoleBg: st.jesterGetsRole ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
-        jesterGetsRoleThumb: st.jesterGetsRole ? 'translateX(22px)' : 'translateX(2px)',
-        jesterGetsRoleToggleOpacity: '1',
-        jesterGetsRoleTogglePointerEvents: 'auto',
-        toggleJesterGetsRole: () => this.setState({ jesterGetsRole: !st.jesterGetsRole }),
+        jesterGetsRoleDesc: isDuel
+          ? 'Unavailable in a duel — there is no Jester'
+          : st.gameMode === 'words' ? 'The Jester is handed a fake word instead of being told they’re the Jester' : 'The Jester is handed a fake role instead of being told they’re the Jester',
+        jesterGetsRoleBg: st.jesterGetsRole && !isDuel ? 'var(--m-toggle-on)' : 'var(--m-lift-toggle)',
+        jesterGetsRoleThumb: st.jesterGetsRole && !isDuel ? 'translateX(22px)' : 'translateX(2px)',
+        jesterGetsRoleToggleOpacity: isDuel ? '.55' : '1',
+        jesterGetsRoleTogglePointerEvents: isDuel ? 'none' : 'auto',
+        toggleJesterGetsRole: () => {
+          if (isDuel) return;
+          this.setState({ jesterGetsRole: !st.jesterGetsRole });
+        },
         // Only the word categories carry hints, and only a jester who knows
         // they're the jester can be handed one — so the row dims outside Word
         // Mode and while the jester is disguised, the same treatment Jesters
@@ -1813,7 +1873,11 @@
         isVoting: st.screen === 'voting',
         isResults: st.screen === 'results',
         isWordsMode: st.gameMode === 'words',
-        showRoleHeading: st.gameMode !== 'words',
+        isRolesMode: st.gameMode === 'roles',
+        // Word Mode and Duel both deal the category's own entries — a genre, a
+        // biome, a location — so both offer the word categories in the picker.
+        showsWordCategories: wordsAsList,
+        showRoleHeading: st.gameMode === 'roles',
         setRoleMode: () => {
           const nextSel = st.selCategories.filter(c => !wordOnlyNames.includes(c));
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
@@ -1829,6 +1893,20 @@
         wordTileBorder: st.gameMode === 'words' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
         wordTileColor: st.gameMode === 'words' ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
         wordTileSubColor: st.gameMode === 'words' ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
+        setDuelMode: () => this.setState({ gameMode: 'duel' }),
+        duelTileBg: isDuel ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
+        duelTileBorder: isDuel ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
+        duelTileColor: isDuel ? 'var(--m-tile-sel-text)' : 'var(--m-muted)',
+        duelTileSubColor: isDuel ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
+        isDuelMode: isDuel,
+        duelReveals: isDuel ? players.slice(0, 2).map(p => ({ name: p.name, word: duelWords[p.id] || '—' })) : [],
+        // A duel is two players by definition. Rather than silently dealing to
+        // the first two, the curtain won't go up until the roster says two.
+        duelNeedsTwo: isDuel && st.playerList.length !== 2,
+        duelPlayerNote: st.playerList.length < 2
+          ? 'A duel needs two players — add one more.'
+          : `A duel is played by two. Drop ${st.playerList.length - 2} to start.`,
+        duelWordFor: (id) => (st.roundDuelWords || {})[id] || null,
         wine, crimson, ivoryFace,
         hasJester: jesterReveals.length > 0,
         jesterReveals,
@@ -1839,6 +1917,7 @@
         castReveals,
         castRevealHeading: jesterReveals.length ? 'The Rest of the Company' : 'The Company',
         goReveal: () => {
+          if (isDuel && st.playerList.length !== 2) return;
           let newJesterCount = jesterCount;
           if (st.randJesters) {
             newJesterCount = randMin + Math.floor(Math.random() * (randMax - randMin + 1));
@@ -1859,7 +1938,36 @@
             pickableCategories = pickableCategories.filter(c => !wordOnlyNames.includes(c));
             if (!pickableCategories.length) pickableCategories = st.categories;
           }
+          // A duel needs two different words out of the one category, so a
+          // category holding a single word can't host one. Custom categories are
+          // the only ones that ever do.
+          if (st.gameMode === 'duel') {
+            const twoWordCategories = pickableCategories.filter(c => getWordPool(c).length >= 2);
+            if (twoWordCategories.length) pickableCategories = twoWordCategories;
+          }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
+          // Duel deals no roles and no jester. Two players, two different words
+          // from the one category, and each player is only ever shown their own —
+          // the whole round is working out what the other one is holding.
+          if (st.gameMode === 'duel') {
+            const drawn = shuffle(getWordPool(chosenCategory)).slice(0, 2);
+            const duelIds = players.slice(0, 2).map(p => p.id);
+            const duelRound = {
+              roundCategory: chosenCategory,
+              // Kept in step with the other modes so everything reading a round
+              // still finds a word there; the pair below is what a duel prints.
+              roundWord: drawn[0],
+              roundRoleMap: {}, roundJesterRoleMap: {}, roundJesterWordMap: {}, roundJesterHint: null,
+              roundDuelWords: duelIds.reduce((acc, id, i) => { acc[id] = drawn[i]; return acc; }, {}),
+            };
+            this.__preloadRoundArt(duelRound, st.gameMode);
+            this.setState({
+              screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false,
+              roundJesterIndices: [], roundStarterIdx: Math.floor(Math.random() * duelIds.length),
+              ...duelRound,
+            });
+            return;
+          }
           let nextRound;
           // From this round's draw, not `players`, which still carries last
           // round's jester flags.
@@ -2057,7 +2165,7 @@
             h('div', { style: css(`font-family:'Cinzel',serif; font-weight:600; font-size:14px; color:${c.color};`) }, c.cat)
           ))
         ),
-        v.isWordsMode && h(React.Fragment, null,
+        v.showsWordCategories && h(React.Fragment, null,
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-label); margin:18px 0 8px;") }, 'Word Categories'),
           h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px;') },
             v.wordCategoryItems.map((c, i) => h('div', { key: i, ...press(c.onToggle, null, { 'aria-pressed': String(c.sel) }), style: css(`padding:14px 12px; border-radius:12px; cursor:pointer; text-align:center; background:${c.tileBg}; border:${c.tileBorder};`) },
@@ -2558,6 +2666,8 @@
           after
         );
       };
+      // Two things are hidden on the creator's card: the ampersand in the role
+      // line opens the Muse category, and the name itself opens Duel Mode.
       // Where the reveal cards' artwork comes from. TMDB and Deezer ask to be
       // named; the photographers ask to be named individually, which is what
       // the list underneath is for.
@@ -2574,7 +2684,10 @@
         ),
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
           company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
-            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-brand);") }, c.name),
+            h('div', {
+              ...(c.secret ? press(v.unlockDuel, 'Unlock the secret mode') : {}),
+              style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-brand);"),
+            }, c.name),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--m-label); margin-top:4px;") }, roleLine(c))
           ))
         ),
@@ -2616,29 +2729,36 @@
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Mode'),
-          h('div', { style: css('display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px;') },
-            h('div', { ...press(v.setRoleMode, null, { 'aria-pressed': String(!v.isWordsMode) }), className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
+          h('div', { style: css(`display:grid; grid-template-columns:${v.duelUnlocked ? '1fr 1fr 1fr' : '1fr 1fr'}; gap:8px; margin-bottom:22px;`) },
+            h('div', { ...press(v.setRoleMode, null, { 'aria-pressed': String(v.isRolesMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_20 } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.roleTileColor};`) }, 'Role Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.roleTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Roles assigned to everyone but the Jester')
             ),
-            h('div', { ...press(v.setWordMode, null, { 'aria-pressed': String(v.isWordsMode) }), className: 'masq-btn', style: css(`padding:13px 14px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
+            h('div', { ...press(v.setWordMode, null, { 'aria-pressed': String(v.isWordsMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.wordTileBg}; border:${v.wordTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_WORD } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.wordTileColor};`) }, 'Word Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.wordTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Everyone gets the word but the Jester')
+            ),
+            v.duelUnlocked && h('div', { ...press(v.setDuelMode, null, { 'aria-pressed': String(v.isDuelMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.duelTileBg}; border:${v.duelTileBorder}; cursor:pointer;`) },
+              h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_DUEL } }),
+              h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.duelTileColor};`) }, 'Duel Mode'),
+              h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.duelTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Two players, a different word each')
             )
           ),
+          v.duelNeedsTwo && h('div', { style: css("margin:-14px 0 22px; padding:11px 14px; border-radius:10px; background:var(--m-lift); border:1px solid var(--m-border-hard); font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted);") }, v.duelPlayerNote),
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Settings'),
           h('div', { style: css('display:flex; flex-direction:column; gap:8px; margin-bottom:8px;') },
             this.settingsRow({ onClick: v.openPlayers, iconBg: 'var(--m-icon-gold)', icon: ICON_PLAYERS, label: 'Players', value: `${v.playerCount} Players` }),
             this.settingsRow({ onClick: v.openCategories, iconBg: 'var(--m-icon-purple)', icon: ICON_CATEGORIES_20, label: 'Categories', value: v.catSummary }),
-            this.settingsRow({ onClick: v.openJesters, iconBg: 'var(--m-icon-crimson)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
+            // No jester in a duel, so the row that sets one has nothing to do.
+            !v.isDuelMode && this.settingsRow({ onClick: v.openJesters, iconBg: 'var(--m-icon-crimson)', icon: ICON_JESTERS_20, label: 'Jesters', value: v.jesterRowValue }),
             this.settingsRow({ onClick: v.openTime, iconBg: 'var(--m-icon-blue)', icon: ICON_TIME, label: 'Time Limit', value: v.timeLimitRow }),
             this.settingsRow({ onClick: v.openGameSettings, iconBg: 'var(--m-icon-gold)', icon: ICON_OPTIONS, label: 'Options', value: v.gameSettingsSummary })
           )
         ),
         h('div', { style: css('padding:12px 20px 28px; background:linear-gradient(0deg,var(--m-screen) 70%,transparent);') },
-          h('div', { ...press(v.goReveal), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'RAISE THE CURTAIN')
+          h('div', { ...press(v.duelNeedsTwo ? null : v.goReveal), className: v.duelNeedsTwo ? '' : 'masq-btn j-glow', style: css(`padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:${v.duelNeedsTwo ? 'default' : 'pointer'}; opacity:${v.duelNeedsTwo ? '.4' : '1'};`) }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
           // Tapping away closes any modal but the category editor, where it
@@ -2803,7 +2923,12 @@
     }
 
     renderVoting(v) {
-      const steps = [
+      const steps = v.isDuelMode ? [
+        { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Question', body: v.starterName + ' asks first. You both hold a word from the same category.' },
+        { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: 'var(--m-text-title)', icon: ICON_STEP2, title: 'Back and Forth', body: 'Take turns asking. Answer honestly — the whole game is what you choose to ask.' },
+        { badge: 'var(--m-accent)', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'var(--m-border-strong)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Name It', body: 'Say the other word out loud the moment you think you have it. First one right wins.' },
+        { badge: '#b3202f', bg: 'linear-gradient(135deg,#5c1117,#3c0a10)', border: 'rgba(178,32,47,.4)', num: '4', numColor: '#fff', icon: ICON_STEP4, title: 'Show Both Words', body: 'Tap below to turn both words over and settle it.', panelBg: 'rgba(178,32,47,.08)' },
+      ] : [
         { badge: '#2e5bb0', bg: 'linear-gradient(135deg,#14254a,#0d1a38)', border: 'rgba(46,91,176,.35)', num: '1', numColor: '#fff', icon: ICON_STEP1, title: 'Opening Statements', body: v.starterName + ' opens the round and asks a question to someone else.' },
         { badge: '#7a1620', bg: 'linear-gradient(135deg,#4d0e14,#380a0f)', border: 'rgba(122,22,32,.5)', num: '2', numColor: 'var(--m-text-title)', icon: ICON_STEP2, title: 'Drop Clues', body: 'Each player asks a question to another player who then gets to ask the next question.' },
         { badge: 'var(--m-accent)', bg: 'linear-gradient(135deg,#3a2a0a,#2a1e06)', border: 'var(--m-border-strong)', num: '3', numColor: '#1a0e02', icon: ICON_STEP3, title: 'Cast Your Vote', body: 'After everyone agrees or the timer runs out, begin discussion or point to the jester.' },
@@ -2813,8 +2938,8 @@
         h('div', { style: css('height:24px;') }),
         h('div', { style: css('position:relative; text-align:center; padding:0 20px 18px;') },
           h('div', { ...press(v.backToReveal, 'Back to the card reveal'), className: 'masq-btn', style: css("position:absolute; left:0; top:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:22px; color:var(--m-accent); cursor:pointer; opacity:.8;") }, '‹'),
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, 'The Trial'),
-          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, 'Debate, accuse, unmask the jester.')
+          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--m-text);") }, v.isDuelMode ? 'The Duel' : 'The Trial'),
+          h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, v.isDuelMode ? 'Ask, deduce, name the other word.' : 'Debate, accuse, unmask the jester.')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px; display:flex; flex-direction:column;') },
           h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text-title); margin-bottom:14px;") }, 'How It Works'),
@@ -2844,12 +2969,12 @@
           )
         ),
         h('div', { style: css('padding:12px 20px 28px;') },
-          h('div', { ...press(v.goResults), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'REVEAL THE JESTER')
+          h('div', { ...press(v.goResults), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, v.isDuelMode ? 'SHOW BOTH WORDS' : 'REVEAL THE JESTER')
         ),
         v.showTimeUpPopup && h('div', { style: css('position:absolute; inset:0; background:var(--m-overlay-vote); display:flex; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css('background:var(--m-modal); border-radius:18px; padding:30px 26px; text-align:center; border:1px solid var(--m-border-hard); max-width:300px; animation:masq-rise .3s ease both;') },
-            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, 'Time to Vote!'),
-            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, 'The clock has run out. Cast your votes and unmask the jester.'),
+            h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, v.isDuelMode ? "Time's Up!" : 'Time to Vote!'),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, v.isDuelMode ? 'The clock has run out. Make your guesses and turn both words over.' : 'The clock has run out. Cast your votes and unmask the jester.'),
             h('div', { ...press(v.dismissTimeUp), className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         )
@@ -2857,6 +2982,29 @@
     }
 
     renderResults(v) {
+      // A duel has no jester to unmask and nothing to score — the payoff is just
+      // the two words side by side, and the pair of you already know who said it
+      // first. Its own screen rather than a branch through the one below, which
+      // is built end to end around a jester reveal.
+      if (v.isDuelMode) {
+        return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:masq-scale-in .35s ease both;') },
+          h('div', { style: css('height:24px;') }),
+          h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent);") }, 'The Final Curtain'),
+          h('div', { style: css('flex:1; overflow-y:auto; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px 20px;') },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:800; font-size:26px; color:var(--m-text-bright); text-align:center;") }, 'The Words'),
+            v.showCategory && h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-results-sub); margin-top:6px;") }, v.gameCategory),
+            h('div', { style: css('display:flex; flex-direction:column; gap:12px; margin-top:22px; width:100%; max-width:340px;') },
+              v.duelReveals.map((d, i) => h('div', { key: i, style: css('padding:16px 18px; border-radius:14px; background:var(--m-lift); border:1px solid var(--m-border-hard); text-align:center; animation:masq-rise .35s ease both;') },
+                h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--m-label);") }, d.name + ' had'),
+                h('div', { className: 'j-title', style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:26px; color:var(--m-brand); margin-top:6px; line-height:1.2;") }, d.word)
+              ))
+            )
+          ),
+          h('div', { style: css('padding:12px 20px 28px; width:100%;') },
+            h('div', { ...press(v.playAgain), className: 'masq-btn j-glow', style: css("padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:14px; box-shadow:var(--m-cta-glow); cursor:pointer;") }, 'PLAY AGAIN')
+          )
+        );
+      }
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:masq-scale-in .35s ease both;') },
         v.jesterMode && h('div', { className: 'j-burst' },
           Array.from({ length: 14 }, (_, i) => h('span', {
