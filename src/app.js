@@ -306,53 +306,12 @@
   const RENAMED_CATEGORIES = { Food: 'Food/Drinks' };
   const currentCategoryName = (name) => RENAMED_CATEGORIES[name] || name;
 
-  // Muse is found once, in the Credits, and a refresh shouldn't hide it again —
-  // so the unlock outlasts the tab. One flag, written when found and never
-  // unwritten: this isn't a setting, it's something that happened.
-  const MUSE_KEY = 'masq.museUnlocked';
-
-  function loadMuseUnlocked() {
-    try {
-      return window.localStorage.getItem(MUSE_KEY) === '1';
-    } catch (err) {
-      return false;
-    }
-  }
-
-  function saveMuseUnlocked() {
-    try {
-      window.localStorage.setItem(MUSE_KEY, '1');
-    } catch (err) {
-      // Private mode / quota — unlocked for this session, found again next time.
-    }
-  }
-
-  // Read once: two state fields are set from this and have to agree about
-  // whether Muse is in the picker.
-  const INITIAL_MUSE_UNLOCKED = loadMuseUnlocked();
-
-  // Duel Mode is found the same way, behind the creator's name in Credits, and
-  // kept under its own key. Two flags rather than one: finding the category
-  // shouldn't hand over the mode, or the other way round.
-  const DUEL_KEY = 'masq.duelUnlocked';
-
-  function loadDuelUnlocked() {
-    try {
-      return window.localStorage.getItem(DUEL_KEY) === '1';
-    } catch (err) {
-      return false;
-    }
-  }
-
-  function saveDuelUnlocked() {
-    try {
-      window.localStorage.setItem(DUEL_KEY, '1');
-    } catch (err) {
-      // Private mode / quota — unlocked for this session, found again next time.
-    }
-  }
-
-  const INITIAL_DUEL_UNLOCKED = loadDuelUnlocked();
+  // Muse and Duel Mode are both found in the Credits, and both are found again
+  // every time. Nothing is written down: the unlock lasts as long as the tab,
+  // and a refresh puts them back where they were hidden. Any flag a previous
+  // release saved is simply never read again.
+  const INITIAL_MUSE_UNLOCKED = false;
+  const INITIAL_DUEL_UNLOCKED = false;
 
   // ---- crossed-out words ----
   // A crossing is a decision about the table, not the session, so these outlast
@@ -1468,12 +1427,10 @@
         duelUnlocked: st.duelUnlocked,
         unlockDuel: () => {
           if (st.duelUnlocked) return;
-          saveDuelUnlocked();
           this.setState({ duelUnlocked: true });
         },
         unlockMuse: () => {
           if (st.museUnlocked) return;
-          saveMuseUnlocked();
           this.setState({ museUnlocked: true, categories: ROLE_CATEGORIES });
         },
         openPlayers: () => this.setState({ modal: 'players' }),
