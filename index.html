@@ -57,7 +57,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: #0e0810; }
   #root { height: 100%; }
-  .noscript-copy { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem; color: #e8dcc8; font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.6; }
+  .noscript-copy { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem; color: #e8dcc8; font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.6; opacity: 0; animation: masq-fallback .25s ease 1.2s forwards; }
+  @keyframes masq-fallback { to { opacity: 1 } }
   .noscript-copy h1, .noscript-copy h2 { font-family: 'Cinzel', Georgia, serif; color: #f0e6c9; line-height: 1.25; }
   a { color: #e6cb7e; }
   a:hover { color: #f4d78c; }
@@ -112,14 +113,12 @@
     0%, 100% { box-shadow: 0 8px 26px rgba(255,61,139,.5), 0 0 0 0 rgba(255,210,63,.35) }
     50%      { box-shadow: 0 10px 34px rgba(139,92,246,.6), 0 0 24px 4px rgba(255,210,63,.22) }
   }
-  /* periodic light sweep across the phone shell */
   .jester-fx::before {
     content: ''; position: absolute; inset: -50%;
     background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.07) 47%, rgba(255,210,63,.13) 51%, transparent 60%);
     animation: j-sweep 7s ease-in-out infinite;
   }
   @keyframes j-sweep { 0%, 55% { transform: translateX(-65%) } 100% { transform: translateX(65%) } }
-  /* dancing MASQ letters (shimmer + bounce share the animation slot) */
   body.jester .j-dance {
     display: inline-block;
     animation: j-shimmer 3.2s linear infinite, j-dance 1.5s ease-in-out infinite;
@@ -129,7 +128,6 @@
     30%      { transform: translateY(-4px) rotate(-5deg) }
     60%      { transform: translateY(1px) rotate(4deg) }
   }
-  /* holographic-foil reveal card (tilt driven from JS via --hx/--hy) */
   body.jester .j-card { transition: transform .18s ease; will-change: transform; }
   .j-holo {
     position: absolute; inset: 0; pointer-events: none;
@@ -143,7 +141,6 @@
     animation: j-holo-idle 5s ease-in-out infinite alternate;
   }
   @keyframes j-holo-idle { from { background-position: 0 0, 0 0 } to { background-position: 0 0, 60px 30px } }
-  /* pointer spark trail */
   .j-spark {
     position: fixed; z-index: 9999; pointer-events: none;
     transform: translate(-50%, -50%);
@@ -154,7 +151,6 @@
     0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg) }
     100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% - 48px)) scale(.35) rotate(170deg) }
   }
-  /* results: rotating carnival ray-wheel behind the mask */
   .j-rays {
     position: absolute; inset: -70px; pointer-events: none; border-radius: 50%;
     background: repeating-conic-gradient(rgba(255,210,63,.25) 0deg 12deg, transparent 12deg 24deg);
@@ -163,7 +159,6 @@
     animation: j-spin 14s linear infinite;
   }
   @keyframes j-spin { to { transform: rotate(360deg) } }
-  /* results: one-shot confetti explosion */
   .j-burst { position: absolute; left: 50%; top: 38%; pointer-events: none; }
   .jb { position: absolute; font-size: 15px; opacity: 0; animation: j-burst 1.1s cubic-bezier(.2,.7,.3,1) forwards; }
   .jb.b0 { color: #ffd23f; text-shadow: 0 0 10px rgba(255,210,63,.9); }
