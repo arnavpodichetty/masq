@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.12.8 — 2026-08-18
+
+The word list comes out onto the table, the jester count reaches the whole
+cast, and the Trial's icons catch up with the lobby's.
+
+**Added**
+- **The word list opens from The Trial.** The reveal screen has had a drawer of
+  the round's whole category since the jester's guess was added, but only the
+  jester ever needed it and only after the round was over. The same drawer now
+  opens from a pill beside the How It Works heading, where everyone is already
+  looking at the same screen — the one list on the table nobody has to be
+  handed the phone to read. It rides the heading line rather than taking a row
+  of its own, which costs the screen a pixel and a half: the clock below claims
+  whatever the steps leave over, and on a short phone a row of its own would be
+  the difference between a clock on screen and a clock under the fold. It only
+  appears when Show Category is on — the list names the category as plainly as
+  the chip on the reveal screen does, and printing one while hiding the other
+  would give it away regardless.
+
+**Changed**
+- **There can be as many jesters as there are players.** The count stopped one
+  short of the table, on the reasoning that a round needs someone to fool. A
+  table that wants every player bluffing at once can have it now — the reveal
+  handles it as it always would, naming every jester and printing no cast list,
+  because there is no rest of the company to print.
+- **The Trial's four step icons are redrawn on the lobby's grid.** They were the
+  last of the old 32x32 set — a stick figure, two lopsided faces and a bare
+  arrow — sitting a screen away from icons rebuilt at 24x24 with a single
+  outlined shape and one accent mark each. The four now read as one hand with
+  the rest: a bubble still asking, two bubbles answering each other, a ballot
+  going into the box, and Role Mode's own domino mask being lifted off.
+  Two of them had also been stroked in `var(--m-brand)` over tiles that stay
+  dark in every theme, so in light mode they were drawing dark gold on near
+  black; each icon now carries the fixed tint its tile is built around.
+- **The screenshot shows Duel Mode.** `masq.png` — the README's image and the
+  link preview for every share of the site — was taken when the lobby had two
+  mode tiles, so the mode 1.12.7 brought out of hiding was missing from the
+  first picture anyone sees of the game. Retaken at 960x1800, with the
+  dimensions and alt text in `index.html` following it.
+
 ## 1.12.7 — 2026-08-17
 
 The mode for two comes out of hiding, and the screen list is rebuilt.

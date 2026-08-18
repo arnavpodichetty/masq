@@ -431,7 +431,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.12.7';
+  const APP_VERSION = '1.12.8';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -813,10 +813,24 @@
   const ICON_SHOW_WORD = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 12 C5.5 7.5 9 5 12 5 C15 5 18.5 7.5 21 12 C18.5 16.5 15 19 12 19 C9 19 5.5 16.5 3 12 Z" stroke="#9fb0cf" stroke-width="1.8"></path><circle cx="12" cy="12" r="2.5" stroke="#9fb0cf" stroke-width="1.4"></circle><path d="M5 19 L19 5" stroke="#9fb0cf" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><rect x="7" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect><rect x="13.4" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect></svg>';
   const ICON_PLAY = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M8.5 5.4 L18 12 L8.5 18.6 Z" fill="var(--m-accent)" stroke="var(--m-accent)" stroke-width="1.8" stroke-linejoin="round"></path></svg>';
-  const ICON_STEP1 = '<svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="10" r="5" fill="none" stroke="#9fb0cf" stroke-width="2"></circle><path d="M11 14 L6 28 M21 14 L26 28 M8 28 L24 28" stroke="#9fb0cf" stroke-width="2" stroke-linecap="round"></path><path d="M13 18 L19 18" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><path d="M12 22 L20 22" stroke="var(--m-brand)" stroke-width="1.5" stroke-linecap="round"></path><circle cx="16" cy="10" r="2.5" fill="var(--m-brand)"></circle></svg>';
-  const ICON_STEP2 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#e6a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 10 16 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 10 22 13" fill="none" stroke="#e6a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 21 Q16 27 21 21" fill="none" stroke="#e6a0a8" stroke-width="2" stroke-linecap="round"></path></svg>';
-  const ICON_STEP3 = '<svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 6 L16 20" stroke="var(--m-brand)" stroke-width="2.5" stroke-linecap="round"></path><path d="M10 14 L16 20 L22 14" fill="none" stroke="var(--m-brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path><rect x="8" y="24" width="16" height="3" rx="1.5" fill="var(--m-brand)" opacity="0.5"></rect></svg>';
-  const ICON_STEP4 = '<svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="15" rx="11" ry="12" fill="none" stroke="#f4a0a8" stroke-width="2"></ellipse><path d="M10 13 Q13 16 16 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M16 13 Q19 16 22 13" fill="none" stroke="#f4a0a8" stroke-width="1.8" stroke-linecap="round"></path><path d="M11 23 Q16 17 21 23" fill="none" stroke="#f4a0a8" stroke-width="2" stroke-linecap="round"></path><path d="M23 6 L26 3 M26 3 L29 6 M26 3 L26 8" stroke="#f4a0a8" stroke-width="1.5" stroke-linecap="round"></path></svg>';
+  // The Trial's four steps, redrawn on the same 24x24 grid as the lobby set
+  // rather than the 32x32 one they used to sit on: one outlined shape, one
+  // lighter inner detail, one accent mark, rounded joins throughout. Strokes
+  // are 1.5 rather than 1.7 because these print at 28px, not 20 — the same
+  // weight on the glass. Each keeps the fixed tint its tile is built around;
+  // the two that reached for var(--m-brand) went nearly invisible in light
+  // mode, since the tiles stay dark in every theme and gold darkens with it.
+  // Step 1 — the round opens: one bubble, still asking.
+  const ICON_STEP1 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M6 4.6 L18 4.6 C19.2 4.6 20.1 5.5 20.1 6.7 L20.1 14.1 C20.1 15.3 19.2 16.2 18 16.2 L11.6 16.2 L7.4 19.6 L7.9 16.2 L6 16.2 C4.8 16.2 3.9 15.3 3.9 14.1 L3.9 6.7 C3.9 5.5 4.8 4.6 6 4.6 Z" stroke="#9fb0cf" stroke-width="1.5" stroke-linejoin="round"></path><path d="M9.9 8.9 C9.9 7.7 10.8 6.9 12 6.9 C13.2 6.9 14.1 7.7 14.1 8.8 C14.1 10.1 12 10.4 12 11.9" stroke="#9fb0cf" stroke-width="1.3" stroke-linecap="round"></path><circle cx="12" cy="13.9" r="1" fill="#d9c48c"></circle></svg>';
+  // Step 2 — the questioning: two bubbles answering each other.
+  const ICON_STEP2 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M4.6 3.6 L13 3.6 C14.1 3.6 15 4.5 15 5.6 L15 9.4 C15 10.5 14.1 11.4 13 11.4 L8.6 11.4 L5.6 13.8 L6 11.4 L4.6 11.4 C3.5 11.4 2.6 10.5 2.6 9.4 L2.6 5.6 C2.6 4.5 3.5 3.6 4.6 3.6 Z" stroke="#e6a0a8" stroke-width="1.5" stroke-linejoin="round"></path><path d="M11 12.6 L19.4 12.6 C20.5 12.6 21.4 13.5 21.4 14.6 L21.4 18.4 C21.4 19.5 20.5 20.4 19.4 20.4 L18 20.4 L18.4 22.8 L15.4 20.4 L11 20.4 C9.9 20.4 9 19.5 9 18.4 L9 14.6 C9 13.5 9.9 12.6 11 12.6 Z" stroke="#e6a0a8" stroke-width="1.5" stroke-linejoin="round"></path><circle cx="6.1" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle><circle cx="8.8" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle><circle cx="11.5" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle></svg>';
+  // Step 3 — the verdict: a ballot going through the slot, the box marked with
+  // the same harlequin lozenge the Categories icon carries.
+  const ICON_STEP3 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><rect x="3.4" y="11.8" width="17.2" height="8.6" rx="2" stroke="#e6cb7e" stroke-width="1.5"></rect><path d="M8.2 11.8 L8.2 14.4 L15.8 14.4 L15.8 11.8" stroke="#e6cb7e" stroke-width="1.3" stroke-linejoin="round"></path><path d="M12 3.2 L12 10.2 M9.3 7.5 L12 10.2 L14.7 7.5" stroke="#e6cb7e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 16.2 L13.3 18 L12 19.8 L10.7 18 Z" stroke="#f4e3b8" stroke-width="1.15" stroke-linejoin="round" opacity=".7"></path></svg>';
+  // Step 4 — the unmasking: Role Mode's domino mask, lifted off the face. The
+  // strokes inside the group are scaled up by the same 0.82 they're scaled
+  // down by, so the mask lands at the set's weight rather than four fifths of it.
+  const ICON_STEP4 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><g transform="translate(2.15 3.6) scale(0.82)"><path d="M2.6 10.2 C2.6 7.4 5 6 7.6 6.4 C9.4 6.7 11 7.6 12 8.4 C13 7.6 14.6 6.7 16.4 6.4 C19 6 21.4 7.4 21.4 10.2 C21.4 13.6 18.6 17.4 15.8 17.4 C13.9 17.4 12.7 16 12 14.6 C11.3 16 10.1 17.4 8.2 17.4 C5.4 17.4 2.6 13.6 2.6 10.2 Z" stroke="#f4a0a8" stroke-width="1.83" stroke-linejoin="round"></path><ellipse cx="7.7" cy="11" rx="2.3" ry="1.6" transform="rotate(-12 7.7 11)" stroke="#f4a0a8" stroke-width="1.59"></ellipse><ellipse cx="16.3" cy="11" rx="2.3" ry="1.6" transform="rotate(12 16.3 11)" stroke="#f4a0a8" stroke-width="1.59"></ellipse></g><path d="M12 7.6 L12 2.9 M9.7 5.2 L12 2.9 L14.3 5.2" stroke="#e6cb7e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path></svg>';
 
   // ---- Mask ----
   function Mask({ comedy, tragedy, cracked, faceColor, lineColor, size, hat }) {
@@ -899,6 +913,10 @@
       // guessing it, with the category's words on hand to pick from.
       resultsWordShown: false,
       resultsPoolOpen: false,
+      // The same list, opened from the Trial instead — there it is the whole
+      // table's to read, not the jester's. Its own flag so closing one sheet
+      // doesn't reach across screens and close the other.
+      votingPoolOpen: false,
       disabledWords: INITIAL_DISABLED,
       customCategories: INITIAL_CUSTOM,
       customDraft: null,
@@ -1224,7 +1242,11 @@
           this.setState({ selCategories: next });
         },
       });
-      const maxJesters = Math.max(0, st.playerList.length - 1);
+      // The whole table, not one short of it. A round where everyone is a
+      // jester has no secret word to protect and no one to protect it from —
+      // which is a round some tables want, and nothing downstream minds: the
+      // cast list on the reveal simply comes back empty.
+      const maxJesters = st.playerList.length;
       const jesterCount = Math.min(st.jesterCount, maxJesters);
       const isProgressive = st.jesterSelection === 'progressive';
       const randMax = Math.min(st.jesterRandMax, maxJesters);
@@ -1429,6 +1451,12 @@
         poolOpen: st.resultsPoolOpen,
         openWordPool: () => this.setState({ resultsPoolOpen: true }),
         closeWordPool: () => this.setState({ resultsPoolOpen: false }),
+        // Same pool, hung off the Trial's category chip. Only offered when the
+        // category is shown: the list names the category as plainly as the chip
+        // does, so hiding one and printing the other tells everyone anyway.
+        votingPoolOpen: st.votingPoolOpen,
+        openVotingPool: () => this.setState({ votingPoolOpen: true }),
+        closeVotingPool: () => this.setState({ votingPoolOpen: false }),
         cardOpen: st.cardOpen,
         openCurtain, closeOverlay, cancelOverlay, dismissOverlay,
         leftCurtain: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '50.5%', background: 'repeating-linear-gradient(90deg,var(--m-curt1) 0 12px,var(--m-curt2) 12px 22px)', boxShadow: 'inset -16px 0 30px rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', transform: st.cardOpen ? 'translateX(-104%)' : 'translateX(0)', transition: 'transform 1.1s cubic-bezier(.7,0,.18,1)' },
@@ -2050,7 +2078,7 @@
           // jesterCount would let a random round overwrite the host's choice.
           this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, jesterWeights: nextWeights, ...nextRound });
         },
-        goVoting: () => { this.setState({ screen: 'voting' }); this.__startTimer(st.timeLimit); },
+        goVoting: () => { this.setState({ screen: 'voting', votingPoolOpen: false }); this.__startTimer(st.timeLimit); },
         // Reset on the way in, so every trip to results starts covered.
         goResults: () => { this.__clearTimer(); this.setState({ screen: 'results', timerPaused: false, resultsWordShown: false, resultsPoolOpen: false }); },
         backToLobby: () => { this.__clearTimer(); this.setState({ screen: 'lobby', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: null, secondsLeft: null, timeUp: false, timerPaused: false }); },
@@ -2926,7 +2954,17 @@
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, v.isDuelMode ? 'Ask, deduce, name the other word.' : 'Debate, accuse, unmask the jester.')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px; display:flex; flex-direction:column;') },
-          h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text-title); margin-bottom:14px;") }, 'How It Works'),
+          // The word list rides the section heading rather than taking a row of
+          // its own: the clock below claims whatever the steps leave over, and
+          // on a short phone another row of its own is the difference between a
+          // clock on screen and a clock below the fold.
+          h('div', { style: css('display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;') },
+            h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text-title);") }, 'How It Works'),
+            v.showCategory && h('div', { ...press(v.openVotingPool, `See all ${v.roundWordPool.length} ${v.gameCategory} words`), className: 'masq-btn', style: css('display:inline-flex; align-items:center; gap:7px; flex:none; padding:6px 12px; border-radius:20px; background:var(--m-lift); border:1px solid var(--m-border-hard); cursor:pointer;') },
+              h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--m-accent);") }, `The Word List · ${v.roundWordPool.length}`),
+              h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:11px; color:var(--m-accent); line-height:1; transform:${v.votingPoolOpen ? 'rotate(180deg)' : 'none'}; transition:transform .25s;`) }, '▾')
+            )
+          ),
           h('div', { style: css('display:flex; flex-direction:column; gap:10px; margin-bottom:22px;') },
             steps.map((s, i) => h('div', { key: i, style: css(`display:flex; align-items:center; gap:14px; padding:16px; border-radius:14px; background:${s.panelBg || 'var(--m-lift)'}; border:1px solid ${s.border};`) },
               h('div', { style: css(`position:relative; flex:none; width:52px; height:52px; border-radius:12px; background:${s.bg}; display:flex; align-items:center; justify-content:center;`) },
@@ -2960,6 +2998,29 @@
             h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:24px; color:var(--m-brand);") }, v.isDuelMode ? "Time's Up!" : 'Time to Vote!'),
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-help); margin-top:8px; line-height:1.4;") }, v.isDuelMode ? 'The clock has run out. Make your guesses and turn both words over.' : 'The clock has run out. Cast your votes and unmask the jester.'),
             h('div', { ...press(v.dismissTimeUp), className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
+          )
+        ),
+        // Every word the round could have dealt, for the table to talk around.
+        // The reveal screen's sheet, kept identical in shape so the same drawer
+        // opens the same way on both screens — only the framing changes, since
+        // here it is reference rather than the jester's last guess.
+        v.votingPoolOpen && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
+          h('div', { onClick: v.closeVotingPool, 'aria-hidden': 'true', style: css('flex:1;') }),
+          h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:75vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
+            h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;') },
+              h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:18px; color:var(--m-text);") }, 'The Word List'),
+              h('div', { ...press(v.closeVotingPool, 'Close'), className: 'masq-btn', style: css("font-family:'Archivo',sans-serif; font-size:22px; color:var(--m-label); cursor:pointer;") }, '×')
+            ),
+            h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-muted); line-height:1.45; margin-bottom:14px;") },
+              `All ${v.roundWordPool.length} words ${v.gameCategory} could have dealt. One of them is this round's — everyone can read it, jester included.`),
+            h('div', { style: css('flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px;') },
+              h('div', { style: css('display:flex; flex-wrap:wrap; gap:6px;') },
+                v.roundWordPool.map((w, i) => h('div', {
+                  key: i,
+                  style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-text); background:var(--m-lift); border:1px solid var(--m-border); border-radius:8px; padding:5px 10px;"),
+                }, w))
+              )
+            )
           )
         )
       );

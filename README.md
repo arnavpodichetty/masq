@@ -30,12 +30,12 @@ The lobby is saved in `localStorage`, so the table you set up is still standing 
 
 1. Whoever opens asks a question to another player.
 2. That player answers, then asks the next — clues that fit your role without giving it away.
-3. Once everyone's had a turn (or the timer runs out), the group votes.
+3. Once everyone's had a turn (or the timer runs out), the group votes. The Word List beside How It Works on The Trial drops the whole word list, so anyone can read what the round could have dealt.
 4. The Jester is unmasked, along with the role every other player was holding. Guess right and the Cast wins; guess wrong and the Jester escapes.
 
 **Options**
 
-- Number of Jesters, fixed or randomized
+- Number of Jesters, fixed or randomized — anywhere from none to the whole table
 - Truly Random or Progressive selection (nudges the role away from whoever just had it)
 - Show/hide the category and word
 - Jesters know each other
