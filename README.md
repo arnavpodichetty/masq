@@ -17,11 +17,13 @@ The lobby is saved in `localStorage`, so the table you set up is still standing 
 
 - **Role Mode** — every performer gets a role tied to the secret word; the Jester flies blind.
 - **Word Mode** — everyone sees the same secret word except the Jester.
+- **Duel Mode** — exactly two players, no Jester and no roles. You each get a different word from the same category and take turns asking questions until one of you can name what the other is holding.
 
 **Categories**
 
-- Either mode: Biomes, Cuisines, Locations, Movie/TV Show Genres, Music Genres
+- Role or Word Mode: Biomes, Cuisines, Locations, Movie/TV Show Genres, Music Genres
 - Word Mode only: Animals, Food/Drinks, Movies/TV, Numbers, Objects
+- Duel Mode plays all of them, the word-only ones included — it deals the category's own entries rather than the roles inside them
 - Your own, via Settings → Custom Categories — saved in `localStorage`, so they stay on that device
 
 **A round**
@@ -66,8 +68,8 @@ src/
 │   └── posters.js     poster map, exposed on window.MASQ_POSTERS
 ├── app.js             all game state, logic, and rendering
 ├── data_roles.js      role catalogs, on window.MASQ_LOCATIONS_DATA
-└── data_words.js      Word Mode's word lists and jester hints, on
-                       window.MASQ_WORDS
+└── data_words.js      the word lists and jester hints, read by Word Mode and
+                       Duel Mode, on window.MASQ_WORDS
 tools/
 ├── fetch-albums.js    Node script, regenerates src/artwork/albums.js from Deezer
 ├── fetch-animals.js   Node script, regenerates src/artwork/animals.js from Wikipedia
@@ -101,7 +103,7 @@ The markup inside `<div id="root">` is not dead code. `createRoot().render()` cl
 
 The five artwork maps are generated and committed, so a round never waits on someone else's API. Re-run the matching script after changing a catalog in `src/data_roles.js` or a word list in `src/data_words.js`; each prints the entries it wasn't sure about, and each keeps a table of hand-pinned answers for the ones a plain search gets wrong. `fetch-animals.js`, `fetch-cuisines.js` and `fetch-objects.js` also collect the photo credits shown in-game, and refuse to write anything if they find a photo that needs crediting and no name to credit. `fetch-cuisines.js` additionally refuses when two *roles* resolve to the same photograph, which would show two players the same card in one round.
 
-Three of those maps serve both modes at once: an animal is a Biomes role and an Animals word, a food is a Cuisines role and a Food/Drinks word, and the picture is the same either way, so each map is the union of the two lists. Objects are Word Mode only.
+Three of those maps serve the roles and the words at once: an animal is a Biomes role and an Animals word, a food is a Cuisines role and a Food/Drinks word, and the picture is the same either way, so each map is the union of the two lists. Objects are Word Mode only.
 
 ## Credits
 

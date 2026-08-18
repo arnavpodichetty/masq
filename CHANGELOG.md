@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.12.7 — 2026-08-17
+
+The mode for two comes out of hiding.
+
+**Changed**
+- **Duel Mode is a tile in the lobby now**, sitting beside Role Mode and Word
+  Mode and selectable the moment the game opens. It had been reachable only by
+  knowing to tap the creator's name in the Credits, which meant the players
+  most likely to want a round for two were the least likely to find one. The
+  Help screen lists it with the other modes rather than waiting until it has
+  been found — there is no longer a secret there to keep.
+- **A saved duel survives a reload.** The lobby restored every setting but this
+  one: a duel came back as Role Mode, because the mode was checked against an
+  unlock that a refresh had already cleared. With nothing to check against, it
+  is restored like the other two.
+- **The README and the page's no-script copy describe the game as it stands.**
+  The README listed two game modes; the copy inside `index.html` — the only
+  text a crawler that never runs the scripts will find — listed four Word Mode
+  categories, having missed Numbers when 1.12.5 added it. Both name all three
+  modes and all five word categories now.
+
+**Removed**
+- **The unlock that hid Duel Mode**, and everything that served it: the session
+  flag, the tap target on the creator's name, the tile's condition, and the
+  reset that dropped a saved duel on load. Muse is untouched — still found on
+  the ampersand in the same card, still forgotten on refresh.
+
+**Fixed**
+- **The version at the foot of Settings matches the top of this file again.**
+  1.12.6 added its entry without moving `APP_VERSION`, so Settings read 1.12.5
+  while What's New read 1.12.6 — the disagreement the single constant exists to
+  prevent.
+
 ## 1.12.6 — 2026-08-17
 
 Zoom had been cancelling itself out.

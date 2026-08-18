@@ -306,12 +306,12 @@
   const RENAMED_CATEGORIES = { Food: 'Food/Drinks' };
   const currentCategoryName = (name) => RENAMED_CATEGORIES[name] || name;
 
-  // Muse and Duel Mode are both found in the Credits, and both are found again
-  // every time. Nothing is written down: the unlock lasts as long as the tab,
-  // and a refresh puts them back where they were hidden. Any flag a previous
-  // release saved is simply never read again.
+  // Muse is found in the Credits, and found again every time. Nothing is
+  // written down: the unlock lasts as long as the tab, and a refresh puts it
+  // back where it was hidden. Any flag a previous release saved is simply
+  // never read again. Duel Mode was hidden the same way once, and is now a
+  // plain third tile in the lobby, so nothing gates it any more.
   const INITIAL_MUSE_UNLOCKED = false;
-  const INITIAL_DUEL_UNLOCKED = false;
 
   // ---- crossed-out words ----
   // A crossing is a decision about the table, not the session, so these outlast
@@ -431,7 +431,7 @@
 
   // Printed at the foot of Settings and beside What's New, and matching the top
   // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
-  const APP_VERSION = '1.12.6';
+  const APP_VERSION = '1.12.7';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -465,7 +465,7 @@
     });
   }
 
-  function loadSettings(customs, museUnlocked, duelUnlocked) {
+  function loadSettings(customs, museUnlocked) {
     let saved = {};
     try {
       const raw = window.localStorage.getItem(SETTINGS_KEY);
@@ -474,10 +474,7 @@
     } catch (err) {
       // Private mode, or something unreadable under the key — take the defaults.
     }
-    // A saved 'duel' is only honoured if the mode is still unlocked — clearing
-    // the unlock shouldn't leave the lobby sitting in a mode it can't show.
-    const savedMode = asOneOf(saved.gameMode, ['roles', 'words', 'duel'], DEFAULT_SETTINGS.gameMode);
-    const gameMode = savedMode === 'duel' && !duelUnlocked ? DEFAULT_SETTINGS.gameMode : savedMode;
+    const gameMode = asOneOf(saved.gameMode, ['roles', 'words', 'duel'], DEFAULT_SETTINGS.gameMode);
     const picked = usableCategories(
       (Array.isArray(saved.selCategories) ? saved.selCategories : []).map(currentCategoryName),
       customs, museUnlocked, gameMode,
@@ -521,7 +518,7 @@
   // Order matters: the customs have to be known before the saved category picks
   // can be checked against them.
   const INITIAL_CUSTOM = loadCustomCategories();
-  const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED, INITIAL_DUEL_UNLOCKED);
+  const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED);
 
   // Swept here rather than on first edit: a crossing for a word this release
   // dropped would otherwise wait for someone to open that category's word list,
@@ -882,7 +879,6 @@
       jesterWeights: {},
       // Alphabetical: also the order the tiles and word lists render in.
       museUnlocked: INITIAL_MUSE_UNLOCKED,
-      duelUnlocked: INITIAL_DUEL_UNLOCKED,
       categories: INITIAL_MUSE_UNLOCKED ? ROLE_CATEGORIES : OPEN_ROLE_CATEGORIES,
       wordCategories: WORD_CATEGORIES,
       roundJesterIndices: null,
@@ -1456,11 +1452,6 @@
         isModalCustomEdit: st.modal === 'customEdit',
         closeModal: () => this.setState({ modal: null }),
         museUnlocked: st.museUnlocked,
-        duelUnlocked: st.duelUnlocked,
-        unlockDuel: () => {
-          if (st.duelUnlocked) return;
-          this.setState({ duelUnlocked: true });
-        },
         unlockMuse: () => {
           if (st.museUnlocked) return;
           this.setState({ museUnlocked: true, categories: ROLE_CATEGORIES });
@@ -2313,9 +2304,7 @@
         { border: '#2e5bb0', title: 'The Round', body: 'Pass the phone so everyone reads their card in private, then take turns asking each other questions. Prove you know the secret without giving it away.' },
         { border: '#7a1620', title: 'Role Mode', body: 'Everyone gets a unique role tied to the word. The Jester gets nothing. Meant to be played with the word hidden so questions are more role-focused than word-focused. You can also turn Show Word on and play with that too (similar to Word Mode).' },
         { border: '#14254a', title: 'Word Mode', body: 'Everyone gets the same secret word, no roles. The Jester gets nothing, though Jester Hints can hand them a single clue about the word to bluff with.' },
-        // Only once the mode has been found. Naming it here otherwise would give
-        // away a secret the lobby is keeping.
-        ...(v.duelUnlocked ? [{ border: '#6b4ea8', title: 'Duel Mode', body: 'Two players, no Jester. You each get a different word from the same category, then take turns asking each other questions. First one to name the other’s word wins.' }] : []),
+        { border: '#6b4ea8', title: 'Duel Mode', body: 'Two players, no Jester. You each get a different word from the same category, then take turns asking each other questions. First one to name the other’s word wins.' },
       ];
       return h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:80vh; overflow-y:auto; animation:masq-slide-up .3s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;') },
@@ -2661,8 +2650,9 @@
           after
         );
       };
-      // Two things are hidden on the creator's card: the ampersand in the role
-      // line opens the Muse category, and the name itself opens Duel Mode.
+      // One thing is hidden on the creator's card: the ampersand in the role
+      // line opens the Muse category. The name used to open Duel Mode, which
+      // is no longer hidden — it sits in the lobby with the other two modes.
       // Where the reveal cards' artwork comes from. TMDB and Deezer ask to be
       // named; the photographers ask to be named individually, which is what
       // the list underneath is for.
@@ -2680,7 +2670,6 @@
         h('div', { style: css('display:flex; flex-direction:column; gap:14px;') },
           company.map((c, i) => h('div', { key: i, style: css(`padding:14px; background:var(--m-lift-soft); border-radius:12px; border-left:3px solid ${c.border};`) },
             h('div', {
-              ...(c.secret ? press(v.unlockDuel, 'Unlock the secret mode') : {}),
               style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--m-brand);"),
             }, c.name),
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--m-label); margin-top:4px;") }, roleLine(c))
@@ -2724,7 +2713,7 @@
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px 14px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--m-label); margin-bottom:10px;") }, 'Game Mode'),
-          h('div', { style: css(`display:grid; grid-template-columns:${v.duelUnlocked ? '1fr 1fr 1fr' : '1fr 1fr'}; gap:8px; margin-bottom:22px;`) },
+          h('div', { style: css('display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:22px;') },
             h('div', { ...press(v.setRoleMode, null, { 'aria-pressed': String(v.isRolesMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.roleTileBg}; border:${v.roleTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_ROLE_20 } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.roleTileColor};`) }, 'Role Mode'),
@@ -2735,7 +2724,7 @@
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.wordTileColor};`) }, 'Word Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.wordTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Everyone gets the word but the Jester')
             ),
-            v.duelUnlocked && h('div', { ...press(v.setDuelMode, null, { 'aria-pressed': String(v.isDuelMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.duelTileBg}; border:${v.duelTileBorder}; cursor:pointer;`) },
+            h('div', { ...press(v.setDuelMode, null, { 'aria-pressed': String(v.isDuelMode) }), className: 'masq-btn', style: css(`padding:13px 11px; border-radius:12px; background:${v.duelTileBg}; border:${v.duelTileBorder}; cursor:pointer;`) },
               h('div', { style: css('margin-bottom:6px;'), dangerouslySetInnerHTML: { __html: ICON_DUEL } }),
               h('div', { style: css(`font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:${v.duelTileColor};`) }, 'Duel Mode'),
               h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.duelTileSubColor}; margin-top:2px; line-height:1.35;`) }, 'Two players, a different word each')
