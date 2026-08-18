@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.12.6 — 2026-08-17
+
+Zoom had been cancelling itself out.
+
+**Fixed**
+- **Ctrl + and Ctrl − do something now.** The phone was scaled to fit the
+  viewport, and browser zoom works by changing the viewport, so the fit undid
+  the zoom to the pixel: every level from 100% to 300% put the same 555 by 1040
+  block of pixels on screen. The fit now divides the zoom back out before it
+  measures, which holds it steady and leaves the zoom itself to come through.
+  Sizing moved from a transform to CSS zoom on the way, because a transform
+  leaves the layout box at its old size — the page never learned the phone had
+  grown, so nothing scrolled and anything past the bottom edge simply could not
+  be reached. The page scrolls when the phone outgrows the window.
+  One case is unchanged: browsers remember zoom per site, and a page that loads
+  at a remembered level reads it as its own 100%. Zoom set on a previous visit
+  still needs one press of the keys to take hold.
+
 ## 1.12.5 — 2026-08-12
 
 A category with nothing to picture and nothing to hint at.

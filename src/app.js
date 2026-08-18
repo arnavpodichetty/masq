@@ -985,16 +985,44 @@
       e.currentTarget.style.transform = '';
     };
 
+    // Browser zoom works by making one CSS px cover more device px, so zooming
+    // in shrinks innerWidth/innerHeight and fires resize. Fitting the shell to
+    // that shrunken viewport scaled it down by exactly the factor the zoom had
+    // scaled it up, and the two cancelled: ctrl +/- did nothing at all. Any fit
+    // read from the viewport has this problem, because the viewport is the only
+    // thing zoom touches. Dividing the zoom back out holds the fit steady and
+    // lets zoom through to the shell.
+    //
+    // devicePixelRatio against its value at load is the only handle on the zoom
+    // level. Two things follow. Moving the window to a monitor of a different
+    // density shifts it too, which re-fits the shell — harmless, and rarer than
+    // zooming. And a page loaded at a zoom level the browser had persisted
+    // takes that level as its baseline, so zoom set on a previous visit still
+    // reads as 100% until the user presses the keys again. Storing the baseline
+    // would fix that, at the cost of a first-ever visit while zoomed poisoning
+    // it permanently; the trade wasn't worth it.
+    //
+    // Sizing goes through CSS zoom rather than a transform because a transform
+    // leaves the layout box at its unscaled size — the page would not know the
+    // shell had grown, so no scrollbar would appear and the overflow would be
+    // unreachable. CSS zoom scales the box as well, which keeps the overflow
+    // scrollable and leaves text laid out at its true size rather than being
+    // rasterised at one size and stretched to another.
     __fitPhoneShell() {
       const el = document.getElementById('phone-shell');
       if (!el) return;
       const BREAKPOINT = 640, BASE_W = 480, BASE_H = 900, MAX_SCALE = 1.7;
-      const vw = window.innerWidth, vh = window.innerHeight;
+      if (!this.__baseDPR) this.__baseDPR = window.devicePixelRatio || 1;
+      const zoom = (window.devicePixelRatio || 1) / this.__baseDPR;
+      const vw = window.innerWidth * zoom, vh = window.innerHeight * zoom;
       if (vw < BREAKPOINT) {
-        el.style.transform = 'none';
+        el.style.zoom = '';
         el.style.width = '100%';
         el.style.maxWidth = BASE_W + 'px';
-        el.style.height = '100%';
+        // 100dvh, not 100%: the wrapper is min-height rather than height, so it
+        // has no definite height for a percentage to resolve against and the
+        // shell would collapse to nothing.
+        el.style.height = '100dvh';
         el.style.maxHeight = BASE_H + 'px';
         return;
       }
@@ -1002,8 +1030,7 @@
       el.style.height = BASE_H + 'px';
       el.style.maxWidth = 'none';
       el.style.maxHeight = 'none';
-      const scale = Math.min(vw / BASE_W, vh / BASE_H, MAX_SCALE);
-      el.style.transform = 'scale(' + scale + ')';
+      el.style.zoom = Math.min(vw / BASE_W, vh / BASE_H, MAX_SCALE);
     }
 
     // Fetched once per session and kept. Opened from a file:// page the request
@@ -3094,7 +3121,7 @@
       const v = this.renderVals();
       const jester = this.state.jesterMode;
       const glyphs = ['◆', '✦', '♦', '✧'];
-      return h('div', { style: css('width:100%; height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(180deg, var(--m-page-vignette) 0, var(--m-page-vignette) env(safe-area-inset-top, 0px), transparent env(safe-area-inset-top, 0px), transparent calc(100% - env(safe-area-inset-bottom, 0px)), var(--m-page-vignette) calc(100% - env(safe-area-inset-bottom, 0px))), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); display:flex; align-items:center; justify-content:center;') },
+      return h('div', { style: css('width:100%; min-height:100dvh; background:radial-gradient(120% 70% at 50% -10%, var(--m-page-glow), transparent 60%), linear-gradient(180deg, var(--m-page-vignette) 0, var(--m-page-vignette) env(safe-area-inset-top, 0px), transparent env(safe-area-inset-top, 0px), transparent calc(100% - env(safe-area-inset-bottom, 0px)), var(--m-page-vignette) calc(100% - env(safe-area-inset-bottom, 0px))), linear-gradient(90deg, var(--m-page-vignette) 0%, transparent calc(50% - 240px), transparent calc(50% + 240px), var(--m-page-vignette) 100%), var(--m-page); padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); display:flex; align-items:safe center; justify-content:safe center;') },
         jester && h('div', { className: 'jester-page-fx' }),
         h('div', { id: 'phone-shell', style: css('width:100%; max-width:480px; height:100%; max-height:900px; position:relative; overflow:hidden; background:var(--m-shell); box-shadow:var(--m-shell-shadow); transform-origin:center center;') },
           v.isLobby && this.renderLobby(v),
