@@ -2,9 +2,24 @@
 
 ## 1.12.7 — 2026-08-17
 
-The mode for two comes out of hiding.
+The mode for two comes out of hiding, and the screen list is rebuilt.
 
 **Changed**
+- **Movies/TV is a new list of 608 titles**, up from 467, replaced wholesale
+  rather than added to. It leans harder on what people have actually seen
+  lately — anime, streaming series, and the last few years of releases — where
+  the old list ran heavily to older films.
+  Removing a title also drops any crossing kept against it, which needs no
+  action: crossings are swept against the catalog on load, so a word that no
+  longer exists is forgotten rather than lingering as a stray.
+- **Six titles had been spelled two ways** — `Pokémon`, `GoodFellas`, `[REC]`,
+  `Les Misérables`, `Mamma Mia!` and `Moulin Rouge!` — once in the role catalog
+  and again, differently, in the word list. Each spelling is a separate key in
+  the poster map, so each of the six was fetched and stored twice. The role
+  catalog now uses the same spelling the word list does. `Les Misérables`
+  mattered most: it is pinned to a specific TMDB id, pins are matched by exact
+  string, and the accented spelling missed the pin entirely and fell back to a
+  popularity search.
 - **Duel Mode is a tile in the lobby now**, sitting beside Role Mode and Word
   Mode and selectable the moment the game opens. It had been reachable only by
   knowing to tap the creator's name in the Credits, which meant the players
@@ -28,6 +43,16 @@ The mode for two comes out of hiding.
   the ampersand in the same card, still forgotten on refresh.
 
 **Fixed**
+- **Fifteen titles had been showing the wrong film.** Posters resolve by
+  popularity, which on a bare title hands back whatever is trending rather than
+  the one people mean: `X-Men` came back as the 1992 cartoon, `Taxi Driver` as
+  a 2021 Korean series, `Taken`, `Love Actually`, `The Equalizer` and `The
+  Purge` as television, `Beetlejuice` as its animated spin-off, `Poltergeist`
+  and `Planet of the Apes` as their remakes, `Bambi` as a 1948 series, and
+  `Kingsman` as the prequel rather than the film that started it. Each is
+  pinned to an id now, as are `Peter Pan`, `101 Dalmatians`, `Alice in
+  Wonderland` and `Miracle`, which had resolved to a live-action or unrelated
+  version instead of the one the rest of the catalog is drawn from.
 - **The version at the foot of Settings matches the top of this file again.**
   1.12.6 added its entry without moving `APP_VERSION`, so Settings read 1.12.5
   while What's New read 1.12.6 — the disagreement the single constant exists to

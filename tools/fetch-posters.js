@@ -33,13 +33,17 @@ const VERBOSE = process.argv.includes('--verbose');
 // The trailing comment says what each id is — pins can't drift, so verify
 // before editing one. Sorted by title.
 const OVERRIDES = {
+  '101 Dalmatians': 12230,                  // One Hundred and One Dalmatians (1961), not the 1996 live action
   '12 Monkeys': 63,                         // Twelve Monkeys (1995)
   '21 Jump Street': 64688,                  // 21 Jump Street (2012)
   'Aladdin': 812,                           // Aladdin (1992)
+  'Alice in Wonderland': 12092,             // Alice in Wonderland (1951), not the 2010 remake
   'Anaconda': 9360,                         // Anaconda (1997)
   'Austin Powers': 816,                     // International Man of Mystery (1997), not the sequel
   'Avatar: The Last Airbender': 'tv:246',   // Avatar: The Last Airbender (2005)
+  'Bambi': 3170,                            // Bambi (1942), not the 1948 series
   'Beauty and the Beast': 10020,            // Beauty and the Beast (1991)
+  'Beetlejuice': 4011,                      // Beetlejuice (1988), not the 1989 animated series
   'Black Christmas': 16938,                 // Black Christmas (1974)
   'Borat': 496,                             // Borat (2006), not Subsequent Moviefilm
   'Candyman': 9529,                         // Candyman (1992)
@@ -63,29 +67,39 @@ const OVERRIDES = {
   'It': 346364,                             // It (2017)
   'James Bond': 646,                        // Dr. No (1962)
   'Kingdom': 'tv:70593',                    // Kingdom (2019), Korean zombie series
-  'Les Miserables': 82695,                  // Les Misérables (2012)
+  'Kingsman': 207703,                       // Kingsman: The Secret Service (2015), not the 2021 prequel
+  'Les Misérables': 82695,                 // Les Misérables (2012)
   'Lethal Weapon': 941,                     // Lethal Weapon (1987)
+  'Love Actually': 508,                     // Love Actually (2003), not the 2021 series
+  'Miracle': 14292,                         // Miracle (2004), the hockey film
   'Mission Impossible': 954,                // Mission: Impossible (1996), not the 1966 series
   'Moana': 277834,                          // Moana (2016)
   'Murder on the Orient Express': 392044,   // Murder on the Orient Express (2017)
   'Night of the Living Dead': 10331,        // Night of the Living Dead (1968)
   'Papillon': 5924,                         // Papillon (1973)
   'Percy Jackson': 32657,                   // The Lightning Thief (2010), not the 2023 series
+  'Peter Pan': 10693,                       // Peter Pan (1953), not the 2003 live action
+  'Planet of the Apes': 871,                // Planet of the Apes (1968), not the 2001 remake
+  'Poltergeist': 609,                       // Poltergeist (1982), not the 2015 remake
   'Pride and Prejudice': 4348,              // Pride & Prejudice (2005)
   'Resident Evil': 1576,                    // Resident Evil (2002)
   'RoboCop': 5548,                          // RoboCop (1987)
   'Scream': 4232,                           // Scream (1996)
   'Sherlock Holmes': 10528,                 // Sherlock Holmes (2009)
-  'Snow White': 408,                        // Snow White and the Seven Dwarfs (1938)
+  'Snow White and the Seven Dwarfs': 408,   // Snow White and the Seven Dwarfs (1938), not the 2025 remake
   'Snowpiercer': 110415,                    // Snowpiercer (2013), the film not the series
   'Spotlight': 314365,                      // Spotlight (2015)
   'Star Trek': 13475,                       // Star Trek (2009), not the 1966 series
+  'Taken': 8681,                            // Taken (2008), not the 2017 series
+  'Taxi Driver': 103,                       // Taxi Driver (1976), not the 2021 series
   'The Chronicles of Narnia': 411,          // The Lion, the Witch and the Wardrobe (2005)
+  'The Equalizer': 156022,                  // The Equalizer (2014), not the 2021 series
   'The Hobbit': 49051,                      // The Hobbit: An Unexpected Journey (2012)
   'The Host': 1255,                         // The Host (2006), Korean monster film
   'The Jungle Book': 9325,                  // The Jungle Book (1967)
   'The Little Mermaid': 10144,              // The Little Mermaid (1989)
   'The Lord of the Rings': 120,             // The Fellowship of the Ring (2001)
+  'The Purge': 158015,                      // The Purge (2013), not the 2018 series
   'The Texas Chainsaw Massacre': 30497,     // The Texas Chain Saw Massacre (1974)
   'Total Recall': 861,                      // Total Recall (1990)
   'Tremors': 9362,                          // Tremors (1990)
@@ -95,6 +109,7 @@ const OVERRIDES = {
   'Wild': 228970,                           // Wild (2014)
   'Willow': 847,                            // Willow (1988), not the 2022 series
   'X': 760104,                              // X (2022) — see the norm() note below
+  'X-Men': 36657,                           // X-Men (2000), not the 1992 animated series
 };
 
 // ---------------------------------------------------------------- title lists
