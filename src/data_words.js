@@ -1,10 +1,6 @@
-// Masq Word Mode data: the word-only catalogs, and the jester hints that go
-// with them. Plain script, exposed on window.MASQ_WORDS.
-//
-// Split out of src/data_roles.js, which holds the role catalogs. These two belong
-// together and to nothing else: a word-only category has no roles, so none of
-// the fake-role machinery next door applies to it, and the hints are keyed by
-// the very categories listed here.
+// Masq Word Mode data: the word-only catalogs and their jester hints, on
+// window.MASQ_WORDS. The role catalogs live in src/data_roles.js; a word-only category
+// has no roles, so none of that file's fake-role machinery applies here.
 (function () {
   var wordOnlyCatalog = {
     'Animals': [
@@ -153,19 +149,17 @@
       'Yo-yo', 'Zipper'],
   };
 
-  // Jester hints, for the word-only categories. A Word Mode jester is handed the
-  // round word's category and nothing else, which leaves them guessing at a pool
-  // of two hundred — so with Jester Hints on, one of the round word's three is
-  // drawn at random and printed on their card. One hint per round, not one per
-  // jester: two jesters comparing notes would otherwise hold the whole answer.
+  // Jester hints for the word-only categories: with Jester Hints on, one of the round
+  // word's three is drawn at random and printed on the jester's card, sparing them a
+  // guess at a pool of two hundred. One hint per round, not per jester — two jesters
+  // comparing notes would otherwise hold the whole answer.
   //
-  // Keyed by category first, then by word. Seven words live in both Food/Drinks
-  // and Animals — Chicken, Crab, Duck, Lobster, Salmon, Shrimp, Turkey — and a
-  // flat map would hand an Animals round the food's hints, telling a jester the
-  // chicken was 'Roasted' for 'Dinner'.
+  // Keyed by category then word: seven words live in both Food/Drinks and Animals
+  // (Chicken, Crab, Duck, Lobster, Salmon, Shrimp, Turkey), and a flat map would tell an
+  // Animals jester their chicken was 'Roasted' for 'Dinner'.
   //
-  // Everything but Movies/TV, where a title is its own clue. A word with no
-  // hints deals no hint, which is what Movies/TV and every custom category do.
+  // Everything but Movies/TV, where a title is its own clue. A word with no hints deals
+  // none, as Movies/TV and every custom category do.
   var wordHintCatalog = {
     'Animals': {
       'Ant': ['Tiny', 'Marching', 'Bug'],

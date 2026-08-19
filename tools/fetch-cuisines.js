@@ -1,15 +1,13 @@
-// Regenerates src/artwork/food.js — the food -> photo map app.js reads for
-// Cuisines rounds and for Word Mode's Food category. The generated file is
-// committed, so the site ships no API key and makes no calls to Wikipedia at
-// play time. Re-run when the cuisine catalogs in src/data_roles.js or the Food
-// word list in src/data_words.js change.
+// Regenerates src/artwork/food.js — the food -> photo map app.js reads for Cuisines rounds
+// and Word Mode's Food category. The generated file is committed, so the site ships no API
+// key and makes no calls at play time. Re-run when the cuisine catalogs in
+// src/data_roles.js or the Food word list in src/data_words.js change.
 //
 //   node tools/fetch-cuisines.js [--verbose]
 //
-// fetch-animals.js pointed at food: same batching, same lead images, same rule
-// that a photo needing a credit must have a name. What differs is what goes
-// wrong — a food has several names spelled several ways, and its article is as
-// often about the technique or the whole cuisine as about the plate.
+// fetch-animals.js pointed at food: same batching, same lead images, same credit rule.
+// What differs is what goes wrong — a food has several names spelled several ways, and
+// its article is as often about the technique or the whole cuisine as about the plate.
 
 const fs = require('fs');
 const path = require('path');
@@ -24,24 +22,23 @@ const COMMONS = 'https://commons.wikimedia.org/w/api.php';
 
 const VERBOSE = process.argv.includes('--verbose');
 
-// Wikimedia asks automated clients to identify themselves and to say where to
-// complain. An anonymous script is the kind that gets range-blocked.
+// Wikimedia asks automated clients to identify themselves; anonymous ones get blocked.
 const UA = 'MasqArtFetch/1.0 (https://github.com/arnavpodichetty/masq; art for a party game) node';
 
 // The API caps anonymous title lists at fifty.
 const BATCH = 50;
 
-// Requested width. Wikimedia serves the next bucket up, so this yields ~500px
-// — enough for the 148px-wide block the card draws at 3x.
+// Requested width. Wikimedia serves the next bucket up, so this yields ~500px — enough
+// for the 148px block the card draws, at 3x.
 const THUMB_PX = 400;
 
-// Entries the plain lookup gets wrong, pinned to what to use instead: a page
-// title, or 'file:Some File.jpg' to name a Commons image outright. Prefer a
-// page, for the same reason the animal fetcher does — a pinned file is frozen.
+// Entries the plain lookup gets wrong, pinned to a page title or to
+// 'file:Some File.jpg' for a Commons image outright. Prefer a page, for the same reason
+// the animal fetcher does — a pinned file is frozen.
 //
-// The catalog spells foods without accents, matching musicGenreCatalog, which
-// costs nothing: Wikipedia redirects Spatzle to Spätzle on its own. Only the
-// cases below need saying out loud. Five things go wrong:
+// The catalog spells foods without accents, matching musicGenreCatalog; Wikipedia
+// redirects Spatzle to Spätzle on its own. Only the cases below need saying out loud.
+// Five things go wrong:
 //
 //   the name means something else     Gyro -> the gyroscope
 //   filed under another spelling      Fir Fir is written Fit-fit
@@ -50,10 +47,9 @@ const THUMB_PX = 400;
 //   the name is the animal, not the   Chicken, Duck, Turkey, Crab, Lobster and
 //   meat, or the plant, not the food  Shrimp are all filed as the creature
 //
-// That last one is the Food word list's doing, and it is most of what follows:
-// a cuisine role is a food by name (Bibimbap, Tlayuda), while a Food word is
-// whatever people call it at the table, and the everyday word is usually taken
-// — by a bird, a country, a comic strip, a dance, or a rib cage.
+// That last one is the Food word list's doing, and most of what follows: a cuisine role
+// is a food by name (Bibimbap, Tlayuda), while a Food word is whatever people call it at
+// the table — and the everyday word is usually taken by a bird, a country, or a dance.
 //
 // The trailing comment says why each is pinned. Sorted by entry.
 const OVERRIDES = {
@@ -160,13 +156,12 @@ const OVERRIDES = {
 const FILE_PIN = 'file:';
 const isFilePin = (pin) => typeof pin === 'string' && pin.startsWith(FILE_PIN);
 
-// Who to credit, where Commons' own answer can't be used as it stands. Keyed by
-// file name. Same two cases as the animal fetcher: nobody is named, so the run
-// refuses to ship a photo crediting no one; or too much is named, and only a
-// reader can tell which words are the name.
+// Who to credit where Commons' own answer can't be used as it stands, keyed by file name.
+// Same two cases as the animal fetcher: nobody is named, or too much is and only a reader
+// can tell which words are the name.
 //
-// Every one of these must keep every person and institution the original names
-// — dropping a request or an address is fine, dropping a name is not.
+// Each must keep every person and institution the original names: dropping a request or
+// an address is fine, dropping a name is not.
 const CREDIT_OVERRIDES = {
   // a 2004 upload predating {{Information}}, so the author is in hand-written
   // prose ("Fotograf: User:FloSch") that extmetadata can't read
@@ -196,16 +191,14 @@ const CREDIT_OVERRIDES = {
 
 // ---------------------------------------------------------------- entry lists
 
-// Everything edible the game can put on a card: the foods used as roles in
-// Cuisines rounds, real and fake alike, plus the Food word list — where the food
-// is the secret word rather than a role, and wants the same photograph. Every
-// fake is a real food from another cuisine, so the fake list adds no titles;
-// it's unioned in anyway, so a fake that stops matching can't slip through
-// picture-less. Both files assign onto window, so give them a window.
+// Everything edible the game can put on a card: Cuisines roles real and fake, plus the
+// Food word list. Every fake is a real food from another cuisine so adds no titles, but is
+// unioned in anyway so one that stops matching can't slip through picture-less. Both files
+// assign onto window, so they're given one.
 //
-// The Food list is a plainer vocabulary than the cuisine catalogs — Pizza and
-// Toast rather than Pastel and Fir Fir — which is why so many of the OVERRIDES
-// above disambiguate an everyday English word from what Wikipedia files it as.
+// The Food list is a plainer vocabulary than the cuisine catalogs — Pizza and Toast rather
+// than Pastel and Fir Fir — which is why so many OVERRIDES above disambiguate an everyday
+// English word from what Wikipedia files it as.
 function loadEntries() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -242,9 +235,8 @@ async function api(endpoint, params) {
 
 const chunk = (arr, n) => arr.reduce((out, x, i) => ((i % n ? out[out.length - 1].push(x) : out.push([x])), out), []);
 
-// Batches titles and hands back what each *requested* title ended up at.
-// MediaWiki reports capitalization fixes and redirects as separate from-to
-// lists rather than on the page, so the hops have to be walked back.
+// Batches titles and hands back what each *requested* title ended up at. MediaWiki reports
+// capitalization fixes and redirects as separate from-to lists, so the hops are walked back.
 async function fetchPages(titles) {
   const pages = new Map();
   for (const group of chunk([...new Set(titles)], BATCH)) {
@@ -266,49 +258,39 @@ async function fetchPages(titles) {
   return pages;
 }
 
-// A page is only usable if it's a real article carrying a lead image.
-// Disambiguation pages are the trap worth naming: "Gyro" and "Shiro" are
-// perfectly real pages that resolve, and picture nothing edible.
+// Only a real article with a lead image is usable. Disambiguation pages are the trap:
+// "Gyro" and "Shiro" resolve perfectly well and picture nothing edible.
 const usable = (p) => !!(p && !p.missing && p.thumbnail
   && !(p.pageprops && 'disambiguation' in p.pageprops));
 
-// Wikipedia titles are case-sensitive past the first letter and food articles
-// use sentence case, so "Pad Thai" is a different title from "Pad thai".
-// Asking both ways costs nothing in a batch.
+// Wikipedia titles are case-sensitive past the first letter and food articles use sentence
+// case, so "Pad Thai" misses "Pad thai". Asking both ways is free in a batch.
 const sentenceCase = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 
-// Wikidata descriptions are reliably food-shaped for one — "Brazilian snack",
-// "Vietnamese noodle dish" — so an article not describing itself that
-// way is usually about something else. Loose on purpose: this only flags
-// entries for a human to check, never rejects one. The trap is the article that
-// resolves cleanly, carries a handsome photo, and is a Japanese given name.
+// Wikidata descriptions are reliably food-shaped — "Brazilian snack", "Vietnamese noodle
+// dish" — so an article not describing itself that way is usually the wrong one, e.g. the
+// article about a Japanese given name. Loose on purpose: this only flags for review.
 const CULINARY = /\b(dish|food|cuisine|meal|soup|stew|broth|salad|bread|flatbread|cake|gateau|pastry|pie|tart|dessert|sweet|confection|snack|noodle|pasta|dumpling|rice|porridge|sandwich|wrap|roll|sauce|relish|condiment|spread|paste|spice|seasoning|marinade|curry|cheese|yogurt|egg|omelette|seafood|fish|shellfish|meat|chicken|pork|beef|lamb|sausage|vegetable|bean|lentil|legume|fruit|breakfast|appetizer|starter|side|drink|beverage|beer|wine|liquor|cooking|culinary|fried|grilled|baked|roast|steamed|pickled|fermented|street)/i;
 
-// The thumbnail URL arrives with campaign tracking on the end. It works either
-// way, but the parameters say "someone browsed Wikipedia", which isn't what
-// happened, and they'd be baked into a committed file forever.
+// The thumbnail URL arrives with campaign tracking on the end, which would otherwise be
+// baked into a committed file forever.
 const cleanUrl = (u) => (u || '').split('?')[0];
 
 // -------------------------------------------------------------------- credits
 
-// Most of these photos are licensed on terms requiring a credit by name, so the
-// credit is written into the generated file as data and read by the Credits
-// screen. A run that can't find a name for a photo that needs one refuses to
-// finish.
+// Most of these photos require a credit by name, so the credit is written into the
+// generated file as data. A run that can't name a photo that needs one refuses to finish.
 
-// MediaWiki treats underscore and space alike and answers in spaces, while
-// pageimages reports the file in underscores. Key both sides the same way or
-// every lookup quietly misses.
+// MediaWiki answers in spaces while pageimages reports underscores. Key both sides the
+// same way or every lookup quietly misses.
 const fileKey = (name) => (name || '').replace(/^File:/, '').replace(/_/g, ' ');
 
-// A wiki username signs itself with a talk-page link, in whichever language the
-// uploader writes in. As in the animal fetcher: signature goes, name stays.
+// A talk-page link in the uploader's own language is a signature, not a name.
 const TALK_LINK = /\(\s*(?:talk|thảo luận|diskussion|discussion|discussione|discusión|discussão|обсуждение|討論|토론|会話)\s*(?:[·|]\s*contribs\s*)?\)/gi;
 
-// Commons' author field is free text, so a name arrives wearing whatever its
-// uploader wrapped it in. Same rules and principle as the animal fetcher:
-// remove only words certainly not part of a name, never trim by length, never
-// stop at the first name found — a photo can have two authors.
+// Commons' author field is free text, so a name arrives wrapped in whatever the uploader
+// put around it. Same rules as the animal fetcher: remove only words certainly not part of
+// a name, never trim by length, never stop at the first name found.
 const TIDY = [
   [/^own(?:\s+work)?$/i, ''],
   [/^pd-\S*\b.*$/i, ''],
@@ -327,19 +309,17 @@ const TIDY = [
   [/\s*\((?:photographer|photograph|photo)\)\s*$/i, ''],
   [/\s*\[\d+\]/g, ''],
   [/\s+on\s+(?:flickr|instagram|500px|deviantart)\b\s*$/i, ''],
-  // Commons' own boilerplate for a pre-{{Information}} upload with no author
-  // field: it says it doesn't know, then names the account it inferred from the
-  // licence tag. That account is the only name there is.
+  // Commons boilerplate for an upload with no author field: it says it doesn't know, then
+  // names the account inferred from the licence tag — the only name there is.
   [/^no machine-readable author provided\.\s*(.+?)\s+assumed\s*\(based on copyright claims\)\.?$/i, '$1'],
-  // "The original uploader was X at Y Wikipedia" is provenance, not a name; so
-  // is the move to Commons, which names whoever pressed the button
+  // "The original uploader was X at Y Wikipedia" is provenance, not a name; so is the
+  // move to Commons, which names whoever pressed the button
   [/^(?:the\s+)?original\s+uploader\s+was\s+/i, ''],
   [/\.?\s*uploaded\s+to\s+commons\s+by\s+.*$/i, ''],
   // a bracket holding contact details is never a name, in either shape
   [/\s*\[[^\]]*\bmail\s*:[^\]]*\]\s*$/i, ''],
-  // "This file was donated to Wikimedia Commons as part of a project by the
-  // Metropolitan Museum of Art. See the…" — a sentence about the donation, with
-  // the one name in it worth keeping buried in the middle
+  // "This file was donated … as part of a project by the Metropolitan Museum of Art.
+  // See the…" — a sentence about the donation with the one name buried in the middle
   [/^this file was donated to wikimedia commons as part of a project by (?:the\s+)?(.+?)\.\s.*$/i, '$1'],
   // an accession or catalogue number is filing, not authorship
   [/[.,]?\s*\b(?:image|photo|accession|catalog(?:ue)?)\s+(?:number|no\.?|id)\s*:?\s*\S+\.?\s*$/i, ''],
@@ -353,15 +333,13 @@ const TIDY = [
   [/\s*\(\s*\)\s*/g, ' '],
   [/\s+/g, ' '],
   [/^[\s,;:·-]+|[\s,;:·-]+$/g, ''],
-  // Commons answers "author unknown" by filling two fields with the same words,
-  // and both come through. Said once is an answer; said twice is a stutter.
+  // Commons answers "author unknown" by filling two fields with the same words.
   [/^(.+?)\s+\1$/i, '$1'],
 ];
 
-// "X from Y" is either a name then a place, or a place then a name. So the
-// clause only goes when what precedes it already reads as a name — two words at
-// least — and what follows neither belongs to somebody nor introduces a second
-// author.
+// "X from Y" is either a name then a place or a place then a name, so the clause only goes
+// when what precedes it already reads as a name — two words at least — and what follows
+// introduces neither an owner nor a co-author.
 function dropTrailingOrigin(s) {
   const m = /^(.+?)\s+from\s+([^()]*)$/i.exec(s);
   if (!m) return s;
@@ -373,8 +351,7 @@ function dropTrailingOrigin(s) {
 
 const tidyCredit = (s) => dropTrailingOrigin(TIDY.reduce((out, [re, to]) => out.replace(re, to), s || ''));
 
-// Thumbnails for files named outright, which don't come from any article and so
-// never pass through pageimages.
+// Thumbnails for files named outright, which never pass through pageimages.
 async function fetchFiles(fileNames) {
   const thumbs = new Map();
   for (const group of chunk([...new Set(fileNames)], BATCH)) {
@@ -405,9 +382,8 @@ async function fetchCredits(fileNames) {
     });
     for (const p of query.pages || []) {
       const meta = (p.imageinfo && p.imageinfo[0] && p.imageinfo[0].extmetadata) || {};
-      // These arrive as scraps of HTML — a link, sometimes a whole vcard — and
-      // a cropped photo's credit arrives as a chain: "original.jpg : first
-      // author, derivative work: second". Strip the plumbing, keep the people.
+      // These arrive as scraps of HTML, and a cropped photo's credit as a chain:
+      // "original.jpg : first author, derivative work: second". Keep only the people.
       const text = (k) => (meta[k]
         ? String(meta[k].value)
           .replace(/<[^>]*>/g, ' ')
@@ -420,17 +396,15 @@ async function fetchCredits(fileNames) {
           .replace(/^[\s,;:·-]+|[\s,;:·-]+$/g, '')
         : '');
       const file = fileKey(p.title);
-      // Three fields can hold the name and any may be the only one filled in.
-      // A hand-written answer wins outright — it exists precisely because the
-      // fields below it are unusable.
+      // Three fields can hold the name and any may be the only one filled in. A
+      // hand-written answer wins outright, since it exists because these are unusable.
       const artist = CREDIT_OVERRIDES[file]
         || tidyCredit(text('Artist') || text('Attribution') || text('Credit'));
       credits.set(file, {
         artist,
         license: text('LicenseShortName') || 'unknown',
-        // Commons states this outright, which beats inferring it from the
-        // licence name — a public-domain photo needs no credit, and saying so
-        // is what lets the missing-name check be strict about the rest.
+        // Commons states this outright, which is what lets the missing-name check be
+        // strict about the rest.
         required: text('AttributionRequired') !== 'false',
       });
     }
@@ -438,14 +412,12 @@ async function fetchCredits(fileNames) {
   return credits;
 }
 
-// Free licences all name themselves; anything else is worth a human deciding
-// about before it ships. (Locally hosted files aren't on Commons, so their
-// lookup comes back empty rather than wrong.)
+// Free licences all name themselves; anything else wants a human before it ships. Locally
+// hosted files aren't on Commons, so their lookup comes back empty rather than wrong.
 //
-// KOGL Type 1 appears here and not in the animal fetcher: it's the Korean
-// government's open licence, and Type 1 alone — the only type Commons accepts —
-// permits commercial use and derivatives given a credit, which is what the
-// Credits screen does. The other three types forbid one or the other.
+// KOGL Type 1 appears here and not in the animal fetcher: it's the Korean government's
+// open licence, and Type 1 alone — the only type Commons accepts — permits commercial use
+// and derivatives given a credit.
 const FREE = /^(cc0|cc by|cc by-sa|public domain|pd|no restrictions|kogl type 1)/i;
 
 // ---------------------------------------------------------------------- main
@@ -454,24 +426,22 @@ function write(rows) {
   const urls = rows.map(({ entry, url, page }) => (
     `    ${JSON.stringify(entry)}: ${JSON.stringify(url)},  // ${page}`
   ));
-  // [food, photographer, licence] — a triple rather than an object, since the
-  // Credits screen prints all three and wants nothing else.
+  // [food, photographer, licence] — a triple, since the Credits screen prints all three
+  // and wants nothing else.
   const credits = rows.map(({ entry, credit }) => (
     `    [${JSON.stringify(entry)}, ${JSON.stringify(credit.artist)}, ${JSON.stringify(credit.license)}],`
   ));
   fs.writeFileSync(OUT, [
     '// GENERATED by tools/fetch-cuisines.js — do not edit by hand.',
-    '// Maps a food — a Cuisines role, or a word from the Food category — to its',
-    '// Wikipedia lead photo, as a finished URL; unlike the album art, there is',
-    '// no size to append. Each trailing comment is the article it came from.',
+    '// Maps a food (a Cuisines role, or a Food word) to its Wikipedia lead photo as a',
+    '// finished URL. Each trailing comment is the article it came from.',
     '(function () {',
     '  window.MASQ_FOOD = {',
     ...urls,
     '  };',
     '',
-    '  // Photographer and licence for each photo above — what most of those',
-    '  // licences ask in return. Read by the Credits screen. An empty name is a',
-    '  // public-domain photo with no author on record, so there is nobody owed.',
+    '  // Photographer and licence for each photo above, read by the Credits screen. An',
+    '  // empty name is a public-domain photo with no author on record.',
     '  window.MASQ_FOOD_CREDITS = [',
     ...credits,
     '  ];',
@@ -484,8 +454,8 @@ function write(rows) {
   const { entries, roles } = loadEntries();
   console.log(`Resolving photos for ${entries.length} foods…`);
 
-  // Every title this run might want, asked for in as few round trips as
-  // possible: the pin if there is one, otherwise the entry both ways up.
+  // Every title this run might want, in as few round trips as possible: the pin if there
+  // is one, otherwise the entry both ways up.
   const wanted = [];
   const pinnedFiles = [];
   for (const entry of entries) {
@@ -506,8 +476,7 @@ function write(rows) {
       const file = pin.slice(FILE_PIN.length);
       const url = files.get(fileKey(file));
       if (!url) { missing.push(`${entry} (${file}: no such file on Commons)`); continue; }
-      // A pinned file has no article behind it, so there's no description to
-      // check and nothing it could have strayed from — it is the answer.
+      // A pinned file has no article behind it — it is the answer.
       resolved.push({ entry, page: file, file, url, description: '', pinned: true });
       continue;
     }
@@ -541,9 +510,8 @@ function write(rows) {
     credit: credits.get(fileKey(r.file)) || { artist: '', license: 'unknown', required: true },
   }));
 
-  // A photo whose licence demands a credit, with no name to put in it, is the
-  // one failure here that can't be left for someone to notice later — it ships
-  // looking finished and isn't. Name it in CREDIT_OVERRIDES and run again.
+  // A photo whose licence demands a credit with no name to put in it ships looking
+  // finished and isn't. Name it in CREDIT_OVERRIDES and run again.
   const uncredited = rows.filter(r => r.credit.required && !r.credit.artist);
   if (uncredited.length) {
     console.error(`\nAttribution required but no photographer named — add these to CREDIT_OVERRIDES:\n${
@@ -553,15 +521,13 @@ function write(rows) {
     return;
   }
 
-  // Two roles sharing one photo is the failure this catalog invites and the
-  // animal one didn't: a Cuisines round deals several foods at once, and two
-  // cards carrying the same picture spoils it for whoever holds either. Pin one
-  // somewhere more specific, or replace it.
+  // Two roles sharing one photo is the failure this catalog invites: a Cuisines round
+  // deals several foods at once, and two cards carrying the same picture spoils it for
+  // whoever holds either. Pin one somewhere more specific, or replace it.
   //
-  // Roles only. A Food word is the whole round on its own, so it can share a
-  // photo with a role harmlessly — which is just as well, since the two lists
-  // sometimes name one food twice (Creme Brulee and Crème Brûlée, Mac and
-  // Cheese and Macaroni and Cheese) and there is only one photograph of it.
+  // Roles only — a Food word is the whole round on its own, so it can share a photo with a
+  // role harmlessly. Just as well, since the two lists sometimes name one food twice
+  // (Creme Brulee and Crème Brûlée) and there is only one photograph of it.
   const byUrl = new Map();
   rows.filter(r => roles.has(r.entry)).forEach(r => byUrl.set(r.url, [...(byUrl.get(r.url) || []), r.entry]));
   const shared = [...byUrl.entries()].filter(([, list]) => list.length > 1);
@@ -577,9 +543,7 @@ function write(rows) {
   write(rows);
   console.log(`\nWrote ${rows.length}/${entries.length} foods to ${OUT}`);
 
-  // Worth a look, in the order a wrong picture is easiest to miss: an article
-  // that doesn't describe food is probably the wrong one, and a name we didn't
-  // ask for may be the wrong food.
+  // Worth a look, in the order a wrong picture is easiest to miss.
   const odd = rows.filter(r => !r.pinned && !CULINARY.test(r.description));
   const strayed = rows.filter(r => !r.pinned
     && r.page.toLowerCase().replace(/[^a-z]/g, '') !== r.entry.toLowerCase().replace(/[^a-z]/g, ''));

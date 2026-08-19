@@ -17,8 +17,8 @@ const API = 'https://api.themoviedb.org/3';
 const KEY = process.env.TMDB_API_KEY;
 const VERBOSE = process.argv.includes('--verbose');
 
-// Titles that search gets wrong, pinned to a TMDB id: a number is a movie,
-// 'tv:N' a series. Four things go wrong:
+// Titles that search gets wrong, pinned to a TMDB id: a number is a movie, 'tv:N' a
+// series. Four things go wrong:
 //
 //   a TV series outranks the film   21 Jump Street -> the 1987 series
 //   a new release recycles a title  Anaconda -> the 2025 comedy
@@ -26,12 +26,12 @@ const VERBOSE = process.argv.includes('--verbose');
 //   another film owns it exactly    E.T. -> a 2015 film, since the 1982 one
 //                                   is titled "E.T. the Extra-Terrestrial"
 //
-// A fifth reason is drift: results are ranked by popularity, so where the
-// runner-up is a *different work of the same name* polling within ~70% of the
-// winner, it gets pinned even though today's answer is right.
+// A fifth reason is drift: results are ranked by popularity, so where the runner-up is a
+// *different work of the same name* polling within ~70% of the winner, it gets pinned even
+// though today's answer is right.
 //
-// The trailing comment says what each id is — pins can't drift, so verify
-// before editing one. Sorted by title.
+// The trailing comment says what each id is — pins can't drift, so verify before editing
+// one. Sorted by title.
 const OVERRIDES = {
   '101 Dalmatians': 12230,                  // One Hundred and One Dalmatians (1961), not the 1996 live action
   '12 Monkeys': 63,                         // Twelve Monkeys (1995)
@@ -114,16 +114,15 @@ const OVERRIDES = {
 
 // ---------------------------------------------------------------- title lists
 
-// Every title used in Movie/TV Show Genres rounds, real role or jester's fake.
-// The Movies/TV word category draws from that same set, so it adds nothing.
+// Every title used in Movie/TV Show Genres rounds, real role or jester's fake. The
+// Movies/TV word category draws from that same set, so it adds nothing.
 //
-// Everything searches /search/multi, since the list is roughly half TV. Forcing
-// /search/movie on a series quietly resolves it to an unrelated film of the same
-// name, and resolve() drops person results, so multi is safe for films too.
+// Everything searches /search/multi, since the list is roughly half TV: forcing
+// /search/movie on a series quietly resolves it to an unrelated film of the same name, and
+// resolve() drops person results, so multi is safe for films too.
 //
-// Both data files assign onto window, so give them one — and both are needed
-// here: the genre catalog is in data_roles.js and the Movies/TV word list, which
-// shares its posters, is in data_words.js.
+// Both data files assign onto window and both are needed — the genre catalog is in
+// data_roles.js, the Movies/TV word list in data_words.js.
 function loadTitles() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -157,9 +156,8 @@ const nameOf = (r) => r.title || r.name || '';
 const yearOf = (r) => (r.release_date || r.first_air_date || '').slice(0, 4);
 const isTv = (r) => r.media_type === 'tv';
 
-// Compare loosely: "Amélie", "AMELIE" and "Amelie" are one title. Keep any
-// letter, not just a-z — dropping non-Latin script would collapse "X调查" to
-// plain "x", an exact match for a title of "X".
+// Compare loosely: "Amélie", "AMELIE" and "Amelie" are one title. Any letter is kept, not
+// just a-z — dropping non-Latin script would collapse "X调查" to "x", matching a title "X".
 const norm = (s) => s
   .normalize('NFD').replace(/[̀-ͯ]/g, '')
   .toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
@@ -178,15 +176,15 @@ async function resolve({ title, endpoint }) {
     r.poster_path && (endpoint === '/search/movie' || r.media_type === 'movie' || isTv(r)));
   if (!hits.length) return null;
 
-  // Results arrive in popularity order, so prefer an exact title match — else
-  // "Up" loses to a more popular film merely containing the word.
+  // Results arrive in popularity order, so prefer an exact title match — otherwise "Up"
+  // loses to a more popular film merely containing the word.
   const exact = hits.filter(r => norm(nameOf(r)) === norm(title));
   const best = (exact.length ? exact : hits).reduce((a, b) => (b.popularity > a.popularity ? b : a));
   return { name: nameOf(best), year: yearOf(best), poster: best.poster_path, tv: isTv(best), match: exact.length ? 'exact' : 'fuzzy' };
 }
 
-// A few hundred titles sits well inside TMDB's rate limit, but there's no need
-// to open a socket for every one at once.
+// A few hundred titles sits well inside TMDB's rate limit, but there's no need to open a
+// socket for every one at once.
 async function mapPool(items, size, fn) {
   const out = new Array(items.length);
   let next = 0;
@@ -242,9 +240,9 @@ function write(posters) {
     if (!hit) { missing.push(error ? `${title} (${error})` : title); continue; }
     posters[title] = hit.poster;
     const line = `${title}  ->  ${hit.name} (${hit.year || '?'})`;
-    // 'fuzzy' means the resolved name differs from ours. Worth a look — but so
-    // is the whole --verbose list, since the ones that bite came back exact and
-    // still picked the wrong film.
+    // 'fuzzy' means the resolved name differs from ours. Worth a look — but so is the
+    // whole --verbose list, since the ones that bite came back exact and still picked the
+    // wrong film.
     if (hit.match === 'fuzzy') fuzzy.push(`  ${line}`);
     if (VERBOSE) {
       const flag = { pin: 'pin ', exact: '    ', fuzzy: '?   ' }[hit.match];

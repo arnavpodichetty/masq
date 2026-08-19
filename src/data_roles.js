@@ -1,12 +1,9 @@
-// Masq role data: the role catalogs (Locations, Biomes, Cuisines, Movie/TV
-// Genres, Music Genres) and a matching fake-role catalog for each. Plain script,
-// exposed on window.MASQ_LOCATIONS_DATA.
+// Masq role data: the role catalogs (Locations, Biomes, Cuisines, Movie/TV Genres, Music
+// Genres) and a matching fake-role catalog for each, on window.MASQ_LOCATIONS_DATA. The
+// word-only catalogs and their jester hints live in src/data_words.js.
 //
-// The word-only catalogs and their jester hints live in src/data_words.js — a
-// word-only category has no roles, so nothing below applies to it.
-//
-// Real catalogs, then the fake-role catalogs that shadow them, then anything
-// parked. Keys and their lists are sorted alphabetically throughout.
+// Real catalogs, then the fake-role catalogs that shadow them, then anything parked. Keys
+// and their lists are sorted alphabetically throughout.
 (function () {
   var biomeCatalog = {
     'Alpine Mountains': ['Bighorn Sheep', 'Condor', 'Eagle', 'Ibex', 'Marmot', 'Mountain Goat', 'Snow Leopard', 'Yak'],
@@ -33,8 +30,8 @@
     'Volcanic Island': ['Fire Salamander', 'Galápagos Iguana', 'Hawaiian Hoary Bat', 'Lava Lizard', 'Peregrine Falcon', 'Vampire Ground Finch', 'Volcanic Mouse', 'Volcano Rabbit'],
   };
 
-  // Dish names are deaccented, like the artists in musicGenreCatalog: the lists
-  // sort plainly and nothing depends on the font having the glyph.
+  // Dish names are deaccented, like the artists in musicGenreCatalog: the lists sort
+  // plainly and nothing depends on the font having the glyph.
   var cuisineCatalog = {
     'American': ['BLT', 'Buffalo Wings', 'Cheeseburger', 'Chicken Fried Steak', 'Clam Chowder', 'Cobb Salad', 'Corn Dog', 'Grilled Cheese', 'Mac and Cheese', 'Meatloaf', 'Pecan Pie', 'Pulled Pork'],
     'Brazilian': ['Acai Bowl', 'Acaraje', 'Brigadeiro', 'Coxinha', 'Farofa', 'Feijoada', 'Moqueca', 'Pao de Queijo', 'Pastel', 'Picanha', 'Quindim', 'Vatapa'],
@@ -207,8 +204,8 @@
     'Volcanic Island': ['Harpy Eagle', 'Sparrow', 'Zebra'],
   };
 
-  // Each fake is a real dish from another cuisine: near enough to read as a
-  // genuine card, far enough that anything true about it gives the jester away.
+  // Each fake is a real dish from another cuisine: near enough to read as a genuine card,
+  // far enough that anything true about it gives the jester away.
   var fakeCuisineRoleCatalog = {
     'American': ['Kibbeh', 'Okonomiyaki', 'Tagine'],
     'Brazilian': ['Bangers and Mash', 'Kimchi Jjigae', 'Spatzle'],

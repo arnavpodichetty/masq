@@ -1,5 +1,4 @@
-// Masq — plain React (no build step). Loaded after React/ReactDOM UMD and the
-// two data files.
+// Masq — plain React, no build step. Loaded after the React UMD bundles and the data files.
 (function () {
   const h = React.createElement;
 
@@ -17,18 +16,16 @@
     return o;
   }
 
-  // Poster paths are pre-resolved into src/artwork/posters.js by
-  // tools/fetch-posters.js — no TMDB calls at play time. A missing map just
-  // means no posters, never a crash.
+  // Poster paths are pre-resolved into src/artwork/posters.js by tools/fetch-posters.js,
+  // so there are no TMDB calls at play time. A missing map means no posters, not a crash.
   const POSTER_BASE = 'https://image.tmdb.org/t/p/w342';
   function posterFor(title) {
     const path = title && window.MASQ_POSTERS ? window.MASQ_POSTERS[title] : null;
     return path ? POSTER_BASE + path : null;
   }
 
-  // Same, from src/artwork/albums.js — but Deezer hands out a per-album URL
-  // prefix, so the size is what gets appended. 300px covers the card's 132px
-  // square at 2x.
+  // Same, from src/artwork/albums.js — but Deezer hands out a per-album URL prefix, so
+  // the size is appended. 300px covers the card's 132px square at 2x.
   const ALBUM_SIZE = '300x300-000000-80-0-0.jpg';
   function albumFor(entry) {
     const prefix = entry && window.MASQ_ALBUMS ? window.MASQ_ALBUMS[entry] : null;
@@ -52,29 +49,25 @@
     return prefix ? prefix + ALBUM_SIZE : null;
   }
 
-  // Animal photos from src/artwork/animals.js (tools/fetch-animals.js, out of
-  // Wikipedia's lead images). Wikimedia returns a finished URL, so unlike the
-  // other two there's nothing to build.
+  // Animal photos from src/artwork/animals.js. Wikimedia URLs arrive finished.
   function animalFor(entry) {
     return (entry && window.MASQ_ANIMALS ? window.MASQ_ANIMALS[entry] : null) || null;
   }
 
-  // Food photos from src/artwork/food.js (tools/fetch-cuisines.js), same
-  // Wikipedia lead images, arriving finished the same way.
+  // Food photos from src/artwork/food.js, finished the same way.
   function foodFor(entry) {
     return (entry && window.MASQ_FOOD ? window.MASQ_FOOD[entry] : null) || null;
   }
 
-  // Object photos from src/artwork/objects.js (tools/fetch-objects.js). Word
-  // Mode only — no role catalog names an everyday object.
+  // Object photos from src/artwork/objects.js. Word Mode only — no role catalog
+  // names an everyday object.
   function objectFor(entry) {
     return (entry && window.MASQ_OBJECTS ? window.MASQ_OBJECTS[entry] : null) || null;
   }
 
-  // The photographers, for the Credits screen — most of these photos are
-  // Creative Commons, which asks that whoever took them is named. Built once,
-  // and empty rather than broken if the artwork file failed to load. No author
-  // on record means public domain, credited to its licence alone.
+  // Photographer attribution for the Credits screen — most photos are Creative Commons.
+  // Empty rather than broken if an artwork file failed to load; no author on record means
+  // public domain, credited to its licence alone.
   const toCredits = (rows) => (rows || []).map(([name, by, license]) => ({
     name,
     credit: by ? `${by} · ${license}` : license,
@@ -83,14 +76,11 @@
   const FOOD_CREDITS = toCredits(window.MASQ_FOOD_CREDITS);
   const OBJECT_CREDITS = toCredits(window.MASQ_OBJECT_CREDITS);
 
-  // CHANGELOG.md, rendered in Settings. It is fetched when the screen is opened
-  // rather than shipped in a script tag: 53KB on every load, for a page most
-  // players never open, would cost more than the feature is worth.
+  // CHANGELOG.md is fetched when Settings opens rather than shipped in a script tag —
+  // 53KB on every load for a page most players never open isn't worth it.
   //
-  // These two parsers read the small dialect the changelog actually uses — '## '
-  // headings, a bold line naming a section, '- ' items whose wrapped lines are
-  // indented under them, and paragraphs — and nothing else. A general Markdown
-  // library would be larger than the file it is here to read.
+  // These two parsers cover only the dialect the changelog uses: '## ' headings, bold
+  // section labels, '- ' items with indented continuation lines, and paragraphs.
   function inlineMarkdown(text) {
     const nodes = [];
     const re = /\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)|\*([^*\n]+)\*/g;
@@ -131,14 +121,12 @@
     return blocks;
   }
 
-  // Each medium keeps its own shape: a poster stands 2:3, a sleeve is square, a
-  // wildlife photo is 4:3 landscape. Cropped to fill, so the wrong frame cuts
-  // the subject out of its own picture.
+  // Each medium keeps its own shape: posters 2:3, sleeves square, photos 4:3 landscape.
+  // Art is cropped to fill, so the wrong frame cuts the subject out.
   //
-  // 'compact' is a size down, for rounds that print a word above the role — see
-  // apArtCompact. 'focus' only matters for the portrait photos: an animal shot
-  // upright carries its head near the top, so those crop high. 'plate' is the
-  // same landscape frame cropped centrally, since food sits centred.
+  // 'compact' is a size down, for rounds that print a word above the role (apArtCompact).
+  // 'focus' crops animal portraits high, since an upright shot carries the head near the
+  // top; 'plate' is the same frame centred, since food sits centred.
   const ART_SHAPES = {
     poster: { full: ['112px', '168px'], compact: ['96px', '144px'], focus: '50% 50%' },
     cover: { full: ['132px', '132px'], compact: ['108px', '108px'], focus: '50% 50%' },
@@ -146,9 +134,8 @@
     plate: { full: ['148px', '111px'], compact: ['128px', '96px'], focus: '50% 50%' },
   };
 
-  // Gives a styled <div> real button semantics: Tab to reach, Enter/Space to
-  // activate, a name to announce. Pass `label` only for a bare glyph like '×';
-  // `extra` overrides the role.
+  // Gives a styled <div> real button semantics: Tab to reach, Enter/Space to activate.
+  // Pass `label` only for a bare glyph like '×'; `extra` overrides the role.
   function press(onClick, label, extra) {
     if (!onClick) return {};
     return {
@@ -166,10 +153,9 @@
   }
 
   // ---- progressive jester ----
-  // Everyone holds "shares", starting at 1; your odds are your share of the
-  // table's total. Being picked costs this much of the table's chance, split
-  // among everyone who wasn't — so the total never drifts and the cost is the
-  // same percentage at any head count. A nudge, not a lockout.
+  // Everyone holds "shares", starting at 1; your odds are your share of the table's
+  // total. Being picked costs this much of the table's chance, split among everyone who
+  // wasn't, so the total never drifts at any head count. A nudge, not a lockout.
   const PROGRESSIVE_STEP_PCT = 0.05;
 
   function freshWeights(ids) {
@@ -216,8 +202,7 @@
     const next = { ...weights };
     const wasPicked = new Set(pickedIds.map(String));
     const others = ids.filter(id => !wasPicked.has(String(id)));
-    // One share per player, so a percentage of the table is that times the
-    // head count, in shares.
+    // One share per player, so a percentage of the table is that times the head count.
     const step = PROGRESSIVE_STEP_PCT * ids.length;
     let released = 0;
     pickedIds.forEach((id) => {
@@ -293,29 +278,22 @@
   const MUSE_CATEGORY = 'Muse';
   const ROLE_CATEGORIES = ['Biomes', 'Cuisines', 'Locations', 'Movie/TV Show Genres', 'Muse', 'Music Genres'];
   const OPEN_ROLE_CATEGORIES = ROLE_CATEGORIES.filter(c => c !== MUSE_CATEGORY);
-  // The word-only categories, in the order their tiles render. A constant
-  // rather than state, unlike the role list: nothing ever unlocks into it.
+  // Word-only categories, in tile order. A constant rather than state, unlike the role
+  // list: nothing ever unlocks into it.
   const WORD_CATEGORIES = ['Animals', 'Food/Drinks', 'Movies/TV', 'Numbers', 'Objects'];
 
-  // Categories that have been renamed, old name to new. A saved lobby and a
-  // crossed-out word list both key off the name, so without this a rename drops
-  // them: the picker would find nothing it recognises and fall back to the
-  // opening categories, and every crossing under the old name would be swept
-  // away as a stray. Entries stay forever — a device that hasn't been opened in
-  // a year still has the old name in it.
+  // Renamed categories, old name to new. Saved lobbies and crossings both key off the
+  // name, so without this a rename silently drops them. Entries stay forever — a device
+  // untouched for a year still holds the old name.
   const RENAMED_CATEGORIES = { Food: 'Food/Drinks' };
   const currentCategoryName = (name) => RENAMED_CATEGORIES[name] || name;
 
-  // Muse is found in the Credits, and found again every time. Nothing is
-  // written down: the unlock lasts as long as the tab, and a refresh puts it
-  // back where it was hidden. Any flag a previous release saved is simply
-  // never read again. Duel Mode was hidden the same way once, and is now a
-  // plain third tile in the lobby, so nothing gates it any more.
+  // Muse is found in the Credits, and found again every time: the unlock lasts as long
+  // as the tab and is never written down. Flags saved by older releases are ignored.
   const INITIAL_MUSE_UNLOCKED = false;
 
   // ---- crossed-out words ----
-  // A crossing is a decision about the table, not the session, so these outlast
-  // the tab.
+  // A crossing is a decision about the table, not the session, so these outlast the tab.
   const DISABLED_KEY = 'masq.disabledWords';
 
   function loadDisabledWords() {
@@ -328,8 +306,8 @@
       Object.keys(parsed).forEach((cat) => {
         if (!Array.isArray(parsed[cat])) return;
         const words = parsed[cat].filter(w => typeof w === 'string' && w);
-        // Under its current name, so a category renamed since these were saved
-        // keeps its crossings instead of losing them to the sweep below.
+        // Under its current name, so a renamed category keeps its crossings instead of
+        // losing them to the sweep below.
         if (words.length) out[currentCategoryName(cat)] = words;
       });
       return out;
@@ -346,9 +324,9 @@
     }
   }
 
-  // Every word a crossing could legitimately point at, as a set per category.
-  // Null when the data files didn't load, which is the difference between "this
-  // word is gone" and "we can't see the catalogs from here".
+  // Every word a crossing could legitimately point at, as a set per category. Null when
+  // the data files didn't load — "the word is gone" and "we can't see the catalogs" are
+  // different answers.
   function knownWordsByCategory(customs) {
     const roles = window.MASQ_LOCATIONS_DATA;
     const words = window.MASQ_WORDS;
@@ -368,14 +346,11 @@
     return out;
   }
 
-  // A word list changes between releases — words get dropped, categories get
-  // renamed — and a crossing pointing at a word that no longer exists is inert
-  // but permanent, sitting in localStorage on that device for good. So the map
-  // is swept on the way in and the strays are dropped.
+  // Words get dropped and categories renamed between releases, leaving crossings that
+  // point at nothing sitting in localStorage for good — so strays are swept on the way in.
   //
-  // A sweep, never a reset: with no catalogs to check against there is nothing
-  // to call stray, so the map is handed back untouched rather than thrown away
-  // on the strength of a script that failed to load.
+  // A sweep, never a reset: with no catalogs to check against nothing counts as stray, so
+  // the map is handed back untouched rather than thrown away on a script that failed to load.
   function pruneDisabledWords(map, known) {
     if (!known) return map;
     const out = {};
@@ -389,16 +364,14 @@
   }
 
   // ---- lobby settings ----
-  // How this table likes to play — mode, categories, jesters, clock, options,
-  // theme. None of it is a decision about one round, so all of it outlasts the
-  // tab. One blob rather than a key each: they're read and written together,
-  // and half a restored lobby is worse than a default one. Deliberately left
-  // out are the round itself and the progressive jester's weights.
+  // How this table likes to play — mode, categories, jesters, clock, options, theme.
+  // None of it is per-round, so it outlasts the tab. One blob rather than a key each:
+  // they're read and written together, and half a restored lobby is worse than a default
+  // one. The round itself and the progressive weights are deliberately left out.
   const SETTINGS_KEY = 'masq.settings';
 
-  // Every field the lobby remembers, and its opening value. Also the read-back
-  // list: anything else in storage is ignored, anything missing or unusable
-  // falls back to its value here.
+  // Every field the lobby remembers and its opening value. Also the read-back list:
+  // anything else in storage is ignored, anything missing or unusable falls back here.
   const DEFAULT_SETTINGS = {
     gameMode: 'roles',
     selCategories: OPEN_ROLE_CATEGORIES,
@@ -406,8 +379,8 @@
     randJesters: false,
     jesterRandMin: 1,
     jesterRandMax: 3,
-    // Progressive to start with: it passes the jester around the table, which
-    // is what most groups expect a random draw to feel like.
+    // Progressive by default: it passes the jester around the table, which is what most
+    // groups expect a random draw to feel like.
     jesterSelection: 'progressive',
     showJesterOdds: false,
     timeLimit: 5,
@@ -416,21 +389,18 @@
     showWord: false,
     jestersKnow: false,
     jesterGetsRole: false,
-    // On to start with: a Word Mode jester is otherwise guessing at a hundred
-    // words, which is the complaint this setting exists to answer.
+    // On by default: a Word Mode jester is otherwise guessing at a hundred words.
     jesterHints: true,
     darkMode: true,
     jesterMode: false,
   };
   const SETTINGS_FIELDS = Object.keys(DEFAULT_SETTINGS);
 
-  // The top of the time dial, in minutes. The dial runs 0 (no limit) through
-  // this and then back to 0, so it's the wrap point as well as the ceiling —
-  // both the stepper and the bounds check below read it from here.
+  // Top of the time dial, in minutes. The dial runs 0 (no limit) up to this and wraps
+  // back to 0, so it is both the ceiling and the wrap point.
   const TIME_LIMIT_MAX = 15;
 
-  // Printed at the foot of Settings and beside What's New, and matching the top
-  // entry of CHANGELOG.md. One constant, so the two can't disagree on screen.
+  // Printed in Settings and beside What's New; matches the top entry of CHANGELOG.md.
   const APP_VERSION = '1.12.8';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
@@ -439,10 +409,8 @@
     ? Math.min(max, Math.max(min, Math.round(v)))
     : fallback);
 
-  // Saved picks are checked against what exists now, not what existed when they
-  // were saved — a custom category can be renamed or deleted between visits. A
-  // stale name would still be drawn, and would quietly deal Locations, so it's
-  // dropped on the way in.
+  // Saved picks are checked against what exists now: a custom category can be renamed or
+  // deleted between visits, and a stale name would quietly deal Locations instead.
   function usableCategories(names, customs, museUnlocked, gameMode) {
     const custom = Array.isArray(customs) ? customs : [];
     const isWordOnly = (c) => c.kind === 'words' || !c.entries.some(e => e.roles && e.roles.length);
@@ -451,9 +419,8 @@
       ...WORD_CATEGORIES,
       ...custom.map(c => c.name),
     ]);
-    // Role Mode can't deal a roleless category — the same cut setRoleMode makes.
-    // Word Mode and Duel both read a category as a list of words, so neither cuts
-    // anything: a Locations round in Duel deals two locations and no roles.
+    // Role Mode can't deal a roleless category — the same cut setRoleMode makes. Word
+    // Mode and Duel read a category as a plain word list, so neither cuts anything.
     const roleless = new Set(gameMode === 'words' || gameMode === 'duel'
       ? []
       : [...WORD_CATEGORIES, ...custom.filter(isWordOnly).map(c => c.name)]);
@@ -481,13 +448,11 @@
     );
     return {
       gameMode,
-      // Never empty: a picker with nothing in it has nothing to deal, so a list
-      // that lost everything falls back to the opening categories.
+      // Never empty: a list that lost everything falls back to the opening categories.
       selCategories: picked.length ? picked : DEFAULT_SETTINGS.selCategories,
       jesterCount: asCount(saved.jesterCount, 0, 99, DEFAULT_SETTINGS.jesterCount),
       randJesters: asBool(saved.randJesters, DEFAULT_SETTINGS.randJesters),
-      // Re-clamped against the cast on every render (see randMin/randMax), so
-      // this only has to be a number.
+      // Re-clamped against the cast on every render (see randMin/randMax).
       jesterRandMin: asCount(saved.jesterRandMin, 0, 99, DEFAULT_SETTINGS.jesterRandMin),
       jesterRandMax: asCount(saved.jesterRandMax, 0, 99, DEFAULT_SETTINGS.jesterRandMax),
       jesterSelection: asOneOf(saved.jesterSelection, ['random', 'progressive'], DEFAULT_SETTINGS.jesterSelection),
@@ -520,10 +485,8 @@
   const INITIAL_CUSTOM = loadCustomCategories();
   const INITIAL_SETTINGS = loadSettings(INITIAL_CUSTOM, INITIAL_MUSE_UNLOCKED);
 
-  // Swept here rather than on first edit: a crossing for a word this release
-  // dropped would otherwise wait for someone to open that category's word list,
-  // which they may never do. Written back only when the sweep found something,
-  // so an untouched device isn't given a pointless write on every load.
+  // Swept on load rather than on first edit, which would wait for someone to open that
+  // category's word list. Written back only when the sweep found something.
   const INITIAL_DISABLED = (() => {
     const saved = loadDisabledWords();
     const swept = pruneDisabledWords(saved, knownWordsByCategory(INITIAL_CUSTOM));
@@ -532,9 +495,9 @@
   })();
 
   // ---- roster ----
-  // The table usually plays with the same people, so the names outlast the tab.
-  // Stored as [{ id, name }] rather than two arrays, so a name can never come
-  // back paired with the wrong id. Round state keys off `id` — see `playerId`.
+  // The table usually plays with the same people, so the names outlast the tab. Stored as
+  // [{ id, name }] rather than two arrays, so a name can't come back paired with the wrong
+  // id. Round state keys off `id` — see `playerId`.
   const PLAYERS_KEY = 'masq.players';
   const DEFAULT_PLAYERS = [
     { id: 0, name: 'Player 1' }, { id: 1, name: 'Player 2' },
@@ -551,8 +514,8 @@
       const players = [];
       parsed.forEach((p) => {
         if (!p || typeof p.name !== 'string' || !p.name.trim()) return;
-        // A duplicate or unusable id would collide in the round maps — keep the
-        // name, reissue the id below.
+        // A duplicate or unusable id would collide in the round maps — keep the name,
+        // reissue the id below.
         const id = (typeof p.id === 'number' && isFinite(p.id) && !seen.has(p.id)) ? p.id : null;
         if (id !== null) seen.add(id);
         players.push({ id, name: p.name.trim() });
@@ -574,8 +537,8 @@
     }
   }
 
-  // Read once: the two state fields and the id counter must agree, and another
-  // tab could write in between two reads.
+  // Read once: the two state fields and the id counter must agree, and another tab could
+  // write in between two reads.
   const INITIAL_PLAYERS = loadPlayers();
 
   const THEME_DARK = {
@@ -675,8 +638,8 @@
     '--m-border-hard': 'rgba(140,110,40,.38)',
     '--m-border-soft': 'rgba(140,110,40,.12)',
     '--m-border-white': 'rgba(60,40,20,.1)',
-    // Inverted from dark: over a near-white screen these wash *down*, and the
-    // saturated hues darken far harder than gold does.
+    // Inverted from dark: over a near-white screen these wash *down*, and the saturated
+    // hues darken far harder than gold does.
     '--m-icon-gold': 'rgba(154,117,40,.2)',
     '--m-icon-crimson': 'rgba(178,32,47,.14)',
     '--m-icon-blue': 'rgba(46,91,176,.16)',
@@ -736,8 +699,8 @@
     '--m-border-hard': 'rgba(255,61,139,.42)',
     '--m-border-soft': 'rgba(255,61,139,.12)',
     '--m-border-white': 'rgba(255,255,255,.1)',
-    // The accent here is hot pink, not gold, so the neutral wash follows it.
-    // Crimson and blue carry over from dark unchanged.
+    // Accent is hot pink here, not gold, so the neutral wash follows it. Crimson and blue
+    // carry over from dark unchanged.
     '--m-icon-gold': 'rgba(255,61,139,.16)',
     '--m-icon-purple': 'rgba(167,139,250,.135)',
     '--m-backdrop': 'rgba(10,2,20,.72)',
@@ -776,60 +739,43 @@
     const scheme = document.querySelector('meta[name="color-scheme"]');
     if (scheme) scheme.setAttribute('content', (darkMode || jesterMode) ? 'dark' : 'light');
   }
-  // Painted before React mounts, in the theme this table chose — otherwise a
-  // light-mode table watches the stage go dark and back again on every load.
+  // Painted before React mounts, so a light-mode table doesn't watch the stage go dark
+  // and back again on every load.
   applyTheme(INITIAL_SETTINGS.darkMode, INITIAL_SETTINGS.jesterMode);
 
   // ---- static icon markup (no dynamic bindings, safe as raw SVG) ----
-  // All drawn on a 24x24 grid at stroke-width ~1.7 so the set reads as one hand.
-  // The 18px variants are resized here rather than kept as second copies, which
-  // drifted from their 20px twins.
+  // All on a 24x24 grid at stroke-width ~1.7 so the set reads as one hand. The 18px
+  // variants are resized here rather than kept as second copies, which used to drift.
   const resize = (svg, size) => svg.replace(/width="\d+" height="\d+"/, `width="${size}" height="${size}"`);
-  // Role Mode: a Venetian domino mask — you're handed a face to wear.
   const ICON_ROLE_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M2.6 10.2 C2.6 7.4 5 6 7.6 6.4 C9.4 6.7 11 7.6 12 8.4 C13 7.6 14.6 6.7 16.4 6.4 C19 6 21.4 7.4 21.4 10.2 C21.4 13.6 18.6 17.4 15.8 17.4 C13.9 17.4 12.7 16 12 14.6 C11.3 16 10.1 17.4 8.2 17.4 C5.4 17.4 2.6 13.6 2.6 10.2 Z" stroke="var(--m-brand)" stroke-width="1.7" stroke-linejoin="round"></path><ellipse cx="7.7" cy="11" rx="2.3" ry="1.6" transform="rotate(-12 7.7 11)" stroke="var(--m-brand)" stroke-width="1.3"></ellipse><ellipse cx="16.3" cy="11" rx="2.3" ry="1.6" transform="rotate(12 16.3 11)" stroke="var(--m-brand)" stroke-width="1.3"></ellipse><path d="M5.6 2.9 L6.9 4.2 L5.6 5.5 L4.3 4.2 Z" stroke="var(--m-accent)" stroke-width="1.2" stroke-linejoin="round" opacity=".75"></path></svg>';
   const ICON_ROLE_18 = resize(ICON_ROLE_20, 18);
-  // Word Mode: the open script everyone but the jester is reading from.
   const ICON_WORD = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 8 C10 6.4 7.4 5.8 4.6 6.2 L4.6 17.6 C7.4 17.2 10 17.8 12 19.4 C14 17.8 16.6 17.2 19.4 17.6 L19.4 6.2 C16.6 5.8 14 6.4 12 8 Z" stroke="var(--m-brand)" stroke-width="1.7" stroke-linejoin="round"></path><path d="M12 8 L12 19.4" stroke="var(--m-brand)" stroke-width="1.4"></path><path d="M7 10.4 C8.2 10.5 9.2 10.8 10.1 11.3 M17 10.4 C15.8 10.5 14.8 10.8 13.9 11.3" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".65"></path></svg>';
-  // Duel Mode: two sabres crossed, sparking where they meet. Drawn to the same
-  // rules as the two tiles beside it — brand strokes, one accent detail.
   const ICON_DUEL = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6.4 17.6 L18.8 5.2" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M17.6 17.6 L5.2 5.2" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M5.0 16.2 L7.8 19.0" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M19.0 16.2 L16.2 19.0" stroke="var(--m-brand)" stroke-width="1.4" stroke-linecap="round"></path><path d="M6.4 17.6 L4.5 19.5" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M17.6 17.6 L19.5 19.5" stroke="var(--m-brand)" stroke-width="1.7" stroke-linecap="round"></path><path d="M12 8.6 L12 6.9 M15.4 12 L17.1 12 M8.6 12 L6.9 12 M12 15.4 L12 17.1" stroke="var(--m-accent)" stroke-width="1.2" stroke-linecap="round" opacity=".7"></path></svg>';
-  // Players: the company — one player forward, the rest of the table behind.
   const ICON_PLAYERS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="5.6" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M2 18.6 C2 16 3.6 14.6 5.6 14.6 C6.2 14.6 6.8 14.7 7.3 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="18.4" cy="10" r="2.3" stroke="var(--m-accent)" stroke-width="1.5" opacity=".55"></circle><path d="M22 18.6 C22 16 20.4 14.6 18.4 14.6 C17.8 14.6 17.2 14.7 16.7 14.9" stroke="var(--m-accent)" stroke-width="1.5" stroke-linecap="round" opacity=".55"></path><circle cx="12" cy="8.6" r="3.3" stroke="var(--m-accent)" stroke-width="1.8"></circle><path d="M6.7 19.4 C6.7 15.8 9.1 13.9 12 13.9 C14.9 13.9 17.3 15.8 17.3 19.4" stroke="var(--m-accent)" stroke-width="1.8" stroke-linecap="round"></path></svg>';
-  // Categories: a deck of cards to draw the round from, marked with a harlequin
-  // lozenge so it can't be mistaken for the script.
   const ICON_CATEGORIES_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M5 16.8 L5 6.2 C5 5.2 5.8 4.4 6.8 4.4 L15.4 4.4" stroke="#b9a8dd" stroke-width="1.4" stroke-linecap="round" opacity=".55"></path><rect x="8" y="6.6" width="11.4" height="13.4" rx="2.2" stroke="#b9a8dd" stroke-width="1.7"></rect><path d="M13.7 9.9 L16.3 13.3 L13.7 16.7 L11.1 13.3 Z" stroke="#b9a8dd" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
   const ICON_CATEGORIES_18 = resize(ICON_CATEGORIES_20, 18);
-  // Jesters: the cap and bells, rather than a third mask icon in the same row.
-  // One flat silhouette, not an outlined cone per horn — outlines at 20px put
-  // four thin lines through the same few pixels and stopped reading. The crown
-  // is drawn last, so the horn bases tuck behind its rim with no seams.
+  // Cap and bells as one flat silhouette, not an outlined cone per horn: outlines at 20px
+  // put four thin lines through the same few pixels and stopped reading. The crown is
+  // drawn last so the horn bases tuck behind its rim.
   const ICON_JESTERS_20 = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M10.2 17.2 C8.4 14.2 6 11.6 3.4 10.3 C2.8 10.1 2.5 10.5 2.9 11.2 C4 13.2 5.4 16.4 6.6 19.6 Z" fill="#e6a0a8"></path><path d="M13.8 17.2 C15.6 14.2 18 11.6 20.6 10.3 C21.2 10.1 21.5 10.5 21.1 11.2 C20 13.2 18.6 16.4 17.4 19.6 Z" fill="#e6a0a8"></path><path d="M10 18.8 C9.8 13.2 10 8.4 11 4.9 C11.2 4.4 11.6 4.4 11.8 4.9 C13.2 8.8 14 13.4 14.2 18.8 Z" fill="#e6a0a8"></path><circle cx="2" cy="9.6" r="1.6" fill="#e6a0a8"></circle><circle cx="10.4" cy="3.4" r="1.6" fill="#e6a0a8"></circle><circle cx="22" cy="9.6" r="1.6" fill="#e6a0a8"></circle><path d="M4.6 15.2 L7 18.4 L9.4 15.2 L11.8 18.4 L14.2 15.2 L16.6 18.4 L19 15.2 L17.6 20.4 C17.5 20.8 17.2 21 16.8 21 L7.2 21 C6.8 21 6.5 20.8 6.4 20.4 Z" fill="#e6a0a8"></path></svg>';
   const ICON_JESTERS_18 = resize(ICON_JESTERS_20, 18);
-  // Time Limit: an hourglass with the sand actually running.
   const ICON_TIME = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6.4 3.6 L17.6 3.6 M6.4 20.4 L17.6 20.4" stroke="#9fb0cf" stroke-width="1.8" stroke-linecap="round"></path><path d="M8.2 3.6 L8.2 6.6 C8.2 9.3 12 10.9 12 12 C12 13.1 8.2 14.7 8.2 17.4 L8.2 20.4 M15.8 3.6 L15.8 6.6 C15.8 9.3 12 10.9 12 12 C12 13.1 15.8 14.7 15.8 17.4 L15.8 20.4" stroke="#9fb0cf" stroke-width="1.7" stroke-linejoin="round"></path><path d="M9.6 5.6 L14.4 5.6 C14 7.6 12.6 8.7 12 9.4 C11.4 8.7 10 7.6 9.6 5.6 Z" fill="#9fb0cf" opacity=".3"></path><path d="M9.9 18.6 C10.6 16.5 13.4 16.5 14.1 18.6 Z" fill="#9fb0cf" opacity=".55"></path><path d="M12 10.9 L12 13.4" stroke="#9fb0cf" stroke-width="1.1" stroke-linecap="round" opacity=".6"></path></svg>';
-  // Options: a lighting board's faders. A gear would echo the header's ⚙, which
-  // opens a different screen.
+  // Faders, not a gear — the header's ⚙ opens a different screen.
   const ICON_OPTIONS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 7 L6.8 7 M11.2 7 L20 7 M4 12 L12.8 12 M17.2 12 L20 12 M4 17 L8.8 17 M13.2 17 L20 17" stroke="var(--m-accent)" stroke-width="1.7" stroke-linecap="round"></path><circle cx="9" cy="7" r="2.2" stroke="var(--m-accent)" stroke-width="1.7"></circle><circle cx="15" cy="12" r="2.2" stroke="var(--m-accent)" stroke-width="1.7"></circle><circle cx="11" cy="17" r="2.2" stroke="var(--m-accent)" stroke-width="1.7"></circle></svg>';
   const ICON_SHOW_WORD = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 12 C5.5 7.5 9 5 12 5 C15 5 18.5 7.5 21 12 C18.5 16.5 15 19 12 19 C9 19 5.5 16.5 3 12 Z" stroke="#9fb0cf" stroke-width="1.8"></path><circle cx="12" cy="12" r="2.5" stroke="#9fb0cf" stroke-width="1.4"></circle><path d="M5 19 L19 5" stroke="#9fb0cf" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   const ICON_PAUSE = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><rect x="7" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect><rect x="13.4" y="5" width="3.6" height="14" rx="1.4" fill="var(--m-accent)"></rect></svg>';
   const ICON_PLAY = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M8.5 5.4 L18 12 L8.5 18.6 Z" fill="var(--m-accent)" stroke="var(--m-accent)" stroke-width="1.8" stroke-linejoin="round"></path></svg>';
-  // The Trial's four steps, redrawn on the same 24x24 grid as the lobby set
-  // rather than the 32x32 one they used to sit on: one outlined shape, one
-  // lighter inner detail, one accent mark, rounded joins throughout. Strokes
-  // are 1.5 rather than 1.7 because these print at 28px, not 20 — the same
-  // weight on the glass. Each keeps the fixed tint its tile is built around;
-  // the two that reached for var(--m-brand) went nearly invisible in light
-  // mode, since the tiles stay dark in every theme and gold darkens with it.
+  // The Trial's four steps, on the lobby set's 24x24 grid but stroked 1.5 rather than 1.7
+  // since they print at 28px. Each keeps a fixed tint instead of var(--m-brand): the tiles
+  // stay dark in every theme, and gold goes nearly invisible in light mode.
   // Step 1 — the round opens: one bubble, still asking.
   const ICON_STEP1 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M6 4.6 L18 4.6 C19.2 4.6 20.1 5.5 20.1 6.7 L20.1 14.1 C20.1 15.3 19.2 16.2 18 16.2 L11.6 16.2 L7.4 19.6 L7.9 16.2 L6 16.2 C4.8 16.2 3.9 15.3 3.9 14.1 L3.9 6.7 C3.9 5.5 4.8 4.6 6 4.6 Z" stroke="#9fb0cf" stroke-width="1.5" stroke-linejoin="round"></path><path d="M9.9 8.9 C9.9 7.7 10.8 6.9 12 6.9 C13.2 6.9 14.1 7.7 14.1 8.8 C14.1 10.1 12 10.4 12 11.9" stroke="#9fb0cf" stroke-width="1.3" stroke-linecap="round"></path><circle cx="12" cy="13.9" r="1" fill="#d9c48c"></circle></svg>';
   // Step 2 — the questioning: two bubbles answering each other.
   const ICON_STEP2 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M4.6 3.6 L13 3.6 C14.1 3.6 15 4.5 15 5.6 L15 9.4 C15 10.5 14.1 11.4 13 11.4 L8.6 11.4 L5.6 13.8 L6 11.4 L4.6 11.4 C3.5 11.4 2.6 10.5 2.6 9.4 L2.6 5.6 C2.6 4.5 3.5 3.6 4.6 3.6 Z" stroke="#e6a0a8" stroke-width="1.5" stroke-linejoin="round"></path><path d="M11 12.6 L19.4 12.6 C20.5 12.6 21.4 13.5 21.4 14.6 L21.4 18.4 C21.4 19.5 20.5 20.4 19.4 20.4 L18 20.4 L18.4 22.8 L15.4 20.4 L11 20.4 C9.9 20.4 9 19.5 9 18.4 L9 14.6 C9 13.5 9.9 12.6 11 12.6 Z" stroke="#e6a0a8" stroke-width="1.5" stroke-linejoin="round"></path><circle cx="6.1" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle><circle cx="8.8" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle><circle cx="11.5" cy="7.5" r=".95" fill="#e6cb7e" opacity=".85"></circle></svg>';
-  // Step 3 — the verdict: a ballot going through the slot, the box marked with
-  // the same harlequin lozenge the Categories icon carries.
+  // Step 3 — the verdict: a ballot going into the box.
   const ICON_STEP3 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><rect x="3.4" y="11.8" width="17.2" height="8.6" rx="2" stroke="#e6cb7e" stroke-width="1.5"></rect><path d="M8.2 11.8 L8.2 14.4 L15.8 14.4 L15.8 11.8" stroke="#e6cb7e" stroke-width="1.3" stroke-linejoin="round"></path><path d="M12 3.2 L12 10.2 M9.3 7.5 L12 10.2 L14.7 7.5" stroke="#e6cb7e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 16.2 L13.3 18 L12 19.8 L10.7 18 Z" stroke="#f4e3b8" stroke-width="1.15" stroke-linejoin="round" opacity=".7"></path></svg>';
-  // Step 4 — the unmasking: Role Mode's domino mask, lifted off the face. The
-  // strokes inside the group are scaled up by the same 0.82 they're scaled
-  // down by, so the mask lands at the set's weight rather than four fifths of it.
+  // Step 4 — the unmasking: Role Mode's mask, lifted. Strokes inside the group are scaled
+  // up by the same 0.82 the group is scaled down by, so they land at the set's weight.
   const ICON_STEP4 = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><g transform="translate(2.15 3.6) scale(0.82)"><path d="M2.6 10.2 C2.6 7.4 5 6 7.6 6.4 C9.4 6.7 11 7.6 12 8.4 C13 7.6 14.6 6.7 16.4 6.4 C19 6 21.4 7.4 21.4 10.2 C21.4 13.6 18.6 17.4 15.8 17.4 C13.9 17.4 12.7 16 12 14.6 C11.3 16 10.1 17.4 8.2 17.4 C5.4 17.4 2.6 13.6 2.6 10.2 Z" stroke="#f4a0a8" stroke-width="1.83" stroke-linejoin="round"></path><ellipse cx="7.7" cy="11" rx="2.3" ry="1.6" transform="rotate(-12 7.7 11)" stroke="#f4a0a8" stroke-width="1.59"></ellipse><ellipse cx="16.3" cy="11" rx="2.3" ry="1.6" transform="rotate(12 16.3 11)" stroke="#f4a0a8" stroke-width="1.59"></ellipse></g><path d="M12 7.6 L12 2.9 M9.7 5.2 L12 2.9 L14.3 5.2" stroke="#e6cb7e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path></svg>';
 
   // ---- Mask ----
@@ -880,16 +826,14 @@
       playerList: INITIAL_PLAYERS.map(p => p.name),
       playerKeys: INITIAL_PLAYERS.map(p => p.id),
       addingPlayer: false, newName: '', editingIdx: null, editingVal: '', removingIds: [],
-      // Fetched the first time Settings → What's New is opened, then kept for
-      // the rest of the session. Not saved: it lives in the file, not the table.
+      // Fetched the first time What's New is opened, then kept for the session.
       changelog: null, changelogStatus: 'idle',
       // Duel only: the word each of the two players is holding, by player id.
       roundDuelWords: {},
-      // Mode, categories, jesters, clock, options and theme, restored as the
-      // table left them. Fields and opening values are in DEFAULT_SETTINGS.
+      // Lobby settings, restored as the table left them (see DEFAULT_SETTINGS).
       ...INITIAL_SETTINGS,
-      // The progressive cycle itself, unlike the setting that turns it on, is
-      // in-memory only: a reload or a roster change starts it over.
+      // The progressive cycle itself is in-memory only, unlike the setting that turns it
+      // on: a reload or a roster change starts it over.
       jesterWeights: {},
       // Alphabetical: also the order the tiles and word lists render in.
       museUnlocked: INITIAL_MUSE_UNLOCKED,
@@ -902,20 +846,19 @@
       roundRoleMap: {},
       roundJesterRoleMap: {},
       roundJesterWordMap: {},
-      // One hint for the round, shared by every jester in it — see
-      // wordHintCatalog in src/data_words.js for why it isn't one each.
+      // One hint per round, shared by every jester in it — see wordHintCatalog in
+      // src/data_words.js for why it isn't one each.
       roundJesterHint: null,
       secondsLeft: null,
       timeUp: false,
       timerPaused: false,
       wordListExpanded: [],
-      // Results keeps the round word covered so the jester still has a shot at
-      // guessing it, with the category's words on hand to pick from.
+      // Results keeps the word covered so the jester still has a shot at guessing it,
+      // with the category's words on hand to pick from.
       resultsWordShown: false,
       resultsPoolOpen: false,
-      // The same list, opened from the Trial instead — there it is the whole
-      // table's to read, not the jester's. Its own flag so closing one sheet
-      // doesn't reach across screens and close the other.
+      // The same list opened from the Trial, where it's the whole table's to read. Its own
+      // flag so closing one sheet doesn't reach across screens and close the other.
       votingPoolOpen: false,
       disabledWords: INITIAL_DISABLED,
       customCategories: INITIAL_CUSTOM,
@@ -925,8 +868,7 @@
       customFrom: 'settings',
     };
 
-    // Past the highest saved id, so a new player can't collide with a restored
-    // one and inherit their round card.
+    // Past the highest saved id, so a new player can't inherit a restored one's card.
     __nextPlayerId = INITIAL_PLAYERS.reduce((max, p) => Math.max(max, p.id), -1) + 1;
 
     componentDidMount() {
@@ -934,8 +876,7 @@
       this.__fitPhoneShell = this.__fitPhoneShell.bind(this);
       this.__fitPhoneShell();
       window.addEventListener('resize', this.__fitPhoneShell);
-      // Jester mode: pointer spark trail, built outside React so it never
-      // triggers a re-render.
+      // Jester mode: pointer spark trail, built outside React so it never re-renders.
       this.__spark = (e) => {
         if (!this.state.jesterMode) return;
         const now = performance.now();
@@ -957,19 +898,16 @@
 
     componentDidUpdate(_, prev) {
       if (prev.darkMode !== this.state.darkMode || prev.jesterMode !== this.state.jesterMode) applyTheme(this.state.darkMode, this.state.jesterMode);
-      // Every edit, add and remove rebuilds the arrays, so identity spots them
-      // all in one place.
+      // Every edit, add and remove rebuilds the arrays, so identity catches them all.
       if (prev.playerList !== this.state.playerList || prev.playerKeys !== this.state.playerKeys) {
         savePlayers(this.state.playerList, this.state.playerKeys);
       }
-      // Same for the crossings: every toggle and reset builds a new map rather
-      // than editing the old one.
+      // Same for the crossings: every toggle and reset builds a new map.
       if (prev.disabledWords !== this.state.disabledWords) {
         saveDisabledWords(this.state.disabledWords);
       }
-      // And the lobby, written as one blob, so one sweep of the field list
-      // covers every setting. Category picks are rebuilt rather than pushed
-      // into, so identity works for the one field that isn't a scalar.
+      // And the lobby, as one blob, so a sweep of the field list covers every setting.
+      // Category picks are rebuilt rather than mutated, so identity works there too.
       if (SETTINGS_FIELDS.some(field => prev[field] !== this.state[field])) {
         saveSettings(this.state);
       }
@@ -982,8 +920,8 @@
       if (this.__audioCtx) this.__audioCtx.close();
     }
 
-    // Jester mode: tilt the card toward the pointer and slide its foil sheen.
-    // --hx/--hy feed the .j-holo gradient.
+    // Jester mode: tilt the card toward the pointer and slide its foil sheen. --hx/--hy
+    // feed the .j-holo gradient.
     __holoMove = (e) => {
       if (!this.state.jesterMode) return;
       const el = e.currentTarget;
@@ -999,29 +937,17 @@
       e.currentTarget.style.transform = '';
     };
 
-    // Browser zoom works by making one CSS px cover more device px, so zooming
-    // in shrinks innerWidth/innerHeight and fires resize. Fitting the shell to
-    // that shrunken viewport scaled it down by exactly the factor the zoom had
-    // scaled it up, and the two cancelled: ctrl +/- did nothing at all. Any fit
-    // read from the viewport has this problem, because the viewport is the only
-    // thing zoom touches. Dividing the zoom back out holds the fit steady and
-    // lets zoom through to the shell.
+    // Browser zoom shrinks innerWidth/innerHeight, so fitting the shell to the viewport
+    // scaled it down by exactly the factor zoom scaled it up and ctrl +/- did nothing.
+    // Dividing the zoom back out holds the fit steady and lets zoom through to the shell.
     //
-    // devicePixelRatio against its value at load is the only handle on the zoom
-    // level. Two things follow. Moving the window to a monitor of a different
-    // density shifts it too, which re-fits the shell — harmless, and rarer than
-    // zooming. And a page loaded at a zoom level the browser had persisted
-    // takes that level as its baseline, so zoom set on a previous visit still
-    // reads as 100% until the user presses the keys again. Storing the baseline
-    // would fix that, at the cost of a first-ever visit while zoomed poisoning
-    // it permanently; the trade wasn't worth it.
+    // devicePixelRatio against its value at load is the only handle on the zoom level, so
+    // a density change on another monitor also re-fits (harmless), and zoom the browser
+    // persisted from a previous visit reads as 100% until the keys are pressed again.
     //
-    // Sizing goes through CSS zoom rather than a transform because a transform
-    // leaves the layout box at its unscaled size — the page would not know the
-    // shell had grown, so no scrollbar would appear and the overflow would be
-    // unreachable. CSS zoom scales the box as well, which keeps the overflow
-    // scrollable and leaves text laid out at its true size rather than being
-    // rasterised at one size and stretched to another.
+    // CSS zoom rather than a transform: a transform leaves the layout box unscaled, so no
+    // scrollbar appears and the overflow is unreachable. zoom scales the box too, and lays
+    // text out at its true size rather than rasterising and stretching it.
     __fitPhoneShell() {
       const el = document.getElementById('phone-shell');
       if (!el) return;
@@ -1033,9 +959,8 @@
         el.style.zoom = '';
         el.style.width = '100%';
         el.style.maxWidth = BASE_W + 'px';
-        // 100dvh, not 100%: the wrapper is min-height rather than height, so it
-        // has no definite height for a percentage to resolve against and the
-        // shell would collapse to nothing.
+        // 100dvh, not 100%: the wrapper is min-height, so a percentage has no definite
+        // height to resolve against and the shell would collapse.
         el.style.height = '100dvh';
         el.style.maxHeight = BASE_H + 'px';
         return;
@@ -1047,9 +972,8 @@
       el.style.zoom = Math.min(vw / BASE_W, vh / BASE_H, MAX_SCALE);
     }
 
-    // Fetched once per session and kept. Opened from a file:// page the request
-    // fails on origin rules rather than on anything being wrong, so the error
-    // state offers the copy on GitHub instead of claiming the file is missing.
+    // Fetched once per session. From a file:// page it fails on origin rules rather than
+    // anything being wrong, so the error state points at GitHub instead of blaming the file.
     __loadChangelog() {
       const status = this.state.changelogStatus;
       if (status === 'loading' || status === 'ready') return;
@@ -1067,20 +991,15 @@
       }
     }
 
-    // Fetches every image this round can put on a card, the moment it's dealt.
-    // The card only mounts when a player opens their overlay, so otherwise the
-    // request starts one tap before the curtain and the artwork lands late.
-    // Worst on Music rounds: our cover size isn't one of Deezer's pre-renders,
-    // so a cold cover costs ~0.3s against ~0.03s for a warm one.
-    //
-    // Fire and forget — the point is the bytes being cached by the time the
-    // <img> mounts, and a failed preload costs nothing, since the card already
-    // treats a dead URL as no art.
+    // Fetches every image this round can put on a card the moment it's dealt. The card
+    // only mounts when a player opens their overlay, so otherwise the request starts one
+    // tap before the curtain and the artwork lands late — worst on Music rounds, where our
+    // cover size isn't one of Deezer's pre-renders (~0.3s cold vs ~0.03s warm). Fire and
+    // forget: the card already treats a dead URL as no art.
     __preloadRoundArt(round, gameMode) {
       if (typeof window === 'undefined' || !window.Image) return;
       const cat = round.roundCategory;
-      // Mirrors how renderVals picks apArt: word-only rounds print no roles, so
-      // their role artwork stays unfetched.
+      // Mirrors how renderVals picks apArt: word-only rounds print no roles.
       const roleArt = gameMode === 'words' || gameMode === 'duel' ? null
         : cat === 'Movie/TV Show Genres' ? posterFor
           : cat === 'Music Genres' ? albumFor
@@ -1094,8 +1013,8 @@
         Object.values(round.roundRoleMap || {}).forEach(r => add(roleArt, r));
         Object.values(round.roundJesterRoleMap || {}).forEach(r => add(roleArt, r));
       }
-      // Three word-only categories picture the word itself; a disguised jester
-      // gets their fake word's picture instead.
+      // Three word-only categories picture the word itself; a disguised jester gets their
+      // fake word's picture instead.
       const wordArt = cat === 'Movies/TV' ? posterFor
         : cat === 'Food/Drinks' ? foodFor
           : cat === 'Animals' ? animalFor
@@ -1104,8 +1023,7 @@
       if (wordArt) {
         add(wordArt, round.roundWord);
         Object.values(round.roundJesterWordMap || {}).forEach(w => add(wordArt, w));
-        // A duel deals a word per player and shows both at the end, so both are
-        // wanted, not just the one in roundWord.
+        // A duel deals a word per player and shows both at the end, so preload both.
         Object.values(round.roundDuelWords || {}).forEach(w => add(wordArt, w));
       }
       urls.forEach((url) => { const img = new window.Image(); img.src = url; });
@@ -1152,8 +1070,8 @@
       }
     };
 
-    // Pause clears the interval, resume starts a fresh one, so the countdown
-    // always restarts on a whole second.
+    // Pause clears the interval and resume starts a fresh one, so the countdown always
+    // restarts on a whole second.
     __runTimer() {
       if (this.__timerId) return;
       this.__timerId = setInterval(this.__tick, 1000);
@@ -1200,8 +1118,8 @@
       };
       const custom = Array.isArray(st.customCategories) ? st.customCategories : [];
       const customByName = custom.reduce((acc, c) => { acc[c.name] = c; return acc; }, {});
-      // A role category with no roles left counts as word-only, so Role Mode
-      // can never deal a roleless round.
+      // A role category with no roles left counts as word-only, so Role Mode can never
+      // deal a roleless round.
       const customIsWordOnly = (c) => c.kind === 'words' || !c.entries.some(e => e.roles && e.roles.length);
       const customWordOnlyNames = custom.filter(customIsWordOnly).map(c => c.name);
       const customNames = custom.map(c => c.name);
@@ -1221,8 +1139,8 @@
         if (category === 'Numbers') return wordOnlyCatalog.Numbers;
         return locationNames;
       };
-      // Crossed-out words are skipped; the word list keeps at least one per
-      // category, so a pool is never empty.
+      // Crossed-out words are skipped; the word list keeps at least one per category, so
+      // a pool is never empty.
       const getWordPool = (category) => {
         const raw = rawWordPool(category);
         const off = (st.disabledWords || {})[category] || [];
@@ -1242,29 +1160,24 @@
           this.setState({ selCategories: next });
         },
       });
-      // The whole table, not one short of it. A round where everyone is a
-      // jester has no secret word to protect and no one to protect it from —
-      // which is a round some tables want, and nothing downstream minds: the
-      // cast list on the reveal simply comes back empty.
+      // The whole table, not one short of it: an all-jester round is one some tables want,
+      // and nothing downstream minds — the reveal's cast list just comes back empty.
       const maxJesters = st.playerList.length;
       const jesterCount = Math.min(st.jesterCount, maxJesters);
       const isProgressive = st.jesterSelection === 'progressive';
       const randMax = Math.min(st.jesterRandMax, maxJesters);
       const randMin = Math.min(st.jesterRandMin, randMax);
-      // Derived, not read off state. Word Mode always shows the word; Role Mode
-      // hides it while the jester is disguised, since a block everyone but them
-      // carries would give them away.
-      // Duel behaves like Word Mode here: the word is the whole card, so it is
-      // always shown and the setting has nothing left to decide.
+      // Derived, not read off state. Word and Duel always show the word — it's the whole
+      // card. Role Mode hides it while the jester is disguised, since a block everyone but
+      // them carries would give them away.
       const wordLocked = st.gameMode === 'words' || st.gameMode === 'duel' || st.jesterGetsRole;
       const showWord = st.gameMode === 'words' || st.gameMode === 'duel' ? true : (st.jesterGetsRole ? false : st.showWord);
-      // Same shape as wordLocked: a hint is a Word Mode idea, and it can only
-      // reach a jester who hasn't been handed a fake word to believe in.
+      // Same shape as wordLocked: hints are a Word Mode idea, and only reach a jester who
+      // wasn't handed a fake word to believe in.
       const hintsAvailable = st.gameMode === 'words' && !st.jesterGetsRole;
       const roundJesterIndices = Array.isArray(st.roundJesterIndices) ? st.roundJesterIndices : [];
       const jesterIndices = new Set(roundJesterIndices);
-      // Round state is keyed by this id, never by name: two players called
-      // "Alex" are two players.
+      // Round state is keyed by id, never by name: two players called "Alex" are two players.
       const playerId = (i) => ((st.playerKeys && st.playerKeys[i] != null) ? st.playerKeys[i] : i);
       const players = st.playerList.map((name, i) => ({
         id: playerId(i),
@@ -1309,8 +1222,8 @@
       const ap = st.activePlayer;
       const apIsJester = ap && !!ap.jester;
       const apRoundRole = ap && !apIsJester ? (roundRoleMap[ap.id] || 'PERFORMER') : null;
-      // A disguise only holds if the round produced one. A single-word category
-      // has nothing to fake with, so that jester is told they're the Jester.
+      // A disguise only holds if the round produced one — a single-word category has
+      // nothing to fake with, so that jester is simply told they're the Jester.
       const apFakeRoleRaw = ap ? (roundJesterRoleMap[ap.id] || null) : null;
       const apFakeWordRaw = ap ? (roundJesterWordMap[ap.id] || null) : null;
       const apRoleDisguised = apIsJester && st.gameMode === 'roles' && st.jesterGetsRole && !!apFakeRoleRaw;
@@ -1318,46 +1231,39 @@
       const apFakeRole = apRoleDisguised ? apFakeRoleRaw : null;
       const apFakeWord = apWordDisguised ? apFakeWordRaw : null;
       const apIsUndisguisedJester = apIsJester && !apRoleDisguised && !apWordDisguised;
-      // Artwork tracks what this player is shown, never the round's real answer:
-      // a disguised jester gets their fake movie's poster.
       const isDuel = st.gameMode === 'duel';
       const wordsAsList = st.gameMode === 'words' || isDuel;
       const duelWords = st.roundDuelWords || {};
-      // In a duel the answer is per player, so the card shows this player's word
-      // and nothing about the other's. Everywhere else the round has one word.
+      // Artwork and text track what this player is shown, never the round's real answer.
+      // In a duel that means their own word; a disguised jester gets their fake one.
       const apWordShown = isDuel ? (ap ? (duelWords[ap.id] || null) : null)
         : apIsJester ? (apWordDisguised ? apFakeWord : null) : st.roundWord;
       const apRoleShown = apIsUndisguisedJester ? 'THE JESTER' : (apIsJester ? (apFakeRole || 'PERFORMER') : apRoundRole);
-      // Movies/TV round: the word is a film or series. Hidden with the word.
+      // Movies/TV round: the word is a film or series, so it hides with the word.
       const apWordPoster = isMoviesWordRound && showWord ? posterFor(apWordShown) : null;
-      // Food and Animals rounds picture the word the same way, off the same two
-      // maps the Cuisines and Biomes roles read — a pizza is a pizza and a wolf
-      // is a wolf, whether the round makes it a role or the answer.
+      // Food and Animals read the same maps the Cuisines and Biomes roles do — a pizza is
+      // a pizza whether the round makes it a role or the answer.
       const apWordFood = isFoodRound && showWord ? foodFor(apWordShown) : null;
       const apWordAnimal = isAnimalsRound && showWord ? animalFor(apWordShown) : null;
       const apWordObject = isObjectsRound && showWord ? objectFor(apWordShown) : null;
-      // Word Mode deals roles but never prints them, so their artwork stays off
-      // too — a picture of a role nobody can read still gives it away.
+      // Word Mode deals roles but never prints them, so their artwork stays off too.
       const apRoleVisible = st.gameMode !== 'words' && !isDuel;
-      // Movie/TV Show Genres round: the *role* is a title, so the poster belongs
-      // to it. 'THE JESTER' and 'PERFORMER' aren't titles and match nothing.
+      // Movie/TV Show Genres round: the *role* is a title, so the poster belongs to it.
+      // 'THE JESTER' and 'PERFORMER' match nothing.
       const apRolePoster = isMovieTvRound && apRoleVisible ? posterFor(apRoleShown) : null;
-      // Music Genres round: the role is "Artist (Song)", pictured by that song's
-      // album. Square, so it gets its own size rather than a poster's 2:3.
+      // Music Genres round: the role is "Artist (Song)", pictured by that song's album —
+      // square, so it gets its own size (see ART_SHAPES).
       const apRoleAlbum = isMusicRound && apRoleVisible ? albumFor(apRoleShown) : null;
-      // Biomes round: the role is a creature, pictured by its photograph —
-      // usually landscape, so it gets a shape of its own. See ART_SHAPES.
+      // Biomes round: the role is a creature, pictured landscape. See ART_SHAPES.
       const apRoleAnimal = isBiomeRound && apRoleVisible ? animalFor(apRoleShown) : null;
-      // Cuisines round: the role is a food, pictured by its photograph. Same
-      // landscape frame as an animal, cropped centrally — see ART_SHAPES.
+      // Cuisines round: the role is a food, same landscape frame cropped centrally.
       const apRoleFood = isCuisineRound && apRoleVisible ? foodFor(apRoleShown) : null;
       const apRoleMuseCover = isMuseRound && apRoleVisible ? museCoverFor(apRoleShown) : null;
       const apArt = apWordPoster || apWordFood || apWordAnimal || apWordObject
         || apRolePoster || apRoleAlbum || apRoleAnimal || apRoleFood || apRoleMuseCover;
-      // Show Word stacks a word block and a role block under the artwork, and
-      // either can wrap — at full size that clips against the card's
-      // overflow:hidden. A word-only round prints no role, so nothing stacks
-      // and its artwork stays full size.
+      // Show Word stacks a word block and a role block under the artwork, and either can
+      // wrap — at full size that clips against the card's overflow:hidden. Word-only rounds
+      // print no role, so nothing stacks and the artwork stays full size.
       const apArtCompact = !!(apRolePoster || apRoleAlbum || apRoleAnimal || apRoleFood || apRoleMuseCover) && showWord;
       const apArtShape = ART_SHAPES[(apRoleFood || apWordFood || apWordObject) ? 'plate'
         : ((apRoleAnimal || apWordAnimal) ? 'photo'
@@ -1367,15 +1273,13 @@
         if (ap) this.setState(s => ({ activePlayer: null, cardOpen: false, viewed: { ...s.viewed, [ap.id]: true } }));
       };
       const openCurtain = () => this.setState({ cardOpen: true });
-      // Backing out of a mis-tapped name leaves that player unviewed, so they
-      // can still take their turn.
+      // Backing out of a mis-tapped name leaves that player unviewed.
       const cancelOverlay = () => this.setState({ activePlayer: null, cardOpen: false });
-      // The backdrop does whatever the visible button does: back out with the
-      // curtain down, dismiss-as-read once it's up.
+      // The backdrop does whatever the visible button does: back out with the curtain
+      // down, dismiss-as-read once it's up.
       const dismissOverlay = () => { if (st.cardOpen) closeOverlay(); else cancelOverlay(); };
 
-      // Gated the same way the reveal card is, so results can never claim a
-      // disguise the player was never shown.
+      // Gated like the reveal card, so results can't claim a disguise never shown.
       const jesterReveals = players.filter(p => p.jester).map((p) => {
         const fakeRole = st.gameMode === 'roles' && st.jesterGetsRole ? (roundJesterRoleMap[p.id] || null) : null;
         const fakeWord = st.gameMode === 'words' && st.jesterGetsRole ? (roundJesterWordMap[p.id] || null) : null;
@@ -1386,10 +1290,8 @@
             : (fakeWord ? 'Held the fake word ' + fakeWord : null),
         };
       });
-      // Everyone who held a real role, off the same map the reveal card read,
-      // so it can only show what a player was actually dealt. Word Mode is
-      // excluded outright: buildRound still fills roundRoleMap there, but the
-      // cards never show a role, so those roles were dealt to nobody.
+      // Everyone who held a real role, off the same map the reveal card read. Word Mode is
+      // excluded outright: buildRound fills roundRoleMap there, but no card ever shows it.
       const castReveals = st.gameMode === 'words' ? [] : players
         .filter(p => !p.jester && roundRoleMap[p.id])
         .map(p => ({ name: p.name, role: roundRoleMap[p.id] }));
@@ -1401,36 +1303,32 @@
         apFace: ap ? ap.face : '#efe4c8', apLine: ap ? ap.line : '#7a1620',
         apRole: apRoleShown,
         apRoleColor: apIsUndisguisedJester ? '#b3202f' : (isBiomeRound ? '#2e5bb0' : (isCuisineRound ? '#a85a2b' : (isMovieTvRound ? '#2f8f7a' : (isMuseRound ? '#8b5cf6' : (isMusicRound ? '#6b4ea8' : 'var(--m-accent)'))))),
-        // Same reason as apWordSize: artwork leaves less room, and "Artist
-        // (Song)" runs longer than a film title. Cuisines carry no artwork but
-        // still sit below the default, for "Schwarzwalder Kirschtorte".
+        // Same reason as apWordSize: artwork leaves less room, and "Artist (Song)" runs
+        // long. Cuisines carry no artwork but still sit below the default, for names like
+        // "Schwarzwalder Kirschtorte".
         apRoleSize: apIsUndisguisedJester ? '26px' : (apRolePoster ? '17px' : (apRoleAlbum ? '16px' : ((apRoleAnimal || apRoleFood) ? '18px' : (isBiomeRound ? '22px' : (isCuisineRound ? '20px' : (isMuseRound ? (apRoleMuseCover ? '15px' : '17px') : ((isMusicRound || isMovieTvRound) ? '19px' : '23px'))))))),
         apWord: apWordShown,
         apArt, apArtW, apArtH, apArtFocus: apArtShape.focus,
         apWordLabel: isCustomRound ? 'Word' : (isBiomeRound ? 'Biome' : (isCuisineRound ? 'Cuisine' : (isMovieTvRound ? 'Genre' : (isMuseRound ? 'Album' : (isMusicRound ? 'Genre' : (isFoodRound ? 'Food / Drink' : (isAnimalsRound ? 'Animal' : (isObjectsRound ? 'Object' : (isMoviesWordRound ? 'Movie / TV' : (isNumbersRound ? 'Number' : 'Location')))))))))),
-        // Artwork eats most of the card, so long titles shrink to stay inside it
-        // rather than clipping against overflow:hidden.
+        // Artwork eats most of the card, so long titles shrink rather than clip.
         apWordSize: apArt ? '17px' : (isBiomeRound ? '20px' : '22px'),
         apWordBlockStyle: showWord ? '' : 'display:none;',
         apIsUndisguisedJester,
         apIsDisguisedJester: apRoleDisguised,
         apIsPerformer: !apIsJester || apWordDisguised,
-        // Excluded by id, so a jester who shares a name isn't struck from their
-        // own ally list.
+        // Excluded by id, so a jester sharing a name isn't struck from their own list.
         apJesterAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1
           ? players.filter(p => p.jester && p.id !== (ap ? ap.id : null)).map(p => p.name).join(', ')
           : null,
         apShowAllies: apIsUndisguisedJester && st.jestersKnow && jesterReveals.length > 1,
-        // Dealt at the top of the round, so every jester reads the same one and
-        // re-opening the card can't roll for a better clue.
+        // Dealt at the top of the round, so re-opening the card can't roll a better clue.
         apJesterHint: apIsUndisguisedJester ? (st.roundJesterHint || null) : null,
         apShowHint: apIsUndisguisedJester && !!st.roundJesterHint,
         starterName: st.playerList[st.roundStarterIdx] || st.playerList[0],
         gameCategory: roundCategory,
         roundWordDisplay: st.roundWord,
-        // The answer's own picture, for the categories that have one. Shaped
-        // like the card's, two thirds the size — a poster stands, a plate and
-        // an animal lie down.
+        // The answer's own picture, for the categories that have one: the card's shape at
+        // two thirds the size.
         resultsArt: isMoviesWordRound ? posterFor(st.roundWord)
           : (isFoodRound ? foodFor(st.roundWord)
             : (isAnimalsRound ? animalFor(st.roundWord)
@@ -1438,22 +1336,18 @@
         resultsArtW: isMoviesWordRound ? '84px' : '112px',
         resultsArtH: isMoviesWordRound ? '126px' : '84px',
         resultsArtFocus: isAnimalsRound ? '50% 25%' : '50% 50%',
-        // Covered until someone taps it, so the jester can guess first. The
-        // poster is part of the answer, so it waits too.
+        // Covered until someone taps it, so the jester can guess first — artwork included.
         roundWordShown: st.resultsWordShown,
         revealRoundWord: () => this.setState({ resultsWordShown: true }),
-        // What the jester picks from: the pool the round was dealt out of,
-        // crossed-out words included, sorted for scanning.
-        // `numeric` so Numbers reads 1, 2, 10, 100 rather than the 1, 10, 100, 2
-        // a plain string sort gives. It changes nothing for the word categories:
-        // it only takes effect on digits, and none of them lead with any.
+        // What the jester picks from: the pool the round was dealt out of, sorted for
+        // scanning. `numeric` so Numbers reads 1, 2, 10, 100; no word category leads with
+        // a digit, so it changes nothing for them.
         roundWordPool: [...getWordPool(roundCategory)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
         poolOpen: st.resultsPoolOpen,
         openWordPool: () => this.setState({ resultsPoolOpen: true }),
         closeWordPool: () => this.setState({ resultsPoolOpen: false }),
-        // Same pool, hung off the Trial's category chip. Only offered when the
-        // category is shown: the list names the category as plainly as the chip
-        // does, so hiding one and printing the other tells everyone anyway.
+        // Same pool, hung off the Trial's category chip. Only offered when the category is
+        // shown — the list gives the category away just as plainly as the chip does.
         votingPoolOpen: st.votingPoolOpen,
         openVotingPool: () => this.setState({ votingPoolOpen: true }),
         closeVotingPool: () => this.setState({ votingPoolOpen: false }),
@@ -1498,8 +1392,8 @@
         changelog: st.changelog,
         changelogStatus: st.changelogStatus,
         appVersion: APP_VERSION,
-        // Reachable from Settings and from the Categories picker; close returns
-        // to whichever you came in through.
+        // Reachable from Settings and from the Categories picker; close returns to whichever
+        // you came in through.
         openCustom: () => this.setState(prev => ({ modal: 'custom', customFrom: prev.modal === 'categories' ? 'categories' : 'settings', customDeleteId: null })),
         closeCustom: () => this.setState(prev => ({ modal: prev.customFrom || 'settings', customDeleteId: null })),
         customCount: custom.length,
@@ -1600,12 +1494,10 @@
           customError: '',
         })),
         cancelDraft: () => this.setState({ modal: 'custom', customDraft: null, customError: '' }),
-        // Every built-in name, not just the ones on screen: Muse is missing from
-        // the picker until it's found, and a custom category named after it
-        // would shadow the real one everywhere the round is dealt.
+        // Every built-in name, not just the ones on screen: Muse is hidden until it's found,
+        // and a custom category named after it would shadow the real one.
         saveDraft: () => this.__saveCustomDraft(custom, [...ROLE_CATEGORIES, ...st.wordCategories]),
-        // Role categories then word categories, alphabetical within each — the
-        // same split and order the category picker uses.
+        // Role categories then word categories, alphabetical within each — the picker's order.
         wordListGroups: [
           { cat: 'Biomes', words: biomeNames },
           { cat: 'Cuisines', words: cuisineNames },
@@ -1640,8 +1532,7 @@
             },
             items: g.words.map(w => {
               const crossed = off.includes(w);
-              // The last surviving word is locked; an empty category has
-              // nothing to deal.
+              // The last surviving word is locked; an empty category can't be dealt.
               const locked = !crossed && kept === 1;
               return {
                 word: w, crossed, locked,
@@ -1661,18 +1552,16 @@
             }),
           };
         }),
-        // A disguised jester doesn't know they're one, so the summary drops that
-        // claim.
-        // A duel has no jester, so none of the jester options are listed even if
-        // one is still switched on from a Role Mode round.
+        // A disguised jester doesn't know they're one, so the summary drops that claim; a
+        // duel lists no jester options at all, even ones left on from a Role Mode round.
         gameSettingsSummary: [st.showCategory ? 'Show Category' : null, showWord ? 'Show Word' : 'Word Hidden', (!isDuel && st.jestersKnow && !st.jesterGetsRole) ? 'Jesters Know Each Other' : null, (!isDuel && st.jesterGetsRole) ? (st.gameMode === 'words' ? 'Jester Gets Word' : 'Jester Gets Role') : null, (st.jesterHints && st.gameMode === 'words' && !st.jesterGetsRole) ? 'Jester Hints' : null].filter(Boolean).join(' · ') || 'Default',
         playerItems: st.playerList.map((name, i) => {
           const editing = st.editingIdx === i;
           const p = players[i];
           const pid = p.id;
           const removing = (st.removingIds || []).includes(pid);
-          // An empty cast would open the trial with "undefined asks the first
-          // question", so the last player's × goes inert.
+          // An empty cast would open the trial with "undefined asks the first question",
+          // so the last player's × goes inert.
           const onlyOne = st.playerList.length <= 1;
           return {
             name, pid, editing, removing, onlyOne,
@@ -1728,8 +1617,7 @@
         customCategoryItems: (wordsAsList ? custom : custom.filter(c => !customIsWordOnly(c))).map(c => mapCategoryItem(c.name)),
         hasCustomInPicker: (wordsAsList ? custom.length : custom.filter(c => !customIsWordOnly(c)).length) > 0,
         catSummary: st.selCategories.length === allCategoryNames.length ? allCategoryNames.join(', ') : st.selCategories.join(', '),
-        // Clamped to the cast: removing players can strand a saved count above
-        // what the table seats.
+        // Clamped to the cast: removing players can strand a count above what it seats.
         jesterCount,
         incJester: () => this.setState({ jesterCount: Math.min(jesterCount + 1, maxJesters) }),
         decJester: () => this.setState({ jesterCount: Math.max(jesterCount - 1, 0) }),
@@ -1811,10 +1699,8 @@
           if (isDuel) return;
           this.setState({ jesterGetsRole: !st.jesterGetsRole });
         },
-        // Only the word categories carry hints, and only a jester who knows
-        // they're the jester can be handed one — so the row dims outside Word
-        // Mode and while the jester is disguised, the same treatment Jesters
-        // Know Each Other gets for the same reason.
+        // Hints are Word Mode only, and only reach a jester who knows they're one — so the
+        // row dims outside Word Mode and while the jester is disguised, like Jesters Know.
         jesterHints: st.jesterHints && hintsAvailable,
         jesterHintsDesc: st.gameMode !== 'words'
           ? 'Word Mode only — a role is already a clue of its own'
@@ -1832,9 +1718,8 @@
         timeLimitDisplay: st.timeLimit === 0 ? '∞' : String(st.timeLimit),
         timeLimitUnit: st.timeLimit === 0 ? 'No limit' : st.timeLimit === 1 ? 'minute' : 'minutes',
         timeLimitRow: st.timeLimit === 0 ? 'No limit' : st.timeLimit + ' min',
-        // One cycle, both ways: no limit, 1, 2 … TIME_LIMIT_MAX, and round to no
-        // limit again. Holding either arrow walks the whole dial rather than
-        // parking at an end, so neither direction is a dead stop.
+        // Wraps both ways: no limit, 1, 2 … TIME_LIMIT_MAX, back to no limit. Holding an
+        // arrow walks the whole dial rather than parking at an end.
         incTime: () => this.setState({ timeLimit: (st.timeLimit + 1) % (TIME_LIMIT_MAX + 1) }),
         decTime: () => this.setState({ timeLimit: (st.timeLimit + TIME_LIMIT_MAX) % (TIME_LIMIT_MAX + 1) }),
         hasTimeLimit: st.timeLimit > 0,
@@ -1883,16 +1768,16 @@
         isResults: st.screen === 'results',
         isWordsMode: st.gameMode === 'words',
         isRolesMode: st.gameMode === 'roles',
-        // Word Mode and Duel both deal the category's own entries — a genre, a
-        // biome, a location — so both offer the word categories in the picker.
+        // Word Mode and Duel deal the category's own entries, so both offer the word
+        // categories in the picker.
         showsWordCategories: wordsAsList,
         showRoleHeading: st.gameMode === 'roles',
         setRoleMode: () => {
           const nextSel = st.selCategories.filter(c => !wordOnlyNames.includes(c));
           this.setState({ gameMode: 'roles', selCategories: nextSel.length ? nextSel : st.categories });
         },
-        // showWord is left alone: Word Mode shows the word regardless, and
-        // writing it here would leave it on for every Role Mode round after.
+        // showWord is left alone: Word Mode shows the word regardless, and writing it here
+        // would leave it on for every Role Mode round after.
         setWordMode: () => this.setState({ gameMode: 'words' }),
         roleTileBg: st.gameMode === 'roles' ? 'var(--m-tile-sel)' : 'var(--m-lift-soft)',
         roleTileBorder: st.gameMode === 'roles' ? '1.5px solid var(--m-accent)' : '1px solid var(--m-border-white)',
@@ -1909,8 +1794,8 @@
         duelTileSubColor: isDuel ? 'var(--m-tile-sel-sub)' : 'var(--m-dim)',
         isDuelMode: isDuel,
         duelReveals: isDuel ? players.slice(0, 2).map(p => ({ name: p.name, word: duelWords[p.id] || '—' })) : [],
-        // A duel is two players by definition. Rather than silently dealing to
-        // the first two, the curtain won't go up until the roster says two.
+        // A duel is two players by definition, so the curtain won't go up until the roster
+        // says two rather than silently dealing to the first pair.
         duelNeedsTwo: isDuel && st.playerList.length !== 2,
         duelPlayerNote: st.playerList.length < 2
           ? 'A duel needs two players — add one more.'
@@ -1933,8 +1818,8 @@
           }
           const drawCount = Math.min(newJesterCount, maxJesters);
           const allIndices = st.playerList.map((_, index) => index);
-          // Progressive draws by weight then rebalances. Random is Fisher-Yates,
-          // not sort(() => Math.random() - .5), which isn't uniform.
+          // Progressive draws by weight then rebalances. Random is Fisher-Yates, not
+          // sort(() => Math.random() - .5), which isn't uniform.
           const selectedJesterIndices = isProgressive
             ? weightedDraw(allIndices, (i) => jesterWeights[playerId(i)], drawCount)
             : shuffle(allIndices).slice(0, drawCount);
@@ -1947,24 +1832,22 @@
             pickableCategories = pickableCategories.filter(c => !wordOnlyNames.includes(c));
             if (!pickableCategories.length) pickableCategories = st.categories;
           }
-          // A duel needs two different words out of the one category, so a
-          // category holding a single word can't host one. Custom categories are
-          // the only ones that ever do.
+          // A duel needs two different words from one category, so single-word categories
+          // (only ever custom ones) are skipped.
           if (st.gameMode === 'duel') {
             const twoWordCategories = pickableCategories.filter(c => getWordPool(c).length >= 2);
             if (twoWordCategories.length) pickableCategories = twoWordCategories;
           }
           const chosenCategory = pickableCategories[Math.floor(Math.random() * pickableCategories.length)];
-          // Duel deals no roles and no jester. Two players, two different words
-          // from the one category, and each player is only ever shown their own —
-          // the whole round is working out what the other one is holding.
+          // Duel deals no roles and no jester: two players, two words from one category,
+          // each shown only their own.
           if (st.gameMode === 'duel') {
             const drawn = shuffle(getWordPool(chosenCategory)).slice(0, 2);
             const duelIds = players.slice(0, 2).map(p => p.id);
             const duelRound = {
               roundCategory: chosenCategory,
-              // Kept in step with the other modes so everything reading a round
-              // still finds a word there; the pair below is what a duel prints.
+              // Kept in step with the other modes so a round always has a word; the pair
+              // below is what a duel actually prints.
               roundWord: drawn[0],
               roundRoleMap: {}, roundJesterRoleMap: {}, roundJesterWordMap: {}, roundJesterHint: null,
               roundDuelWords: duelIds.reduce((acc, id, i) => { acc[id] = drawn[i]; return acc; }, {}),
@@ -1978,8 +1861,7 @@
             return;
           }
           let nextRound;
-          // From this round's draw, not `players`, which still carries last
-          // round's jester flags.
+          // From this round's draw — `players` still carries last round's jester flags.
           const jesterPlayerIds = selectedJesterIndices.map(i => playerId(i));
           const jesterIdSet = new Set(jesterPlayerIds);
           const rolePlayerIds = players.map(p => p.id).filter(id => !jesterIdSet.has(id));
@@ -2002,8 +1884,8 @@
             return { roundCategory, roundWord: wordName, roundRoleMap, roundJesterRoleMap };
           };
           const buildWordOnlyRound = (category) => ({ roundCategory: category, roundWord: pickFrom(category), roundRoleMap: {}, roundJesterRoleMap: {} });
-          // Fake roles are borrowed from the category's other words — what the
-          // built-in fake catalogs do by hand.
+          // Fake roles are borrowed from the category's other words, as the built-in fake
+          // catalogs do by hand.
           const buildCustomRound = (c) => {
             const roleCatalog = {};
             const fakeRoleCatalog = {};
@@ -2057,25 +1939,21 @@
               }, {});
             }
           }
-          // A hint only means anything to a jester who knows they are one: a
-          // disguised jester is holding a fake word and believes it, so handing
-          // them a clue would tell them what the disguise exists to hide. Word
-          // categories only — the role catalogs already give their jester a
-          // fake role to work with.
-          // Keyed by category then word: six words are in both Food and
-          // Animals, and a flat lookup would deal the food's hints to an
-          // Animals round.
+          // A hint only means anything to a jester who knows they are one — handing one to
+          // a disguised jester would give away what the disguise exists to hide.
+          //
+          // Keyed by category then word: seven words are in both Food and Animals, and a
+          // flat lookup would deal the food's hints to an Animals round.
           const hints = (wordHintCatalog[nextRound.roundCategory] || {})[nextRound.roundWord] || null;
           const roundJesterHint = st.jesterHints && !useJesterWord && hints && hints.length
             ? hints[Math.floor(Math.random() * hints.length)]
             : null;
           nextRound = { ...nextRound, roundJesterWordMap, roundJesterHint };
-          // Ahead of the render, so the fetches are in flight while players are
-          // still passing the phone around.
+          // Ahead of the render, so the fetches are in flight while the phone goes round.
           this.__preloadRoundArt(nextRound, st.gameMode);
           const roundStarterIdx = Math.floor(Math.random() * st.playerList.length);
-          // The dealt count stays in roundJesterIndices; writing it to
-          // jesterCount would let a random round overwrite the host's choice.
+          // The dealt count stays in roundJesterIndices; writing it to jesterCount would let
+          // a random round overwrite the host's choice.
           this.setState({ screen: 'reveal', viewed: {}, activePlayer: null, cardOpen: false, roundJesterIndices: selectedJesterIndices, roundStarterIdx, jesterWeights: nextWeights, ...nextRound });
         },
         goVoting: () => { this.setState({ screen: 'voting', votingPoolOpen: false }); this.__startTimer(st.timeLimit); },
@@ -2136,8 +2014,8 @@
         this.setState({ customError: 'Add at least one word.' });
         return;
       }
-      // A roleless role category would never come up in Role Mode — say so here
-      // rather than let them find out mid-game.
+      // A roleless role category would never come up in Role Mode — say so now rather than
+      // let them find out mid-game.
       if (kind === 'roles' && !entries.some(e => e.roles.length)) {
         this.setState({ customError: 'Give at least one word some roles, or switch this to a word category.' });
         return;
@@ -2267,9 +2145,8 @@
             h('div', { style: css(`font-family:'Archivo',sans-serif; font-size:10px; color:${v.progressivePickSubColor}; margin-top:3px; line-height:1.35;`) }, 'Recent jesters get picked less often')
           )
         ),
-        // Off by default. The switch sits here rather than in Settings: the odds
-        // are a Progressive-only reading, so the toggle means nothing until this
-        // branch is on screen, and a screen away it was hard to connect to.
+        // Off by default. The switch sits here rather than in Settings because the odds are
+        // a Progressive-only reading, and mean nothing until this branch is on screen.
         v.isProgressiveJester && h('div', { style: css('margin-top:12px; animation:masq-rise .2s ease both;') },
           h('div', { ...press(v.toggleShowJesterOdds, 'Show progressive jester odds', { role: 'switch', 'aria-checked': String(v.showJesterOdds) }), className: 'masq-btn', style: css('display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:var(--m-lift-soft); border:1px solid var(--m-border); cursor:pointer; margin-bottom:12px;') },
             h('div', { style: css('flex:1;') },
@@ -2312,8 +2189,8 @@
           ),
           h('div', { ...press(v.incTime, 'Lengthen the time limit'), style: css('width:52px; height:52px; border-radius:50%; background:rgba(178,32,47,.25); border:1px solid rgba(178,32,47,.5); display:flex; align-items:center; justify-content:center; font-size:26px; color:#f4a0a8; cursor:pointer; line-height:1;') }, '+')
         ),
-        // The chime only ever plays when this timer expires, so it lives here
-        // rather than in Settings. Dimmed at 'No limit', where nothing expires.
+        // The chime only plays when this timer expires, so the switch lives here rather
+        // than in Settings. Dimmed at 'No limit', where nothing expires.
         h('div', { ...press(v.toggleSoundEffects, 'Timer sound effect', { role: 'switch', 'aria-checked': String(v.soundEffects) }), className: 'masq-btn', style: css(`display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin-top:20px; background:var(--m-lift); border-radius:12px; cursor:pointer; opacity:${v.hasTimeLimit ? '1' : '.45'}; transition:opacity .2s;`) },
           h('div', null,
             h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:15px; color:var(--m-text);") }, 'Timer Sound Effect'),
@@ -2478,8 +2355,7 @@
       );
     }
 
-    // Step one for a new category. Skipped when editing — an existing category
-    // already knows what it is.
+    // Step one for a new category; skipped when editing, since the kind is already set.
     customKindModal(v) {
       const tile = (onClick, icon, title, body) => h('div', { ...press(onClick), className: 'masq-btn', style: css('display:flex; align-items:flex-start; gap:13px; padding:16px; background:var(--m-lift); border:1px solid var(--m-border-med); border-radius:14px; cursor:pointer;') },
         h('div', { style: css('flex:none; margin-top:1px;'), dangerouslySetInnerHTML: { __html: icon } }),
@@ -2637,9 +2513,8 @@
       }
       if (v.changelogStatus !== 'ready' || !v.changelog) return shell(message('Loading…'));
 
-      // One flat list rather than a block per release: a version heading is just
-      // the rule that starts the next one, so nothing has to be nested to read
-      // as grouped.
+      // One flat list rather than a block per release — a version heading is just the rule
+      // that starts the next one, so nothing needs nesting to read as grouped.
       return shell(h('div', null,
         v.changelog.map((b, i) => {
           if (b.type === 'version') {
@@ -2666,6 +2541,7 @@
         { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
         { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
       ];
+      // The ampersand in the creator's role line unlocks the Muse category.
       const roleLine = (c) => {
         if (!c.secret) return c.role;
         const [before, after] = c.role.split('&');
@@ -2678,12 +2554,8 @@
           after
         );
       };
-      // One thing is hidden on the creator's card: the ampersand in the role
-      // line opens the Muse category. The name used to open Duel Mode, which
-      // is no longer hidden — it sits in the lobby with the other two modes.
-      // Where the reveal cards' artwork comes from. TMDB and Deezer ask to be
-      // named; the photographers ask to be named individually, which is what
-      // the list underneath is for.
+      // Where the reveal cards' artwork comes from. TMDB and Deezer ask to be named; the
+      // photographers ask to be named individually, which the lists underneath do.
       const sources = [
         { name: 'TMDB', of: 'Movie & TV posters', note: 'This product uses the TMDB API but is not endorsed or certified by TMDB.' },
         { name: 'Deezer', of: 'Album art', note: 'Not endorsed or certified by Deezer.' },
@@ -2711,9 +2583,8 @@
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:12px; color:var(--m-soft2); margin-top:6px; line-height:1.4;") }, s.note)
           ))
         ),
-        // The photographers, one line each. Each set is boxed and scrolled on
-        // its own, so hundreds of names don't bury the three people who made
-        // the game, and each name sits in the list it belongs to.
+        // The photographers, one line each. Each set scrolls in its own box, so hundreds of
+        // names don't bury the credits above them.
         ...[['Animal photographs', v.photoCredits], ['Food photographs', v.foodCredits], ['Object photographs', v.objectCredits]]
           .filter(([, rows]) => rows.length > 0)
           .map(([heading, rows]) => h(React.Fragment, { key: heading },
@@ -2773,8 +2644,8 @@
           h('div', { ...press(v.duelNeedsTwo ? null : v.goReveal), className: v.duelNeedsTwo ? '' : 'masq-btn j-glow', style: css(`padding:17px; text-align:center; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:17px; letter-spacing:.08em; border-radius:12px; box-shadow:var(--m-cta-glow); cursor:${v.duelNeedsTwo ? 'default' : 'pointer'}; opacity:${v.duelNeedsTwo ? '.4' : '1'};`) }, 'RAISE THE CURTAIN')
         ),
         v.hasModal && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
-          // Tapping away closes any modal but the category editor, where it
-          // would discard everything typed.
+          // Tapping away closes any modal but the category editor, where it would discard
+          // everything typed.
           h('div', { onClick: v.isModalCustomEdit ? undefined : v.closeModal, 'aria-hidden': 'true', style: css('flex:1;') }),
           v.isModalCategories && this.categoriesModal(v),
           v.isModalJesters && this.jestersModal(v),
@@ -2869,19 +2740,17 @@
         v.showOverlay && h('div', { onClick: v.dismissOverlay, style: css('position:absolute; inset:0; background:var(--m-overlay); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; animation:masq-fade-in .2s ease both;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent); margin-bottom:6px;") }, 'Your Role'),
           h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:28px; color:var(--m-text-bright); margin-bottom:22px;") }, v.apName),
-          // Stops its own click so tapping the card raises the curtain instead
-          // of reaching the backdrop's dismiss handler.
+          // Stops its own click so tapping the card raises the curtain instead of reaching
+          // the backdrop's dismiss handler.
           h('div', { ...press((e) => { e.stopPropagation(); v.openCurtain(); }), className: 'j-card', onPointerMove: this.__holoMove, onPointerLeave: this.__holoLeave, style: css('position:relative; width:240px; height:340px; border-radius:16px; cursor:pointer; overflow:hidden; box-shadow:0 20px 56px rgba(0,0,0,.7); border:1px solid rgba(180,140,50,.45);') },
             h('div', { style: css('position:absolute; inset:0; background:var(--m-card-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center;') },
               h('div', { style: css('display:flex; justify-content:center; margin-bottom:14px;') },
-                // On a Movies, Music, Biomes or Cuisines round the artwork
-                // stands in for the mask. The name sits right underneath, so
-                // the image is decorative and a dead URL just collapses.
+                // On a Movies, Music, Biomes or Cuisines round the artwork stands in for
+                // the mask. The name sits underneath, so a dead URL just collapses.
                 v.apArt
                   ? h('img', {
-                      // Keyed by src so each image is a fresh element: onError
-                      // hides the node, and React would otherwise reuse the
-                      // hidden one for the next player's artwork.
+                      // Keyed by src so each image is a fresh element — onError hides the
+                      // node, and React would otherwise reuse it for the next player.
                       key: v.apArt,
                       src: v.apArt, alt: '', draggable: false,
                       onError: (e) => { e.target.style.display = 'none'; },
@@ -2896,8 +2765,7 @@
                   h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#b3202f; margin-bottom:3px;") }, 'Your Fellow Jesters'),
                   h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:#7a1620;") }, v.apJesterAllies)
                 ),
-                // Gold rather than the allies block's crimson: it's the one
-                // thing on this card that helps rather than condemns.
+                // Gold rather than the allies block's crimson — this one helps.
                 v.apShowHint && h('div', { style: css('margin-top:12px; padding:8px 12px; background:rgba(200,162,76,.18); border:1px solid rgba(200,162,76,.45); border-radius:8px; text-align:center;') },
                   h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#8a6d28; margin-bottom:3px;") }, 'Your Only Clue'),
                   h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:#6b5318; text-wrap:balance;") }, v.apJesterHint)
@@ -2954,10 +2822,9 @@
           h('div', { style: css("font-family:'EB Garamond',serif; font-size:14px; color:var(--m-muted); margin-top:4px;") }, v.isDuelMode ? 'Ask, deduce, name the other word.' : 'Debate, accuse, unmask the jester.')
         ),
         h('div', { style: css('flex:1; overflow-y:auto; padding:0 20px; display:flex; flex-direction:column;') },
-          // The word list rides the section heading rather than taking a row of
-          // its own: the clock below claims whatever the steps leave over, and
-          // on a short phone another row of its own is the difference between a
-          // clock on screen and a clock below the fold.
+          // The word list rides the section heading rather than taking a row of its own:
+          // the clock below claims whatever the steps leave over, and on a short phone an
+          // extra row is the difference between a clock on screen and one below the fold.
           h('div', { style: css('display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;') },
             h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:var(--m-text-title);") }, 'How It Works'),
             v.showCategory && h('div', { ...press(v.openVotingPool, `See all ${v.roundWordPool.length} ${v.gameCategory} words`), className: 'masq-btn', style: css('display:inline-flex; align-items:center; gap:7px; flex:none; padding:6px 12px; border-radius:20px; background:var(--m-lift); border:1px solid var(--m-border-hard); cursor:pointer;') },
@@ -3000,10 +2867,8 @@
             h('div', { ...press(v.dismissTimeUp), className: 'masq-btn', style: css("margin-top:22px; padding:14px; background:var(--m-cta); color:var(--m-cta-text); font-family:'Cinzel',serif; font-weight:700; font-size:15px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'GOT IT')
           )
         ),
-        // Every word the round could have dealt, for the table to talk around.
-        // The reveal screen's sheet, kept identical in shape so the same drawer
-        // opens the same way on both screens — only the framing changes, since
-        // here it is reference rather than the jester's last guess.
+        // Every word the round could have dealt, for the table to talk around. Same sheet
+        // as the results screen's, so the drawer opens the same way on both.
         v.votingPoolOpen && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
           h('div', { onClick: v.closeVotingPool, 'aria-hidden': 'true', style: css('flex:1;') }),
           h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:75vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },
@@ -3027,10 +2892,9 @@
     }
 
     renderResults(v) {
-      // A duel has no jester to unmask and nothing to score — the payoff is just
-      // the two words side by side, and the pair of you already know who said it
-      // first. Its own screen rather than a branch through the one below, which
-      // is built end to end around a jester reveal.
+      // A duel has no jester to unmask and nothing to score — the payoff is just the two
+      // words side by side. Its own screen rather than a branch through the one below,
+      // which is built end to end around a jester reveal.
       if (v.isDuelMode) {
         return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; background:var(--m-results-bg); animation:masq-scale-in .35s ease both;') },
           h('div', { style: css('height:24px;') }),
@@ -3059,8 +2923,7 @@
           }, ['◆', '✦', '♦', '✧'][i % 4]))
         ),
         h('div', { style: css('height:24px;') }),
-        // No way back from here: the round is spent, and Play Again is the only
-        // door out.
+        // No way back: the round is spent, and Play Again is the only door out.
         h('div', { style: css('position:relative; width:100%; display:flex; justify-content:center; align-items:center; margin-bottom:2px;') },
           h('div', { style: css("font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.35em; text-transform:uppercase; color:var(--m-accent);") }, 'The Final Curtain')
         ),
@@ -3079,14 +2942,13 @@
               )
             : h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:34px; color:var(--m-brand); margin-top:14px;"), className: 'j-title' }, 'No One'),
           h('div', { style: css('display:flex; gap:14px; margin-top:24px; padding:0 26px; width:100%; justify-content:center;') },
-            // Centred so this tile still reads as balanced when the word tile
-            // beside it grows to fit a poster.
+            // Centred so this tile stays balanced when the word tile beside it grows to
+            // fit a poster.
             h('div', { style: css('flex:1; max-width:140px; text-align:center; padding:14px 10px; border-radius:12px; background:rgba(46,91,176,.18); border:1px solid rgba(46,91,176,.4); display:flex; flex-direction:column; justify-content:center;') },
               h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; color:#9fb0cf;") }, 'ROUND CATEGORY'),
               h('div', { style: css("font-family:'Cinzel',serif; font-weight:700; font-size:16px; color:#cfe0ff; margin-top:5px;") }, v.gameCategory)
             ),
-            // Covered until tapped: the jester gets their guess in before the
-            // answer is on screen. The picture is withheld with it.
+            // Covered until tapped, artwork included, so the jester guesses first.
             h('div', {
               ...(v.roundWordShown ? {} : press(v.revealRoundWord, 'Reveal the round word')),
               className: v.roundWordShown ? '' : 'masq-btn',
@@ -3107,23 +2969,22 @@
                   )
             )
           ),
-          // The jester's last chance: name the word and they still win. Kept
-          // above the word tile so it reads while the answer is still covered.
+          // The jester's last chance: name the word and they still win. Above the word
+          // tile so it reads while the answer is still covered.
           !v.roundWordShown && v.hasJester && h('div', { style: css('margin-top:14px; padding:0 26px; width:100%; max-width:360px; text-align:center;') },
             h('div', { style: css("font-family:'EB Garamond',serif; font-size:13px; color:var(--m-results-sub); line-height:1.4;") },
               v.jesterReveals.length > 1 ? 'The jesters may still steal it by naming the word.' : 'The jester may still steal it by naming the word.'),
             h('div', { ...press(v.openWordPool), className: 'masq-btn', style: css("margin-top:8px; display:inline-block; padding:9px 16px; border-radius:10px; background:var(--m-lift); border:1px solid var(--m-border-hard); font-family:'Archivo',sans-serif; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--m-accent); cursor:pointer;") },
               `See all ${v.roundWordPool.length} ${v.gameCategory} words`)
           ),
-          // Scrolls inside its own box rather than growing the centred column,
-          // which a full table would push off the top of the screen.
+          // Scrolls in its own box rather than growing the centred column, which a full
+          // table would push off the top of the screen.
           v.castReveals.length > 0 && h('div', { style: css('margin-top:22px; padding:0 26px; width:100%; max-width:360px;') },
             h('div', { style: css("font-family:'Archivo',sans-serif; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--m-results-sub); text-align:center; margin-bottom:8px;") }, v.castRevealHeading),
-            // Gives back the height the guess prompt takes while it's up — the
-            // column can't scroll, so this box absorbs the difference.
+            // Gives back the height the guess prompt takes while it's up — the column
+            // can't scroll, so this box absorbs the difference.
             h('div', { style: css(`display:flex; flex-direction:column; gap:3px; max-height:${(!v.roundWordShown && v.hasJester) ? '132px' : '180px'}; overflow-y:auto;`) },
-              // The roles come from the real word, so they stay masked until
-              // it's tapped — the row itself stays put either way.
+              // The roles come from the real word, so they stay masked until it's tapped.
               v.castReveals.map((p, i) => h('div', { key: i, style: css('display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding:7px 12px; background:var(--m-lift); border-radius:8px;') },
                 h('div', { style: css("font-family:'Cinzel',serif; font-weight:600; font-size:13px; color:var(--m-text-bright); flex:none;") }, p.name),
                 v.roundWordShown
@@ -3142,9 +3003,9 @@
         h('div', { style: css('width:100%; padding:12px 20px 28px;') },
           h('div', { ...press(v.playAgain), className: 'masq-btn', style: css("padding:17px; text-align:center; background:var(--m-encore); color:var(--m-encore-text); font-family:'Cinzel',serif; font-weight:700; font-size:16px; letter-spacing:.05em; border-radius:10px; cursor:pointer;") }, 'PLAY AGAIN')
         ),
-        // Every word the round could have dealt, for the jester to guess from.
-        // Its own overlay rather than an inline panel, so a long category can't
-        // push the reveal off the top of the screen.
+        // Every word the round could have dealt, for the jester to guess from. Its own
+        // overlay rather than an inline panel, so a long category can't push the reveal
+        // off the top of the screen.
         v.poolOpen && h('div', { style: css('position:absolute; inset:0; background:var(--m-backdrop); display:flex; flex-direction:column; justify-content:flex-end; animation:masq-backdrop .2s ease both;') },
           h('div', { onClick: v.closeWordPool, 'aria-hidden': 'true', style: css('flex:1;') }),
           h('div', { style: css('background:var(--m-modal); border-radius:22px 22px 0 0; padding:20px 20px 36px; border-top:1px solid var(--m-border-strong); max-height:75vh; display:flex; flex-direction:column; animation:masq-slide-up .3s ease both;') },

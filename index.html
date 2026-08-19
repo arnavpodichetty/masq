@@ -10,13 +10,10 @@
 
 <link rel="canonical" href="https://masq.games/">
 
-<!-- The SVG is what a browser tab should use; the raster ones are for everything
-     that won't take an SVG, Google Search included — its documented format list
-     is the one from the .ico era, and sizes are best square and above 48px.
-     Only favicon.ico stays at the root, because a browser asks for exactly that
-     path when nothing else matches, and it is the file that was 404ing when the
-     result came back with a blank globe. The rest are linked here by name, so
-     they can live in a folder. Don't rename any of them: a favicon URL that
+<!-- The SVG is what a browser tab should use; the raster ones are for everything that
+     won't take one, Google Search included (square, above 48px). favicon.ico stays at the
+     root because a browser asks for exactly that path when nothing else matches — it was
+     the 404 behind Search's blank globe. Don't rename any of these: a favicon URL that
      keeps changing is one Search stops trusting. -->
 <link rel="icon" href="./favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="./icons/favicon-96.png" type="image/png" sizes="96x96">
@@ -40,11 +37,9 @@
 <meta name="twitter:image" content="https://masq.games/masq.png">
 <meta name="twitter:image:alt" content="Masq on a phone, showing the game setup screen: Role, Word and Duel Mode side by side with Role Mode selected, four players, one Jester, and a Raise the Curtain button.">
 
-<!-- What Search prints above the result: without this it falls back to the
-     domain, which is why the game was billed as "masq.games". og:site_name is
-     only a hint and loses to the URL; WebSite structured data is the signal
-     that settles it. Has to sit on the home page at the root of the domain —
-     it cannot be claimed from a subdirectory. -->
+<!-- What Search prints above the result; without it, the domain, which is why the game
+     was billed as "masq.games". og:site_name is only a hint and loses to the URL. Has to
+     sit on the home page at the root of the domain. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
