@@ -2662,7 +2662,7 @@
 
     creditsModal(v) {
       const company = [
-        { border: 'var(--m-accent)', name: 'Arnav Podichetty', role: 'Creator & Code', secret: true },
+        { border: '#560c9a', name: 'Arnav Podichetty', role: 'Creator & Lead Developer', secret: true },
         { border: '#7a1620', name: 'Richard Chen', role: 'Creator & Concept' },
         { border: '#2e5bb0', name: 'Esha Bansiya', role: 'Contributions' },
       ];
