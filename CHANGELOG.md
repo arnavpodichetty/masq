@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.12.9 — 2026-08-22
+
+The name over the door is lit like a marquee.
+
+**Changed**
+- **The lobby's MASQ is set in Rialto NF.** Cinzel Decorative still sets every
+  other flourish in the game — the revealed word, the named jester, the version
+  block in Settings — and it is the right face for those: engraved capitals, the
+  program held in the hand. The one word at the top of the lobby was doing a
+  different job, though. It is the sign out front, and it now reads as one:
+  Rialto is Nick Curtis' revival of a 1930s theatre marquee, inline caps carrying
+  the light-bulb line down the middle of every stroke.
+  It is cut shorter and narrower than what it replaces, so held at the old 22px
+  it read as the smaller title of the two. It is set at 27px with letter-spacing
+  opened to `.06em`, which puts the word back at about the width it had between
+  the two 36px buttons it sits between. The weight drops to 400 because the
+  family ships a single style — asking for 700 got synthetic bold, which
+  thickens the stroke until the inline closes up and the marquee goes solid.
+  The file ships unmodified, as a 42KB TTF rather than a subset WOFF2: the
+  1001Fonts FFC license allows commercial use but forbids altering the files,
+  and both subsetting and format conversion alter them. It is preloaded and set
+  `font-display: swap`, so the header paints in the fallback and reflows once
+  instead of waiting on it. The license text travels with it in `fonts/`.
+
 ## 1.12.8 — 2026-08-18
 
 The word list comes out onto the table, the jester count reaches the whole

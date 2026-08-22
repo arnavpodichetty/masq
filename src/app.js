@@ -401,7 +401,7 @@
   const TIME_LIMIT_MAX = 15;
 
   // Printed in Settings and beside What's New; matches the top entry of CHANGELOG.md.
-  const APP_VERSION = '1.12.8';
+  const APP_VERSION = '1.12.9';
 
   const asBool = (v, fallback) => (typeof v === 'boolean' ? v : fallback);
   const asOneOf = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
@@ -2603,7 +2603,7 @@
       return h('div', { style: css('position:absolute; inset:0; display:flex; flex-direction:column; background:var(--m-screen); animation:masq-fade-in .25s ease both;') },
         h('div', { style: css('display:flex; align-items:center; justify-content:space-between; padding:24px 20px 18px;') },
           h('div', { ...press(v.openHelp, 'How to play'), className: 'masq-btn', style: css("width:36px; height:36px; border-radius:10px; background:var(--m-lift-med); border:1px solid var(--m-border-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:17px; color:var(--m-accent);") }, '?'),
-          h('div', { style: css("font-family:'Cinzel Decorative',serif; font-weight:700; font-size:22px; color:var(--m-text-title); letter-spacing:.04em; cursor:pointer;"), className: 'j-title', ...press(v.toggleJesterMode, 'Jester mode', { role: 'switch', 'aria-checked': String(v.jesterMode) }) },
+          h('div', { style: css("font-family:'Rialto NF','Cinzel Decorative',serif; font-weight:400; font-size:27px; color:var(--m-text-title); letter-spacing:.06em; line-height:1; cursor:pointer;"), className: 'j-title', ...press(v.toggleJesterMode, 'Jester mode', { role: 'switch', 'aria-checked': String(v.jesterMode) }) },
             v.jesterMode
               ? 'MASQ'.split('').map((ch, i) => h('span', { key: i, className: 'j-title j-dance', style: { animationDelay: (i * 0.13) + 's, ' + (i * 0.13) + 's' } }, ch))
               : 'MASQ'
