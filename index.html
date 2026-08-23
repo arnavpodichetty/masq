@@ -83,25 +83,48 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="preconnect" href="https://unpkg.com" crossorigin="">
 <link rel="preconnect" href="https://image.tmdb.org">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700&family=EB+Garamond:wght@400&family=Archivo:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/Zodiak-Variable.woff2" as="font" type="font/woff2" crossorigin="">
+<link rel="preload" href="/fonts/Gambetta-Variable.woff2" as="font" type="font/woff2" crossorigin="">
 <link rel="preload" href="/fonts/RialtoNF.ttf" as="font" type="font/ttf" crossorigin="">
 <style>
-  /* Rialto NF by Nick Curtis - 1001Fonts Free For Commercial Use license.
-     Shipped unmodified (see fonts/RialtoNF-LICENSE.txt): the license forbids
-     altering the file, so no woff2 conversion and no subsetting. */
+  /* Ship these as downloaded: subsetting or converting them breaks both licenses
+     (fonts/). The 100-900 ranges are deliberate — Rialto and Stardom have one cut
+     each, and the range stops the browser synthesising a bold from it. */
   @font-face {
     font-family: 'Rialto NF';
     src: url('/fonts/RialtoNF.ttf') format('truetype');
-    font-weight: 400;
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Zodiak';
+    src: url('/fonts/Zodiak-Variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Gambetta';
+    src: url('/fonts/Gambetta-Variable.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Stardom';
+    src: url('/fonts/Stardom-Regular.woff2') format('woff2');
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; background: #0e0810; }
   #root { min-height: 100%; }
-  .noscript-copy { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem; color: #e8dcc8; font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.6; opacity: 0; animation: masq-fallback .25s ease 1.2s forwards; }
+  .noscript-copy { max-width: 44rem; margin: 0 auto; padding: 3rem 1.5rem; color: #e8dcc8; font-family: 'Gambetta', Georgia, serif; font-size: 17px; line-height: 1.6; opacity: 0; animation: masq-fallback .25s ease 1.2s forwards; }
   @keyframes masq-fallback { to { opacity: 1 } }
-  .noscript-copy h1, .noscript-copy h2 { font-family: 'Cinzel', Georgia, serif; color: #f0e6c9; line-height: 1.25; }
+  .noscript-copy h1, .noscript-copy h2 { font-family: 'Zodiak', Georgia, serif; color: #f0e6c9; line-height: 1.25; }
   a { color: #e6cb7e; }
   a:hover { color: #f4d78c; }
   @keyframes masq-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }

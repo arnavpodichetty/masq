@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.13.0 — 2026-08-22
+
+Three of the four typefaces are replaced, and the last one gets some weight.
+
+**Changed**
+- **Cinzel, Cinzel Decorative and EB Garamond are gone.** Rialto put a real
+  marquee over the door in 1.12.9 and left the rest of the game set in the stack
+  every design tool reaches for when it wants to look expensive. Each of the three
+  is replaced by the face that does its particular job better, and the three
+  entries below are what that came to.
+- **UI labels are Zodiak** — 76 call sites, every button, heading and tile title.
+  This is the one that changes the app's character most, and it cost nothing to
+  fit: Zodiak's x-height is 498 against Cinzel's 500, so not one size, line-height
+  or container had to move.
+- **Body copy is Gambetta** — 67 call sites. EB Garamond's x-height is 400 per
+  1000 units, the smallest of any serif that could reasonably set text, which at
+  the app's commonest body size of 13px left 5.2px of lowercase to read in pale
+  type on near black. Gambetta is 452, so the same 13px now sets what EB Garamond
+  would have needed about 14.7px to match, and it keeps the old-style warmth that
+  made the original choice right in the first place.
+- **The revealed word and the named jester are Stardom** — 11 call sites, counting
+  the lobby title's fallback. Deco capitals cut from the same 1930s signage as
+  Rialto, and the only one of the three that is purely a display face: it is never
+  set below 16px.
+- **The small tracked labels are heavier.** Archivo stays — it is a good grotesque
+  and the one face here that was never the obvious pick — but all 51 of its real
+  typographic uses sit between 8px and 12px under `.28em` of tracking, where weight
+  400 is too thin to hold. They are 500 now. The fifteen 22px instances are
+  untouched, because they are not text: they are the `×` that closes a modal.
+- **Four labels had never named a weight** and were landing on Cinzel 500 by way of
+  CSS weight matching, which is also the only reason that file was ever downloaded.
+  They ask for 500 outright now.
+- **The font payload is smaller and mostly first-party.** Cinzel shipped as four
+  static weights at 25.9KB each; Zodiak and Gambetta are single variable files
+  covering every weight the app asks for. Latin webfont bytes drop from about 154KB
+  to 100KB self-hosted plus 29KB of Archivo, and Google Fonts goes from seven files
+  to two. The three new faces are the official `.woff2` from Fontshare, unconverted
+  and unsubset, under the ITF Free Font License, which permits commercial use and
+  self-hosting outright; the license travels with them in `fonts/`.
+
 ## 1.12.9 — 2026-08-22
 
 The name over the door is lit like a marquee.
